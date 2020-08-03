@@ -9,7 +9,6 @@ import { v4 } from 'uuid'
 import { CallbackPayload, EvaluatePayload } from '../../src/common/types'
 import { quoridorConcludeWorker, quoridorMoveWorker } from '../../src/quoridor/queues'
 import { QuoridorAction, QuoridorActionType } from '../../src/quoridor/types'
-import { externalizeAction } from '../../src/quoridor/common'
 
 type Event = Record<string, unknown>
 type OnEvent = (event: Event, ctx: PlayContext) => void
@@ -132,6 +131,15 @@ export const expectPawnMove = (position: string, player: string) =>
     })
   })
 
+export const expectPutWall = (position: string, player: string) =>
+  receiveEvent((event) => {
+    expect(event).toEqual({
+      action: QuoridorActionType.PUT_WALL,
+      position,
+      player
+    })
+  })
+
 export const expectWinner = (winner: string) =>
   receiveEvent((event) => {
     expect(event).toEqual({ winner })
@@ -170,6 +178,11 @@ export const flipTable = (): Step => play({ action: 'flipTable' })
 
 export const movePawn = (position: string): Step => play({
   action: QuoridorActionType.MOVE,
+  position
+})
+
+export const putWall = (position: string): Step => play({
+  action: QuoridorActionType.PUT_WALL,
   position
 })
 

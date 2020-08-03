@@ -3,10 +3,12 @@ import {
   expectFlipTable,
   expectGameStart,
   expectPawnMove,
+  expectPutWall,
   expectTotalScore,
   flipTable,
   listenEvent,
   movePawn,
+  putWall,
   receiveEvent,
   requestForGrade,
   startBattle,
@@ -115,6 +117,56 @@ describe('quoridor-simple', () => {
       viewBattle(battle => {
         expect(battle.flippedBy).toEqual('second')
         expect(battle.flippedReason).toEqual('Cannot move to f9')
+      }),
+      expectTotalScore(0))
+  })
+
+  describe('flips when player place walls exceed boundary', () => {
+    it ('|', () => {
+      return startBattle('quoridor',
+        QuoridorCaseType.BASE_AI_SECOND,
+        listenEvent(),
+        expectGameStart('first'),
+        putWall('f9v'),
+        expectPutWall('f9v', 'first'),
+        expectFlipTable('second'),
+        viewBattle(battle => {
+          expect(battle.flippedBy).toEqual('second')
+          expect(battle.flippedReason).toEqual('Cannot put | wall at f9')
+        }),
+        expectTotalScore(0))
+    })
+
+    it('-', () => {
+      return startBattle('quoridor',
+        QuoridorCaseType.BASE_AI_SECOND,
+        listenEvent(),
+        expectGameStart('first'),
+        putWall('i8h'),
+        expectPutWall('i8h', 'first'),
+        expectFlipTable('second'),
+        viewBattle(battle => {
+          expect(battle.flippedBy).toEqual('second')
+          expect(battle.flippedReason).toEqual('Cannot put - wall at i8')
+        }),
+        expectTotalScore(0))
+    })
+  })
+
+  it('flip when player put overlapping wall', () => {
+    return startBattle('quoridor',
+      QuoridorCaseType.BASE_AI_SECOND,
+      listenEvent(),
+      expectGameStart('first'),
+      putWall('a5h'),
+      expectPutWall('a5h', 'first'),
+      receiveEvent(),
+      putWall('a5v'),
+      expectPutWall('a5v', 'first'),
+      expectFlipTable('second'),
+      viewBattle(battle => {
+        expect(battle.flippedBy).toEqual('second')
+        expect(battle.flippedReason).toEqual('Cannot put | wall at a5')
       }),
       expectTotalScore(0))
   })

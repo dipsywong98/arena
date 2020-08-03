@@ -232,7 +232,8 @@ export const handlePutWall = (ctx: ProcessMoveContext): ProcessMoveContext => {
         return draft
       } else {
         if (!canPutWall(state, x1, y1, o)) {
-          draft.output.errors.push(`Cannot put ${o} wall at ${x1},${y1}`)
+          const s = externalizeAction(action).position?.substr(0, 2) ?? 'undefined'
+          draft.output.errors.push(`Cannot put ${o} wall at ${s}`)
         }
       }
     }
@@ -242,7 +243,7 @@ export const handlePutWall = (ctx: ProcessMoveContext): ProcessMoveContext => {
     if (draft.output.errors.length > 0) {
       return draft
     }
-    const current = applyAction(state, { type: action.type, x: x1, y: y1 })
+    const current = applyAction(state, { type: action.type, x: x1, y: y1, o })
     draft.battle.history.push(current)
     return draft
   })
