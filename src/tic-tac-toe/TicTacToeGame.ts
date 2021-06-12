@@ -111,7 +111,6 @@ export class TicTacToeGame {
 
   private checkEndGame () {
     const result = this.determineWinner()
-    console.log('result', result)
     if (result !== 'continue') {
       this.send({winner: result})
       this.destroy()
