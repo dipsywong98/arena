@@ -1,5 +1,5 @@
-import { flip, TicTacToeGame, Turn } from './index'
 import { alphaBetaTree } from '../AlphaBetaTree'
+import { flip, Turn } from './utils'
 
 export interface TicTacToeState {
   board: (Turn | null)[][]
