@@ -78,6 +78,7 @@ export class TicTacToeGame {
     if (player === this._externalPlayer) {
       this.aiMove()
     }
+    this.checkEndGame()
   }
 
   public aiMove() {
@@ -86,9 +87,34 @@ export class TicTacToeGame {
       const move = agent({ board: this._board, turn: this._turn })
       if (move) {
         this.put(aiTurn, move[0], move[1])
-      } else {
-        this.surrender(this._turn)
       }
+    }
+  }
+
+  private determineWinner (): Turn | 'draw' | 'continue' {
+    for (let i = 0; i < 3; i++) {
+      if (this.board[i][0] !== null && this.board[i][0] === this.board[i][1] && this.board[i][1] === this.board[i][2]) {
+        return this.board[i][0]
+      }
+      if (this.board[0][i] !== null && this.board[0][i] === this.board[1][i] && this.board[1][i] === this.board[2][i]) {
+        return this.board[0][i]
+      }
+    }
+    if (this.board[0][0] !== null && this.board[0][0] === this.board[1][1] && this.board[1][1] === this.board[2][2]) {
+      return this.board[1][1]
+    }
+    if (this.board[2][0] !== null && this.board[2][0] === this.board[1][1] && this.board[1][1] === this.board[0][2]) {
+      return this.board[1][1]
+    }
+    return (this.board.filter(row => row.findIndex(c => c === null) !== -1).length === 0) ? 'draw' : 'continue'
+  }
+
+  private checkEndGame () {
+    const result = this.determineWinner()
+    console.log('result', result)
+    if (result !== 'continue') {
+      this.send({winner: result})
+      this.destroy()
     }
   }
 
@@ -98,13 +124,9 @@ export class TicTacToeGame {
     ).join('\n')
   }
 
-  public surrender (player: Turn) {
-    this.send({ player, surrender: true })
-    this.destroy()
-  }
-
   public destroy () {
     delete TicTacToeGame.games[this._id]
     this._res?.end()
+    this._res = undefined
   }
 }

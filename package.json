@@ -61,6 +61,7 @@
   ],
   "dependencies": {
     "alphabeta": "^1.0.2",
+    "axios": "^0.21.1",
     "command-line-args": "^5.1.1",
     "cookie-parser": "^1.4.5",
     "dotenv": "^9.0.2",
