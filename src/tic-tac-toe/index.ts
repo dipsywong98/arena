@@ -62,14 +62,19 @@ ticTacToeRouter.get('/view/:id', withHandleGameError((req, res) => {
 
 ticTacToeRouter.get('/test', (req, res) => {
   const getEndpoint = (route: string): string => req.protocol + '://' + req.get('host') + req.originalUrl.replace('/test', route)
-  http.get(getEndpoint('/start'), (res) => {
+  const history: string[] = []
+  http.get(getEndpoint('/start'), (incoming) => {
     let id: string
     let state: TicTacToeState
     let me: Turn
     let first = false
-    res.on('data', data => {
-      let text = new TextDecoder('utf-8').decode(data)
+    incoming.on('data', data => {
+      let text = new TextDecoder('utf-8').decode(data).trimEnd()
+      if(/^\s*\n*$/.test(text)) {
+        return
+      }
       const message = JSON.parse(text.replace('data: ', ''))
+      history.push(text)
       console.log(text)
       if ('id' in message) {
         id = message.id
@@ -94,9 +99,8 @@ ticTacToeRouter.get('/test', (req, res) => {
           state.turn = me
           const move = agent(state)
           if (move) {
-            console.log(state)
-            console.log(`move ${move[0]} ${move[1]}`)
             state.board[move[1]][move[0]] = me
+            history.push(state.board.map(r => r.join('')).join('\n'))
             axios.post(getEndpoint(`/play/${id}`), {x: move[0], y: move[1]})
               .catch((error) => {
                 console.error('error', error.response.body)
@@ -105,15 +109,12 @@ ticTacToeRouter.get('/test', (req, res) => {
         }
         first = false
       }
+      if ('winner' in message) {
+        console.log(JSON.stringify(history))
+        res.send(`<pre>${history.join('\n')}</pre>`)
+      }
     })
   })
-  res.send('end')
 })
-
-// ticTacToeRouter.use((err, req, res) => {
-//   if(err.name){
-//     console.log(err)
-//   }
-// })
 
 export default ticTacToeRouter
