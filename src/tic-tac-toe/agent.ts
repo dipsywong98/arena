@@ -63,7 +63,9 @@ const isEndGame = (state: TicTacToeState) => {
   return state.board.filter(row => row.findIndex(c => c === null) !== -1).length === 0
 }
 
-const getRandomAction = (state: TicTacToeState): TicTacToeAction | undefined => {
+export type TicTacToeAgent = (state: TicTacToeState) => TicTacToeAction | undefined
+
+export const getFirstAvailableActionAgent: TicTacToeAgent = (state) => {
   for (let i = 0; i < 3; i++) {
     for (let j = 0; j < 3; j++) {
       if (state.board[i][j] === null) {
@@ -74,7 +76,7 @@ const getRandomAction = (state: TicTacToeState): TicTacToeAction | undefined => 
   return undefined
 }
 
-const agent = (state: TicTacToeState): TicTacToeAction | undefined => {
+export const alphaBetaTreeAgent: TicTacToeAgent = (state) => {
   return alphaBetaTree({
     state,
     generator,
@@ -85,7 +87,7 @@ const agent = (state: TicTacToeState): TicTacToeAction | undefined => {
     alpha: -Infinity,
     beta: Infinity,
     apply
-  }).action ?? getRandomAction(state)
+  }).action ?? getFirstAvailableActionAgent(state)
 }
 
-export default agent
+export default alphaBetaTreeAgent

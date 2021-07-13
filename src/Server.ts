@@ -1,15 +1,17 @@
-import cookieParser from 'cookie-parser';
-import morgan from 'morgan';
-import path from 'path';
-import helmet from 'helmet';
+import cookieParser from 'cookie-parser'
+import morgan from 'morgan'
+import helmet from 'helmet'
 
-import express, { NextFunction, Request, Response } from 'express';
-import StatusCodes from 'http-status-codes';
-import 'express-async-errors';
+import express from 'express'
+import StatusCodes from 'http-status-codes'
+import 'express-async-errors'
 import ticTacToeRouter from './tic-tac-toe'
+
+import serverAdapter from './queues'
 
 const app = express();
 const { BAD_REQUEST } = StatusCodes;
+
 
 
 
@@ -33,6 +35,7 @@ if (process.env.NODE_ENV === 'production') {
 
 console.log('hi')
 app.use('/tic-tac-toe', ticTacToeRouter)
+app.use('/admin/queues', serverAdapter.getRouter())
 // const viewsDir = path.join(__dirname, 'views');
 // app.use(express.static(viewsDir));
 // app.get('*', (req: Request, res: Response) => {

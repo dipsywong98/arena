@@ -1,13 +1,21 @@
 import { Router } from 'express'
-import { RequestHandler } from 'express-serve-static-core'
 import { TicTacToeGame } from './TicTacToeGame'
 import GameError from '../libs/GameError'
-import http from 'http'
-import agent, { TicTacToeState } from './agent'
-import { Turn } from './utils'
-import axios from 'axios'
+import { withHandleGameError } from './withHandleGameError'
+
+const toGradeQueue = []
 
 const ticTacToeRouter = Router()
+
+ticTacToeRouter.post('/rfg', (req, res) => {
+  const { gradeId, endpoint } = req.body
+  if(typeof gradeId === 'string' && typeof endpoint === 'string') {
+    toGradeQueue.push({gradeId, endpoint})
+    res.send({result: 'ok'})
+  } else {
+    res.send({error: 'missing gradeId or endpoint'})
+  }
+})
 
 ticTacToeRouter.get('/start', (req, res) => {
   res.setHeader('Cache-Control', 'no-cache')
@@ -27,22 +35,6 @@ ticTacToeRouter.get('/start', (req, res) => {
   }, 1000 * 60 * 10)  // clear the game after 10 min
 })
 
-const withHandleGameError = (f: RequestHandler): RequestHandler => (req, res, next) => {
-  try {
-    f(req, res, next)
-  } catch (e) {
-    if (e.name === GameError.name) {
-      res.status(400).json({
-        error: e.message
-      })
-    } else {
-      res.status(500).json({
-        error: e.message
-      })
-    }
-  }
-}
-
 ticTacToeRouter.post('/play/:id', withHandleGameError((req, res) => {
   const id = req.params.id
   const { x, y } = req.body
@@ -60,61 +52,6 @@ ticTacToeRouter.get('/view/:id', withHandleGameError((req, res) => {
   res.send(`<pre>${game.serialize()}</pre>`)
 }))
 
-ticTacToeRouter.get('/test', (req, res) => {
-  const getEndpoint = (route: string): string => req.protocol + '://' + req.get('host') + req.originalUrl.replace('/test', route)
-  const history: string[] = []
-  http.get(getEndpoint('/start'), (incoming) => {
-    let id: string
-    let state: TicTacToeState
-    let me: Turn
-    let first = false
-    incoming.on('data', data => {
-      let text = new TextDecoder('utf-8').decode(data).trimEnd()
-      if(/^\s*\n*$/.test(text)) {
-        return
-      }
-      const message = JSON.parse(text.replace('data: ', ''))
-      history.push(text)
-      console.log(text)
-      if ('id' in message) {
-        id = message.id
-      }
-      if ('youAre' in message) {
-        me = message.youAre
-        first = message.youAre === 'O'
-        state = {
-          board: [
-            [null, null, null],
-            [null, null, null],
-            [null, null, null]
-          ],
-          turn: 'O'
-        }
-      }
-      if (('player' in message && 'x' in message && 'y' in message && message.player !== me) || first) {
-        if(!first) {
-          state.board[message.y][message.x] = message.player
-        }
-        if(message.player !== me || first) {
-          state.turn = me
-          const move = agent(state)
-          if (move) {
-            state.board[move[1]][move[0]] = me
-            history.push(state.board.map(r => r.join('')).join('\n'))
-            axios.post(getEndpoint(`/play/${id}`), {x: move[0], y: move[1]})
-              .catch((error) => {
-                console.error('error', error.response.body)
-              })
-          }
-        }
-        first = false
-      }
-      if ('winner' in message) {
-        console.log(JSON.stringify(history))
-        res.send(`<pre>${history.join('\n')}</pre>`)
-      }
-    })
-  })
-})
+ticTacToeRouter.get('/test', )
 
 export default ticTacToeRouter

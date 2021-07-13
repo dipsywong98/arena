@@ -1,6 +1,6 @@
 import { Response } from 'express'
 import { v4 } from 'uuid'
-import agent from './agent'
+import alphaBetaTreeAgent from './agent'
 import GameError from '../libs/GameError'
 import { flip, Turn } from './utils'
 
@@ -84,7 +84,7 @@ export class TicTacToeGame {
   public aiMove() {
     const aiTurn = flip(this._externalPlayer)
     if (this._turn === aiTurn) {
-      const move = agent({ board: this._board, turn: this._turn })
+      const move = alphaBetaTreeAgent({ board: this._board, turn: this._turn })
       if (move) {
         this.put(aiTurn, move[0], move[1])
       }
