@@ -1,0 +1,92 @@
+import { Redis } from 'ioredis'
+import { Queue } from 'bullmq'
+
+export enum CaseType {
+  BASE_AI_O = 'BASE_AI_O',
+  BASE_AI_X = 'BASE_AI_X',
+  AB_AI_O = 'AB_AI_O',
+  AB_AI_X = 'AB_AI_X',
+  C_AI_X_FIRST = 'C_AI_X_FIRST',
+  C_AI_DUP = 'C_AI_X_FIRST',
+  C_AI_OUT_OF_BOUND = 'C_AI_OUT_OF_BOUND',
+  C_AI_TWICE_A_ROW = 'C_AI_TWICE_A_ROW'
+}
+
+export enum Turn {
+  O = 'O',
+  X = 'X'
+}
+
+export type Board = Array<Array<Turn | null>>
+
+export interface TicTacToeState {
+  externalPlayer: Turn
+  turn: Turn
+  board: Board
+  expectFlip: boolean
+  createdAt: number
+}
+
+export enum TicTacToeActionType {
+  PUT_SYMBOL = 'putSymbol',
+  FLIP_TABLE = 'flipTable',
+  END_GAME = 'endGame'
+}
+
+export interface TicTacToeAction {
+  action: TicTacToeActionType,
+  x?: number
+  y?: number
+}
+
+export interface TestCase {
+  initialStateGenerator: () => TicTacToeState
+  agent: (state: TicTacToeState) => TicTacToeAction
+  score: number
+}
+
+export interface Battle {
+  id: string
+  gradeId: string
+  type: CaseType
+  history: TicTacToeState[]
+}
+
+export interface Score {
+  id: string
+  score: number
+}
+
+export interface Move {
+  id: string
+  battleId: string
+  action: TicTacToeAction
+}
+
+export interface AppContext {
+  pubRedis: Redis
+  subRedis: Redis
+  battleQueue: Queue<Battle>
+  scoreQueue: Queue<Score>
+  moveQueue: Queue<Move>
+}
+
+export const flip = (turn: Turn) => turn === Turn.X ? Turn.O : Turn.X
+
+export const isEndGame = (state: TicTacToeState): boolean => {
+  for (let i = 0; i < 3; i++) {
+    if (state.board[i][0] === state.board[i][1] && state.board[i][1] === state.board[i][2]) {
+      return state.board[i][0] === state.turn
+    }
+    if (state.board[0][i] === state.board[1][i] && state.board[1][i] === state.board[2][i]) {
+      return state.board[0][i] === state.turn
+    }
+  }
+  if (state.board[0][0] === state.board[1][1] && state.board[1][1] === state.board[2][2]) {
+    return state.board[1][1] === state.turn
+  }
+  if (state.board[2][0] === state.board[1][1] && state.board[1][1] === state.board[0][2]) {
+    return state.board[1][1] === state.turn
+  }
+  return state.board.filter(row => row.findIndex(c => c === null) !== -1).length === 0
+}

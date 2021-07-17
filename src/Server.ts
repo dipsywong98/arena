@@ -3,17 +3,18 @@ import morgan from 'morgan'
 import helmet from 'helmet'
 
 import express from 'express'
-import StatusCodes from 'http-status-codes'
 import 'express-async-errors'
-import ticTacToeRouter from './tic-tac-toe'
+import { makeRouter } from './ttt/router'
 
-import serverAdapter from './queues'
+import { battleQueue, moveQueue, scoreQueue, serverAdapter } from './ttt/queues'
+import { AppContext } from './ttt/common'
+import { makeRedis } from './redis'
 
+const appContext: AppContext = {
+    battleQueue: battleQueue, moveQueue: moveQueue, pubRedis: makeRedis(), subRedis: makeRedis(), scoreQueue: scoreQueue
+}
+const ticTacToeRouter = makeRouter(appContext)
 const app = express();
-const { BAD_REQUEST } = StatusCodes;
-
-
-
 
 /************************************************************************************
  *                              Set basic express settings
