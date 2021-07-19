@@ -20,7 +20,6 @@ export enum Turn {
 export type Board = Array<Array<Turn | null>>
 
 export interface TicTacToeState {
-  externalPlayer: Turn
   turn: Turn
   board: Board
   expectFlip: boolean
@@ -28,19 +27,20 @@ export interface TicTacToeState {
 }
 
 export enum TicTacToeActionType {
+  START_GAME = 'startGame', // internal
   PUT_SYMBOL = 'putSymbol',
   FLIP_TABLE = 'flipTable',
-  END_GAME = 'endGame'
+  END_GAME = 'endGame'// internal
 }
 
 export interface TicTacToeAction {
-  action: TicTacToeActionType,
+  type: TicTacToeActionType,
   x?: number
   y?: number
 }
 
 export interface TestCase {
-  initialStateGenerator: () => TicTacToeState
+  initialStateGenerator: (battleId: string, gradeId: string) => Omit<Battle, 'type'>
   agent: (state: TicTacToeState) => TicTacToeAction
   score: number
 }
@@ -48,6 +48,9 @@ export interface TestCase {
 export interface Battle {
   id: string
   gradeId: string
+  externalPlayer: Turn
+  winner?: Turn | 'DRAW' | 'FLIPPED'
+  flippedReason?: string
   type: CaseType
   history: TicTacToeState[]
 }
@@ -60,6 +63,7 @@ export interface Score {
 export interface Move {
   id: string
   battleId: string
+  by: Turn
   action: TicTacToeAction
 }
 
@@ -68,7 +72,7 @@ export interface AppContext {
   subRedis: Redis
   battleQueue: Queue<Battle>
   scoreQueue: Queue<Score>
-  moveQueue: Queue<Move>
+  incomingMoveQueue: Queue<Move>
 }
 
 export const flip = (turn: Turn) => turn === Turn.X ? Turn.O : Turn.X

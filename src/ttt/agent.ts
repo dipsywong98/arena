@@ -25,7 +25,7 @@ const generator = (state: TicTacToeState): TicTacToeAction[] => {
     for (let x = 0; x < 3; x++) {
       if (state.board[y][x] === null) {
         moves.push({
-          action: TicTacToeActionType.PUT_SYMBOL,
+          type: TicTacToeActionType.PUT_SYMBOL,
           x,
           y
         })
@@ -36,7 +36,7 @@ const generator = (state: TicTacToeState): TicTacToeAction[] => {
 }
 
 const apply = (state: TicTacToeState, action: TicTacToeAction): TicTacToeState => {
-  if(action.action === TicTacToeActionType.PUT_SYMBOL && action.x && action.y) {
+  if(action.type === TicTacToeActionType.PUT_SYMBOL && action.x && action.y) {
     const dup = JSON.parse(JSON.stringify(state))
     dup.board[action.y][action.x] = dup.turn
     dup.turn = flip(dup.turn)
@@ -52,7 +52,7 @@ export const baseAgent: TicTacToeAgent = (state) => {
     for (let j = 0; j < 3; j++) {
       if (state.board[i][j] === null) {
         return {
-          action: TicTacToeActionType.PUT_SYMBOL,
+          type: TicTacToeActionType.PUT_SYMBOL,
           x: j,
           y: i
         }
@@ -60,7 +60,7 @@ export const baseAgent: TicTacToeAgent = (state) => {
     }
   }
   return {
-    action: TicTacToeActionType.END_GAME
+    type: TicTacToeActionType.END_GAME
   }
 }
 

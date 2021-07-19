@@ -9,10 +9,10 @@ const makeChannel = (channelName: string, battleId: string) => {
   return `areana:ttt:channel:${channelName}:${battleId}`
 }
 
-export const getBattle = async (redis: Redis, battleId: string): Promise<Battle> => {
+export const getBattle = async (redis: Redis, battleId: string): Promise<Battle | null> => {
   const text = await redis.get(makeId(battleId))
   if (text === null) {
-    throw new Error(`battle of id ${battleId} does not exist`)
+    return null
   }
   return JSON.parse(text) as Battle
 }
@@ -21,7 +21,7 @@ export const setBattle = async (redis: Redis, battle: Battle): Promise<void> => 
   await redis.set(makeId(battle.id), JSON.stringify(battle), 'EX', 60 * 60) // expire in 1 hour
 }
 
-export const subscribeMove = async (redis: Redis, battleId: string, callback: (move: Move) => void | Promise<void>) => {
+export const subscribeOutgoingMove = async (redis: Redis, battleId: string, callback: (move: Move) => void | Promise<void>) => {
   await redis.subscribe(makeChannel('move', battleId))
   redis.on('message', (channel, message) => {
     if (channel === makeChannel('move', battleId)) {
@@ -30,6 +30,6 @@ export const subscribeMove = async (redis: Redis, battleId: string, callback: (m
   })
 }
 
-export const publishMove = async (redis: Redis, battleId: string, move: Move) => {
-  await redis.publish(makeChannel('move', battleId), JSON.stringify(move))
+export const publishOutgoingMove = async (redis: Redis, move: Move) => {
+  await redis.publish(makeChannel('move', move.battleId), JSON.stringify(move))
 }

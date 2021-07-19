@@ -11,7 +11,7 @@ import { AppContext } from './ttt/common'
 import { makeRedis } from './redis'
 
 const appContext: AppContext = {
-    battleQueue: battleQueue, moveQueue: moveQueue, pubRedis: makeRedis(), subRedis: makeRedis(), scoreQueue: scoreQueue
+    battleQueue: battleQueue, incomingMoveQueue: moveQueue, pubRedis: makeRedis(), subRedis: makeRedis(), scoreQueue: scoreQueue
 }
 const ticTacToeRouter = makeRouter(appContext)
 const app = express();

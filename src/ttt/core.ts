@@ -1,5 +1,6 @@
 import {
   AppContext,
+  Battle,
   CaseType,
   flip,
   Move,
@@ -10,17 +11,23 @@ import {
   Turn
 } from './common'
 import abAgent, { baseAgent } from './agent'
-import { getBattle, publishMove, setBattle } from './store'
+import { getBattle, publishOutgoingMove, setBattle } from './store'
 import { v4 } from 'uuid'
 import { makeRedis } from '../redis'
 import produce from 'immer'
+import { Redis } from 'ioredis'
+import { last, pipe } from 'ramda'
 
-const makeInitialStateGenerator = (aiTurn: Turn) => (): TicTacToeState => ({
+const makeInitialStateGenerator = (aiTurn: Turn) => (battleId: string, gradeId: string): Omit<Battle, 'type'> => ({
+  id: battleId,
+  gradeId,
   externalPlayer: flip(aiTurn),
-  turn: aiTurn,
-  board: [[null, null, null], [null, null, null], [null, null, null]],
-  expectFlip: false,
-  createdAt: Date.now()
+  history: [{
+    expectFlip: false,
+    turn: Turn.O,
+    board: [[null, null, null], [null, null, null], [null, null, null]],
+    createdAt: Date.now()
+  }]
 })
 
 const config: Record<CaseType, TestCase> = {
@@ -86,17 +93,15 @@ export const generateBattlesForGrading = async (appContext: AppContext, gradeId:
   return Promise.all(Object.entries(config).map(async ([type, { initialStateGenerator }]) => {
     const id = v4()
     await setBattle(appContext.pubRedis, {
-      history: [initialStateGenerator()],
-      id,
-      type: type as CaseType,
-      gradeId
+      ...initialStateGenerator(id, gradeId),
+      type: type as CaseType
     })
     return id
   }))
 }
 
 export const applyAction = (state: TicTacToeState, action: TicTacToeAction): TicTacToeState => {
-  if (action.action === TicTacToeActionType.PUT_SYMBOL) {
+  if (action.type === TicTacToeActionType.PUT_SYMBOL) {
     return produce(state, draft => {
       draft.board[action.y!][action.x!] = state.turn
       draft.turn = flip(state.turn)
@@ -105,17 +110,133 @@ export const applyAction = (state: TicTacToeState, action: TicTacToeAction): Tic
   return state
 }
 
-export const processMove = async (move: Move) => {
-  const redis = makeRedis()
-  const {battleId, action} = move
-  const battle = await getBattle(redis, battleId)
-  const prevState = battle.history[battle.history.length - 1]
-  // validate(state, move)
-  const currState = applyAction(prevState, action)
-  const ourAction = config[battle.type].agent(currState)
-  const nextState = applyAction(currState, ourAction)
-  battle.history.push(currState, nextState)
-  await setBattle(redis, battle)
-  await publishMove(redis, battleId, {id: v4(), battleId, action: ourAction})
-  return ourAction
+interface ProcessMoveContext {
+  redis: Redis
+  battle: Battle
+  input: {
+    move: Move
+  }
+  output: {
+    errors: string[]
+    action?: TicTacToeAction
+    endgame?: boolean
+  }
 }
+
+export const validate = (ctx: ProcessMoveContext): ProcessMoveContext => produce(ctx, (draft) => {
+  const move = draft.input.move
+  const state = last(draft.battle.history)!
+  if (move.action.type === TicTacToeActionType.PUT_SYMBOL) {
+
+  } else if (move.action.type === TicTacToeActionType.FLIP_TABLE) {
+    if (!state.expectFlip) {
+      draft.output.errors.push(`You are not supposed to flip the table now`)
+    }
+    if (state.turn !== move.by) {
+      draft.output.errors.push('Not your turn')
+    }
+  } else if (move.action.type === TicTacToeActionType.START_GAME) {
+    if (draft.battle.history.length !== 1) {
+      draft.output.errors.push('game already started')
+    }
+  } else {
+    draft.output.errors.push('unknown action type')
+  }
+  return draft
+})
+
+export const handlePutSymbol = (ctx: ProcessMoveContext): ProcessMoveContext => {
+  if (ctx.input.move.action.type !== TicTacToeActionType.PUT_SYMBOL) return ctx
+  return produce(ctx, draft => {
+    const move = draft.input.move
+    const state = last(draft.battle.history)!
+    if (typeof (move.action.x) !== 'number' || typeof (move.action.y) !== 'number') {
+      draft.output.errors.push('Expect x and y shall be number for put symbol action')
+    } else {
+      if (move.action.x < 0 || move.action.y < 0 || move.action.x > 2 || move.action.y > 2) {
+        draft.output.errors.push(`location ${move.action.x},${move.action.y} is out of range`)
+      }
+      if (state.board[move.action.y][move.action.x] !== null) {
+        draft.output.errors.push(`location ${move.action.x},${move.action.y} is not empty`)
+      }
+    }
+    if (state.turn !== move.by) {
+      draft.output.errors.push('Not your turn')
+    }
+    if (draft.output.errors.length > 0) {
+      return draft
+    }
+    const current = applyAction(state, move.action)
+    draft.battle.history.push(current)
+    return draft
+  })
+}
+
+export const agentMove = (ctx: ProcessMoveContext): ProcessMoveContext => produce(ctx, draft => {
+  const state = last(draft.battle.history)!
+  if (state.turn === flip(draft.battle.externalPlayer)) {
+    draft.output.action = config[draft.battle.type].agent(state)
+    draft.battle.history.push(applyAction(state, draft.output.action))
+    return draft
+  }
+  return draft
+})
+
+export const publishOutput = async (ctx: ProcessMoveContext): Promise<ProcessMoveContext> => produce(ctx, async draft => {
+  if (draft.output.errors.length > 0) {
+    await setBattle(draft.redis, { ...draft.battle, winner: 'FLIPPED', flippedReason: draft.output.errors.join('\n') })
+    const action = {
+      type: TicTacToeActionType.FLIP_TABLE
+    }
+    await publishOutgoingMove(draft.redis, {
+      id: v4(),
+      battleId: draft.battle.id,
+      action,
+      by: flip(draft.battle.externalPlayer)
+    })
+    return draft
+  } else {
+    if (draft.output.action) {
+      await setBattle(draft.redis, draft.battle)
+      await publishOutgoingMove(draft.redis, {
+        id: v4(),
+        battleId: draft.battle.id,
+        action: draft.output.action,
+        by: flip(draft.battle.externalPlayer)
+      })
+    }
+
+  }
+})
+
+export const processMove = async (move: Move): Promise<unknown> => {
+  const redis = makeRedis()
+  const battle = await getBattle(redis, move.battleId)
+  if (battle !== null) {
+    const ctx: ProcessMoveContext = {
+      redis,
+      battle,
+      input: { move },
+      output: {
+        errors: []
+      }
+    }
+    const pipe1 = await pipe(
+      validate,
+      handlePutSymbol,
+      agentMove,
+      publishOutput
+    )(ctx)
+    console.log(pipe1)
+    return pipe1
+  } else {
+    return `battle ${move.battleId} does not exist`
+  }
+}
+
+// TODO make flip table reason inside history
+// TODO validate battle state before apply, aka whether started game and whether flipped table
+// TODO shuffle the generated battle ids
+// TODO time limit for submitting next move
+// TODO linter
+// TODO testing
