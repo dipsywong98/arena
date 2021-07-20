@@ -2,7 +2,7 @@ import { Router } from 'express'
 import { AppContext, Move, TicTacToeActionType } from './common'
 import axios from 'axios'
 import { generateBattlesForGrading } from './core'
-import { getBattle, publishOutgoingMove, subscribeOutgoingMove } from './store'
+import { getBattle, publishOutgoingMove, subscribeMessage, subscribeOutgoingMove } from './store'
 import { withHandleGameError } from '../tic-tac-toe/withHandleGameError'
 import { v4 } from 'uuid'
 
@@ -46,6 +46,13 @@ export const makeRouter = (appContext: AppContext) => {
 
     subscribeOutgoingMove(appContext.subRedis, battleId, (move) => {
       res.write(`data: ${JSON.stringify({ ...move.action, player: move.by })}\n\n`)
+    }).catch(e => {
+      console.error(e)
+      res.status(500).send(e.message)
+    })
+
+    subscribeMessage(appContext.subRedis, battleId, (message) => {
+      res.write(`data: ${message}\n\n`)
     }).catch(e => {
       console.error(e)
       res.status(500).send(e.message)

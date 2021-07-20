@@ -3,7 +3,9 @@ import {
   Battle,
   CaseType,
   flip,
+  getWinner,
   Move,
+  Result,
   TestCase,
   TicTacToeAction,
   TicTacToeActionType,
@@ -11,7 +13,7 @@ import {
   Turn
 } from './common'
 import abAgent, { baseAgent } from './agent'
-import { getBattle, publishOutgoingMove, setBattle } from './store'
+import { getBattle, publishMessage, publishOutgoingMove, setBattle } from './store'
 import { v4 } from 'uuid'
 import { makeRedis } from '../redis'
 import produce from 'immer'
@@ -119,7 +121,6 @@ interface ProcessMoveContext {
   output: {
     errors: string[]
     action?: TicTacToeAction
-    endgame?: boolean
   }
 }
 
@@ -172,9 +173,23 @@ export const handlePutSymbol = (ctx: ProcessMoveContext): ProcessMoveContext => 
   })
 }
 
+export const checkEndGame = (ctx: ProcessMoveContext): ProcessMoveContext => produce(ctx, draft => {
+  if (ctx.input.move.action.type === TicTacToeActionType.FLIP_TABLE) {
+    draft.battle.result = Result.FLIPPED
+    return draft
+  } else {
+    const state = last(draft.battle.history)!
+    const winner = getWinner(state)
+    if (winner) {
+      draft.battle.result = winner
+    }
+    return draft
+  }
+})
+
 export const agentMove = (ctx: ProcessMoveContext): ProcessMoveContext => produce(ctx, draft => {
   const state = last(draft.battle.history)!
-  if (state.turn === flip(draft.battle.externalPlayer)) {
+  if (state.turn === flip(draft.battle.externalPlayer) && draft.battle.result === undefined) {
     draft.output.action = config[draft.battle.type].agent(state)
     draft.battle.history.push(applyAction(state, draft.output.action))
     return draft
@@ -184,7 +199,14 @@ export const agentMove = (ctx: ProcessMoveContext): ProcessMoveContext => produc
 
 export const publishOutput = async (ctx: ProcessMoveContext): Promise<ProcessMoveContext> => produce(ctx, async draft => {
   if (draft.output.errors.length > 0) {
-    await setBattle(draft.redis, { ...draft.battle, winner: 'FLIPPED', flippedReason: draft.output.errors.join('\n') })
+    const battle = {
+      ...draft.battle,
+      result: Result.FLIPPED,
+      flippedReason: draft.output.errors.join('\n'),
+      flippedBy: flip(draft.battle.externalPlayer)
+    }
+    await setBattle(draft.redis, battle)
+    draft.battle = battle
     const action = {
       type: TicTacToeActionType.FLIP_TABLE
     }
@@ -196,8 +218,8 @@ export const publishOutput = async (ctx: ProcessMoveContext): Promise<ProcessMov
     })
     return draft
   } else {
+    await setBattle(draft.redis, draft.battle)
     if (draft.output.action) {
-      await setBattle(draft.redis, draft.battle)
       await publishOutgoingMove(draft.redis, {
         id: v4(),
         battleId: draft.battle.id,
@@ -205,7 +227,21 @@ export const publishOutput = async (ctx: ProcessMoveContext): Promise<ProcessMov
         by: flip(draft.battle.externalPlayer)
       })
     }
-
+    if (draft.battle.result !== undefined) {
+      const message: Record<string, unknown> = {}
+      switch (draft.battle.result) {
+        case Result.O_WIN:
+          message.winner = 'O'
+          break
+        case Result.X_WIN:
+          message.winner = 'X'
+          break
+        case Result.DRAW:
+          message.winner = 'DRAW'
+          break
+      }
+      await publishMessage(draft.redis, draft.battle.id, message)
+    }
   }
 })
 
@@ -213,22 +249,28 @@ export const processMove = async (move: Move): Promise<unknown> => {
   const redis = makeRedis()
   const battle = await getBattle(redis, move.battleId)
   if (battle !== null) {
-    const ctx: ProcessMoveContext = {
-      redis,
-      battle,
-      input: { move },
-      output: {
-        errors: []
+    if (battle.result === undefined) {
+      const ctx: ProcessMoveContext = {
+        redis,
+        battle,
+        input: { move },
+        output: {
+          errors: []
+        }
       }
+      const { redis: _, ...rest } = await pipe(
+        validate,
+        handlePutSymbol,
+        checkEndGame,
+        agentMove,
+        checkEndGame,
+        publishOutput
+      )(ctx)
+      console.log(rest)
+      return rest
+    } else {
+      return `battle ${move.battleId} has result ${battle.result}`
     }
-    const pipe1 = await pipe(
-      validate,
-      handlePutSymbol,
-      agentMove,
-      publishOutput
-    )(ctx)
-    console.log(pipe1)
-    return pipe1
   } else {
     return `battle ${move.battleId} does not exist`
   }

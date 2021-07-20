@@ -33,3 +33,16 @@ export const subscribeOutgoingMove = async (redis: Redis, battleId: string, call
 export const publishOutgoingMove = async (redis: Redis, move: Move) => {
   await redis.publish(makeChannel('move', move.battleId), JSON.stringify(move))
 }
+
+export const publishMessage = async (redis: Redis, battleId: string, message: Record<string, unknown>) => {
+  await redis.publish(makeChannel('publish', battleId), JSON.stringify(message))
+}
+
+export const subscribeMessage = async (redis: Redis, battleId: string, callback: (message: string) => void | Promise<void>) => {
+  await redis.subscribe(makeChannel('publish', battleId))
+  redis.on('message', (channel, message) => {
+    if (channel === makeChannel('publish', battleId)) {
+      callback(message)
+    }
+  })
+}

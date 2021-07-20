@@ -49,8 +49,9 @@ export interface Battle {
   id: string
   gradeId: string
   externalPlayer: Turn
-  winner?: Turn | 'DRAW' | 'FLIPPED'
+  result?: Result
   flippedReason?: string
+  flippedBy?: Turn
   type: CaseType
   history: TicTacToeState[]
 }
@@ -75,6 +76,13 @@ export interface AppContext {
   incomingMoveQueue: Queue<Move>
 }
 
+export enum Result {
+  O_WIN = 'O_WIN',
+  X_WIN = 'X_WIN',
+  DRAW = 'DRAW',
+  FLIPPED = 'FLIPPED',
+}
+
 export const flip = (turn: Turn) => turn === Turn.X ? Turn.O : Turn.X
 
 export const isEndGame = (state: TicTacToeState): boolean => {
@@ -93,4 +101,22 @@ export const isEndGame = (state: TicTacToeState): boolean => {
     return state.board[1][1] === state.turn
   }
   return state.board.filter(row => row.findIndex(c => c === null) !== -1).length === 0
+}
+
+export const getWinner = (state: TicTacToeState): Result | undefined => {
+  for (let i = 0; i < 3; i++) {
+    if (state.board[i][0]!== null && state.board[i][0] === state.board[i][1] && state.board[i][1] === state.board[i][2]) {
+      return state.board[i][0] === Turn.O ? Result.O_WIN : Result.X_WIN
+    }
+    if (state.board[0][i] !== null && state.board[0][i] === state.board[1][i] && state.board[1][i] === state.board[2][i]) {
+      return state.board[0][i] === Turn.O ? Result.O_WIN : Result.X_WIN
+    }
+  }
+  if (state.board[0][0] !== null && state.board[0][0] === state.board[1][1] && state.board[1][1] === state.board[2][2]) {
+    return state.board[1][1]=== Turn.O ? Result.O_WIN : Result.X_WIN
+  }
+  if (state.board[2][0] !== null && state.board[2][0] === state.board[1][1] && state.board[1][1] === state.board[0][2]) {
+    return state.board[1][1] === Turn.O ? Result.O_WIN : Result.X_WIN
+  }
+  return state.board.filter(row => row.findIndex(c => c === null) !== -1).length === 0 ? Result.DRAW : undefined
 }
