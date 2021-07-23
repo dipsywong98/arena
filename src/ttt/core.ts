@@ -276,8 +276,6 @@ export const processMove = async (move: Move): Promise<unknown> => {
   }
 }
 
-// TODO make flip table reason inside history
-// TODO validate battle state before apply, aka whether started game and whether flipped table
 // TODO shuffle the generated battle ids
 // TODO time limit for submitting next move
 // TODO linter
