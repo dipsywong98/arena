@@ -19,19 +19,20 @@ import {
   Turn
 } from './types'
 
-const makeInitialStateGenerator = (aiTurn: Turn) => (battleId: string, gradeId: string): Omit<Battle, 'type'> => ({
-  id: battleId,
-  gradeId,
-  externalPlayer: flip(aiTurn),
-  history: [{
-    expectFlip: false,
-    turn: Turn.O,
-    board: [[null, null, null], [null, null, null], [null, null, null]],
-    createdAt: Date.now()
-  }]
-})
+const makeInitialStateGenerator = (aiTurn: Turn) =>
+  (battleId: string, gradeId: string): Omit<Battle, 'type'> => ({
+    id: battleId,
+    gradeId,
+    externalPlayer: flip(aiTurn),
+    history: [{
+      expectFlip: false,
+      turn: Turn.O,
+      board: [[null, null, null], [null, null, null], [null, null, null]],
+      createdAt: Date.now()
+    }]
+  })
 
-const config: Record<CaseType, TestCase> = {
+const config: Record<CaseType, TestCase> = Object.freeze({
   [CaseType.BASE_AI_O]: {
     initialStateGenerator: makeInitialStateGenerator(Turn.O),
     agent (state: TicTacToeState): TicTacToeAction {
@@ -88,17 +89,23 @@ const config: Record<CaseType, TestCase> = {
     },
     score: 3
   }
-}
+})
 
-export const generateBattlesForGrading = async (appContext: AppContext, gradeId: string): Promise<string[]> => {
-  return Promise.all(Object.entries(config).map(async ([type, { initialStateGenerator }]) => {
-    const id = v4()
-    await setBattle(appContext.pubRedis, {
-      ...initialStateGenerator(id, gradeId),
-      type: type as CaseType
-    })
-    return id
-  }))
+export const generateBattlesForGrading = async (
+  appContext: AppContext,
+  gradeId: string,
+  type?: CaseType
+): Promise<string[]> => {
+  return Promise.all(
+    Object.entries(type !== undefined ? { [type]: config[type] } : config)
+      .map(async ([type, { initialStateGenerator }]) => {
+        const id = v4()
+        await setBattle(appContext.pubRedis, {
+          ...initialStateGenerator(id, gradeId),
+          type: type as CaseType
+        })
+        return id
+      }))
 }
 
 interface ProcessMoveContext {
@@ -115,22 +122,26 @@ interface ProcessMoveContext {
 
 export const validate = (ctx: ProcessMoveContext): ProcessMoveContext => produce(ctx, (draft) => {
   const move = draft.input.move
-  const state = last(draft.battle.history)!
-  if (move.action.type === TicTacToeActionType.PUT_SYMBOL) {
-
-  } else if (move.action.type === TicTacToeActionType.FLIP_TABLE) {
-    if (!state.expectFlip) {
-      draft.output.errors.push(`You are not supposed to flip the table now`)
-    }
-    if (state.turn !== move.by) {
-      draft.output.errors.push('Not your turn')
-    }
-  } else if (move.action.type === TicTacToeActionType.START_GAME) {
-    if (draft.battle.history.length !== 1) {
-      draft.output.errors.push('game already started')
-    }
+  const state = last(draft.battle.history)
+  if (state === undefined) {
+    draft.output.errors.push('Battle has no history')
   } else {
-    draft.output.errors.push('unknown action type')
+    if (move.action.type === TicTacToeActionType.PUT_SYMBOL) {
+      // check in handlePutSymbol
+    } else if (move.action.type === TicTacToeActionType.FLIP_TABLE) {
+      if (!state.expectFlip) {
+        draft.output.errors.push(`You are not supposed to flip the table now`)
+      }
+      if (state.turn !== move.by) {
+        draft.output.errors.push('Not your turn')
+      }
+    } else if (move.action.type === TicTacToeActionType.START_GAME) {
+      if (draft.battle.history.length !== 1) {
+        draft.output.errors.push('game already started')
+      }
+    } else {
+      draft.output.errors.push('unknown action type')
+    }
   }
   return draft
 })
@@ -186,53 +197,54 @@ export const agentMove = (ctx: ProcessMoveContext): ProcessMoveContext => produc
   return draft
 })
 
-export const publishOutput = async (ctx: ProcessMoveContext): Promise<ProcessMoveContext> => produce(ctx, async draft => {
-  if (draft.output.errors.length > 0) {
-    const battle = {
-      ...draft.battle,
-      result: Result.FLIPPED,
-      flippedReason: draft.output.errors.join('\n'),
-      flippedBy: flip(draft.battle.externalPlayer)
-    }
-    await setBattle(draft.redis, battle)
-    draft.battle = battle
-    const action = {
-      type: TicTacToeActionType.FLIP_TABLE
-    }
-    await publishOutgoingMove(draft.redis, {
-      id: v4(),
-      battleId: draft.battle.id,
-      action,
-      by: flip(draft.battle.externalPlayer)
-    })
-    return draft
-  } else {
-    await setBattle(draft.redis, draft.battle)
-    if (draft.output.action) {
+export const publishOutput = async (ctx: ProcessMoveContext): Promise<ProcessMoveContext> =>
+  produce(ctx, async draft => {
+    if (draft.output.errors.length > 0) {
+      const battle = {
+        ...draft.battle,
+        result: Result.FLIPPED,
+        flippedReason: draft.output.errors.join('\n'),
+        flippedBy: flip(draft.battle.externalPlayer)
+      }
+      await setBattle(draft.redis, battle)
+      draft.battle = battle
+      const action = {
+        type: TicTacToeActionType.FLIP_TABLE
+      }
       await publishOutgoingMove(draft.redis, {
         id: v4(),
         battleId: draft.battle.id,
-        action: draft.output.action,
+        action,
         by: flip(draft.battle.externalPlayer)
       })
-    }
-    if (draft.battle.result !== undefined) {
-      const message: Record<string, unknown> = {}
-      switch (draft.battle.result) {
-        case Result.O_WIN:
-          message.winner = 'O'
-          break
-        case Result.X_WIN:
-          message.winner = 'X'
-          break
-        case Result.DRAW:
-          message.winner = 'DRAW'
-          break
+      return draft
+    } else {
+      await setBattle(draft.redis, draft.battle)
+      if (draft.output.action) {
+        await publishOutgoingMove(draft.redis, {
+          id: v4(),
+          battleId: draft.battle.id,
+          action: draft.output.action,
+          by: flip(draft.battle.externalPlayer)
+        })
       }
-      await publishMessage(draft.redis, draft.battle.id, message)
+      if (draft.battle.result !== undefined) {
+        const message: Record<string, unknown> = {}
+        switch (draft.battle.result) {
+          case Result.O_WIN:
+            message.winner = 'O'
+            break
+          case Result.X_WIN:
+            message.winner = 'X'
+            break
+          case Result.DRAW:
+            message.winner = 'DRAW'
+            break
+        }
+        await publishMessage(draft.redis, draft.battle.id, message)
+      }
     }
-  }
-})
+  })
 
 export const processMove = async (move: Move): Promise<unknown> => {
   const redis = makeRedis()
@@ -247,7 +259,7 @@ export const processMove = async (move: Move): Promise<unknown> => {
           errors: []
         }
       }
-      const { redis: _, ...rest } = await pipe(
+      const { battle: battleNew, input, output } = await pipe(
         validate,
         handlePutSymbol,
         checkEndGame,
@@ -255,7 +267,7 @@ export const processMove = async (move: Move): Promise<unknown> => {
         checkEndGame,
         publishOutput
       )(ctx)
-      return rest
+      return { battle: battleNew, input, output }
     } else {
       return `battle ${move.battleId} has result ${battle.result}`
     }

@@ -13,7 +13,7 @@ export const battleQueue = new Queue<Battle>('battleQueue', { connection: redis 
 export const scoreQueue = new Queue<Score>('scoreQueue', { connection: redis })
 export const moveQueue = new Queue<Move>('moveQueue', { connection: redis })
 
-new Worker<Move>('moveQueue', async (job) => {
+export const moveWorker = new Worker<Move>('moveQueue', async (job) => {
   const move = job.data
   return await processMove(move)
 }, { connection: redis })

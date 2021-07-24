@@ -11,7 +11,11 @@ import { makeRedis } from './redis'
 import { AppContext } from './ttt/types'
 
 const appContext: AppContext = {
-    battleQueue: battleQueue, incomingMoveQueue: moveQueue, pubRedis: makeRedis(), subRedis: makeRedis(), scoreQueue: scoreQueue
+    battleQueue: battleQueue,
+    incomingMoveQueue: moveQueue,
+    pubRedis: makeRedis(),
+    subRedis: makeRedis(),
+    scoreQueue: scoreQueue
 }
 const ticTacToeRouter = makeRouter(appContext)
 const app = express();
@@ -34,7 +38,6 @@ if (process.env.NODE_ENV === 'production') {
     app.use(helmet());
 }
 
-console.log('hi')
 app.use('/tic-tac-toe', ticTacToeRouter)
 app.use('/admin/queues', serverAdapter.getRouter())
 // const viewsDir = path.join(__dirname, 'views');

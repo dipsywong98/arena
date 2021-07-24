@@ -4,19 +4,27 @@ import { generateBattlesForGrading } from './core'
 import { getBattle, publishOutgoingMove, subscribeMessage, subscribeOutgoingMove } from './store'
 import { withHandleGameError } from './withHandleGameError'
 import { v4 } from 'uuid'
-import { AppContext, Move, TicTacToeActionType } from './types'
+import { AppContext, isCaseType, Move, TicTacToeActionType } from './types'
 
 export const makeRouter = (appContext: AppContext) => {
   const ticTacToeRouter = Router()
+  ticTacToeRouter.get('/hi', (request, response) => {
+    response.send({ hi: 'hi' })
+  })
 
   ticTacToeRouter.post('/rfg', async (req, res) => {
-    const { gradeId, endpoint } = req.body
+    const { gradeId, endpoint, caseType } = req.body
     if (typeof gradeId === 'string' && typeof endpoint === 'string') {
-      const battleIds = await generateBattlesForGrading(appContext, gradeId)
+      const battleIds = await generateBattlesForGrading(appContext, gradeId, isCaseType(caseType) ? caseType : undefined)
+      const errors = []
       for (const battleId of battleIds) {
-        await axios.post(`${endpoint}/tic-tac-toe`, { battleId })
+        try{
+          await axios.post(`${endpoint}/tic-tac-toe`, { battleId })
+        }catch (e) {
+          errors.push(e.message)
+        }
       }
-      res.send({ battleIds })
+      res.send({ battleIds, errors })
     } else {
       res
         .status(400)
@@ -89,7 +97,7 @@ export const makeRouter = (appContext: AppContext) => {
   }))
 
   ticTacToeRouter.post('/', (req, res) => {
-    console.log('/')
+    console.log('/', req.body)
     res.send('OK')
   })
 

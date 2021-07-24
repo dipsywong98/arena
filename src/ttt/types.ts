@@ -7,9 +7,13 @@ export enum CaseType {
   AB_AI_O = 'AB_AI_O',
   AB_AI_X = 'AB_AI_X',
   C_AI_X_FIRST = 'C_AI_X_FIRST',
-  C_AI_DUP = 'C_AI_X_FIRST',
+  C_AI_DUP = 'C_AI_DUP',
   C_AI_OUT_OF_BOUND = 'C_AI_OUT_OF_BOUND',
   C_AI_TWICE_A_ROW = 'C_AI_TWICE_A_ROW'
+}
+
+export function isCaseType (p: string): p is CaseType {
+  return p in CaseType
 }
 
 export enum Turn {
