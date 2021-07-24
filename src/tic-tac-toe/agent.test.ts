@@ -1,4 +1,4 @@
-import { TicTacToeGame } from './index'
+import { TicTacToeGame } from './TicTacToeGame'
 import alphaBetaTreeAgent from './agent'
 
 describe('agent', () => {
