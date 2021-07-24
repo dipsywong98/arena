@@ -36,7 +36,7 @@ const generator = (state: TicTacToeState): TicTacToeAction[] => {
 }
 
 const apply = (state: TicTacToeState, action: TicTacToeAction): TicTacToeState => {
-  if(action.type === TicTacToeActionType.PUT_SYMBOL && action.x && action.y) {
+  if(action.type === TicTacToeActionType.PUT_SYMBOL && action.x !== undefined && action.y !== undefined) {
     const dup = JSON.parse(JSON.stringify(state))
     dup.board[action.y][action.x] = dup.turn
     dup.turn = flip(dup.turn)
