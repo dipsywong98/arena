@@ -1,5 +1,5 @@
-import { Battle, Move } from './common'
 import { Redis } from 'ioredis'
+import { Battle, Move } from './types'
 
 const makeId = (battleId: string) => {
   return `arena:ttt:battle:${battleId}`

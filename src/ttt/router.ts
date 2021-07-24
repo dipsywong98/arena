@@ -1,10 +1,10 @@
 import { Router } from 'express'
-import { AppContext, Move, TicTacToeActionType } from './common'
 import axios from 'axios'
 import { generateBattlesForGrading } from './core'
 import { getBattle, publishOutgoingMove, subscribeMessage, subscribeOutgoingMove } from './store'
 import { withHandleGameError } from './withHandleGameError'
 import { v4 } from 'uuid'
+import { AppContext, Move, TicTacToeActionType } from './types'
 
 export const makeRouter = (appContext: AppContext) => {
   const ticTacToeRouter = Router()

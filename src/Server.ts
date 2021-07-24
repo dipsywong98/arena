@@ -7,8 +7,8 @@ import 'express-async-errors'
 import { makeRouter } from './ttt/router'
 
 import { battleQueue, moveQueue, scoreQueue, serverAdapter } from './ttt/queues'
-import { AppContext } from './ttt/common'
 import { makeRedis } from './redis'
+import { AppContext } from './ttt/types'
 
 const appContext: AppContext = {
     battleQueue: battleQueue, incomingMoveQueue: moveQueue, pubRedis: makeRedis(), subRedis: makeRedis(), scoreQueue: scoreQueue

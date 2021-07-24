@@ -1,5 +1,6 @@
 import { alphaBetaTree } from '../AlphaBetaTree'
-import { flip, isEndGame, TicTacToeAction, TicTacToeActionType, TicTacToeState, Turn } from './common'
+import { applyAction, isEndGame } from './common'
+import { TicTacToeAction, TicTacToeActionType, TicTacToeState, Turn } from './types'
 
 const scorer = (me: Turn) => (state: TicTacToeState): number => {
   for (let i = 0; i < 3; i++) {
@@ -35,16 +36,6 @@ const generator = (state: TicTacToeState): TicTacToeAction[] => {
   return moves
 }
 
-const apply = (state: TicTacToeState, action: TicTacToeAction): TicTacToeState => {
-  if(action.type === TicTacToeActionType.PUT_SYMBOL && action.x !== undefined && action.y !== undefined) {
-    const dup = JSON.parse(JSON.stringify(state))
-    dup.board[action.y][action.x] = dup.turn
-    dup.turn = flip(dup.turn)
-    return dup
-  }
-  return state
-}
-
 export type TicTacToeAgent = (state: TicTacToeState) => TicTacToeAction
 
 export const baseAgent: TicTacToeAgent = (state) => {
@@ -74,7 +65,7 @@ export const abAgent: TicTacToeAgent = (state): TicTacToeAction => {
     maximize: true,
     alpha: -Infinity,
     beta: Infinity,
-    apply
+    apply: applyAction
   }).action ?? baseAgent(state)
 }
 

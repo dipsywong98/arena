@@ -4,8 +4,8 @@ import { createBullBoard } from '@bull-board/api'
 import { BullMQAdapter } from '@bull-board/api/bullMQAdapter'
 import { ExpressAdapter } from '@bull-board/express'
 import { makeRedis } from '../redis'
-import { Battle, Move, Score } from './common'
 import { processMove } from './core'
+import { Battle, Move, Score } from './types'
 
 const redis = makeRedis()
 // Create a new connection in every instance

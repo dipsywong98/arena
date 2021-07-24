@@ -1,17 +1,4 @@
-import {
-  AppContext,
-  Battle,
-  CaseType,
-  flip,
-  getWinner,
-  Move,
-  Result,
-  TestCase,
-  TicTacToeAction,
-  TicTacToeActionType,
-  TicTacToeState,
-  Turn
-} from './common'
+import { applyAction, flip, getWinner } from './common'
 import abAgent, { baseAgent } from './agent'
 import { getBattle, publishMessage, publishOutgoingMove, setBattle } from './store'
 import { v4 } from 'uuid'
@@ -19,6 +6,18 @@ import { makeRedis } from '../redis'
 import produce from 'immer'
 import { Redis } from 'ioredis'
 import { last, pipe } from 'ramda'
+import {
+  AppContext,
+  Battle,
+  CaseType,
+  Move,
+  Result,
+  TestCase,
+  TicTacToeAction,
+  TicTacToeActionType,
+  TicTacToeState,
+  Turn
+} from './types'
 
 const makeInitialStateGenerator = (aiTurn: Turn) => (battleId: string, gradeId: string): Omit<Battle, 'type'> => ({
   id: battleId,
@@ -100,16 +99,6 @@ export const generateBattlesForGrading = async (appContext: AppContext, gradeId:
     })
     return id
   }))
-}
-
-export const applyAction = (state: TicTacToeState, action: TicTacToeAction): TicTacToeState => {
-  if (action.type === TicTacToeActionType.PUT_SYMBOL) {
-    return produce(state, draft => {
-      draft.board[action.y!][action.x!] = state.turn
-      draft.turn = flip(state.turn)
-    })
-  }
-  return state
 }
 
 interface ProcessMoveContext {
@@ -266,7 +255,6 @@ export const processMove = async (move: Move): Promise<unknown> => {
         checkEndGame,
         publishOutput
       )(ctx)
-      console.log(rest)
       return rest
     } else {
       return `battle ${move.battleId} has result ${battle.result}`
@@ -276,6 +264,7 @@ export const processMove = async (move: Move): Promise<unknown> => {
   }
 }
 
+// TODO handle the endgame result
 // TODO shuffle the generated battle ids
 // TODO time limit for submitting next move
 // TODO linter

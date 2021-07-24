@@ -1,5 +1,5 @@
 import abAgent from '../../../src/ttt/agent'
-import { TicTacToeActionType, Turn } from '../../../src/ttt/common'
+import { TicTacToeActionType, Turn } from '../../../src/ttt/types'
 
 describe('abAgent', () => {
   it('can prevent losing', () => {
