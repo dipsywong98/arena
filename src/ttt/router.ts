@@ -3,7 +3,7 @@ import { AppContext, Move, TicTacToeActionType } from './common'
 import axios from 'axios'
 import { generateBattlesForGrading } from './core'
 import { getBattle, publishOutgoingMove, subscribeMessage, subscribeOutgoingMove } from './store'
-import { withHandleGameError } from '../tic-tac-toe/withHandleGameError'
+import { withHandleGameError } from './withHandleGameError'
 import { v4 } from 'uuid'
 
 export const makeRouter = (appContext: AppContext) => {
