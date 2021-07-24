@@ -1,8 +1,5 @@
 import Redis from 'ioredis'
 
 export const makeRedis = () => {
-  return new Redis({
-    host: process.env.REDIS_URL,
-    port: Number.parseInt(process.env.REDIS_PORT ?? '6379')
-  })
+  return new Redis(process.env.REDIS_TLS_URL ?? process.env.REDIS_URL)
 }
