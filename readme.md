@@ -91,7 +91,7 @@ data: {"player":"O","action":"flipTable"}
 ### Goal
 
 Win the baseline AI, survive long enough when battling with advanced AI and flip table when necessary to win the 70% of the scores,
-extra 10% for winning the advanced AI!
+10% for winning the advanced AI!
 
 ### Rule
 
@@ -110,8 +110,8 @@ Walls can be placed directly between two spaces, in any groove not already occup
 ### Specification
 
 You maybe `white` or `black` player, 
-white will start first at `(4,0)` and black start at `(4,8)`,
-and white will win if it reaches `(*, 8)` and black win if it reaches `(*, 0)`.
+white will start first and start at `(4,0)`, and black start at `(4,8)`.
+White will win if it reaches `(*, 8)` and black win if it reaches `(*, 0)`.
 
 For walls, each player will have 10, and the coordinate of wall will be the coordinate of the top-left most square the wall adjacent to, together with its orientation, as illustrated below.
 
@@ -133,7 +133,7 @@ For walls, each player will have 10, and the coordinate of wall will be the coor
    an [`event/stream`](https://developer.mozilla.org/en-US/docs/Web/API/Server-sent_events/Using_server-sent_events)
    that it can keep pushing latest update (aka events) of the battle to you. The possible events are in the next section
 
-4. When it is your turn, you need to submit your move in 2 seconds. To submit move, `POST`
+4. When it is your turn, you need to submit your move in 5 seconds. To submit move, `POST`
    to `{arenaEndpoint}/quoridor/play/{battleId}`.
 
 Move your pawn:
@@ -198,6 +198,6 @@ data: {"winner":"white"}
 
 Flip table tells you someone flipped table and who flipped it
 ```
-data: {"flipTable": "black"}
+data: {"player":"black","action":"flipTable"}
 ```
 
