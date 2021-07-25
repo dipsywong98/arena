@@ -5,6 +5,7 @@ import * as http from 'http'
 import { allRedis } from '../../src/redis'
 import { moveWorker } from '../../src/ttt/queues'
 import stoppable from 'stoppable'
+import produce from 'immer'
 
 let server: http.Server & stoppable.WithStop | undefined
 const sentBattleIds: string[] = []
@@ -40,13 +41,6 @@ afterAll(async () => {
   server?.stop(() => {
     console.log('stopped')
   })
-  // await new Promise((resolve, reject) => {
-  //   server?.close((e) => {
-  //     console.log('closed', e)
-  //     resolve(true)
-  //   })
-  //   server?.unref();
-  // })
 })
 
 export const requestForGrade = async (caseType?: CaseType): Promise<string[]> => {
@@ -57,4 +51,63 @@ export const requestForGrade = async (caseType?: CaseType): Promise<string[]> =>
   })
   expect(battleIds).toEqual(expect.arrayContaining(sentBattleIds))
   return battleIds as string[]
+}
+
+type Event = Record<string, unknown>
+type OnEvent = (event: Event, ctx: PlayContext) => void
+
+interface PlayContext {
+  battleId: string
+  events: Event[]
+  onceEvents: OnEvent[]
+}
+
+
+type Step = (ctx: PlayContext) => Promise<void>
+
+export const receiveEvent = (
+  callback: OnEvent
+):Step => async (ctx: PlayContext) => {
+  const event = ctx.events.pop()
+  if (event !== undefined) {
+    callback(event, ctx)
+  } else {
+    await new Promise((resolve) => {
+      ctx.onceEvents.push((event) => {
+        callback(event, ctx)
+        resolve(true)
+      })
+    })
+  }
+}
+
+export const play = (
+  payload: Event
+):Step => async (ctx: PlayContext) => {
+  await axios.post(`/tic-tac-toe/play/${ctx.battleId}`, payload)
+}
+
+export const startBattle = async (caseType: CaseType, ...steps: Step[]): Promise<void> => {
+  const [battleId] = await requestForGrade(caseType)
+  const ctx: PlayContext = {
+    battleId,
+    events: [],
+    onceEvents: []
+  }
+  const req = http.get(`http://localhost:12345/tic-tac-toe/start/${battleId}`, res => {
+    res.on('data', data => {
+      const text = new TextDecoder('utf-8').decode(data)
+      const event = JSON.parse(text.replace('data: ', ''))
+      const onceEvent = ctx.onceEvents.pop()
+      if (onceEvent !== undefined) {
+        onceEvent(event, ctx)
+      } else {
+        ctx.events.push(event)
+      }
+    })
+  })
+  for(const step of steps) {
+    await step(ctx)
+  }
+  req.emit('close')
 }

@@ -1,5 +1,5 @@
 import { CaseType } from '../../../src/ttt/types'
-import { requestForGrade } from '../common'
+import { startBattle, receiveEvent, requestForGrade, play } from '../common'
 import * as http from 'http'
 
 describe('ttt', () => {
@@ -22,6 +22,38 @@ describe('ttt', () => {
           })
         })
       })
+    })
+
+    it('can receive ai movement', () => {
+      return startBattle(
+        CaseType.BASE_AI_O,
+        receiveEvent((event, { battleId }) => {
+          expect(event).toEqual({ id: battleId, youAre: 'X' })
+        }),
+        receiveEvent((event) => {
+          expect(event).toEqual({ type: 'putSymbol', x: 0, y: 0, player: 'O' })
+        })
+      )
+    })
+
+    it('can react to player movement', () => {
+      return startBattle(
+        CaseType.BASE_AI_O,
+        receiveEvent((event, { battleId }) => {
+          expect(event).toEqual({ id: battleId, youAre: 'X' })
+        }),
+        receiveEvent((event) => {
+          expect(event).toEqual({ type: 'putSymbol', x: 0, y: 0, player: 'O' })
+        }),
+        play({action: 'putSymbol', x: 0, y: 1}),
+        receiveEvent((event) => {
+          expect(event).toEqual({ type: 'putSymbol', x: 0, y: 1, player: 'X' })
+        }),
+        receiveEvent((event) => {
+          console.log(event)
+          expect(event).toEqual({ type: 'putSymbol', x: 1, y: 0, player: 'O' })
+        })
+      )
     })
   })
 })
