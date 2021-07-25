@@ -1,11 +1,12 @@
 image: node:latest
 
 stages:
-  - install_dependencies
+  - install
   - test
+  - build
 
-install_dependencies:
-  stage: install_dependencies
+install:
+  stage: install
   cache:
     key: $CI_COMMIT_REF_SLUG-$CI_PROJECT_DIR
     paths:
@@ -18,6 +19,7 @@ install_dependencies:
 
 unit:
   stage: test
+  needs: ["install"]
   cache:
     key: $CI_COMMIT_REF_SLUG-$CI_PROJECT_DIR
     paths:
@@ -28,6 +30,7 @@ unit:
 
 acceptance:
   stage: test
+  needs: ["install"]
   cache:
     key: $CI_COMMIT_REF_SLUG-$CI_PROJECT_DIR
     paths:
@@ -37,7 +40,8 @@ acceptance:
     - yarn test:acceptance
 
 build:
-  stage: test
+  stage: build
+  needs: ["install"]
   cache:
     key: $CI_COMMIT_REF_SLUG-$CI_PROJECT_DIR
     paths:
@@ -51,6 +55,7 @@ build:
 
 lint:
   stage: test
+  needs: ["install"]
   cache:
     key: $CI_COMMIT_REF_SLUG-$CI_PROJECT_DIR
     paths:
