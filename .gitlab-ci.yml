@@ -1,5 +1,12 @@
 image: node:latest
 
+services:
+  - redis:latest
+
+variables:
+  REDIS_URL: redis://redis:6379
+  REDIS_PORT: 6379
+
 stages:
   - install
   - test
