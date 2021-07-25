@@ -26,7 +26,6 @@ install:
 
 unit:
   stage: test
-  needs: ["install"]
   cache:
     key: $CI_COMMIT_REF_SLUG-$CI_PROJECT_DIR
     paths:
@@ -37,7 +36,6 @@ unit:
 
 acceptance:
   stage: test
-  needs: ["install"]
   cache:
     key: $CI_COMMIT_REF_SLUG-$CI_PROJECT_DIR
     paths:
@@ -48,7 +46,6 @@ acceptance:
 
 build:
   stage: build
-  needs: ["install"]
   cache:
     key: $CI_COMMIT_REF_SLUG-$CI_PROJECT_DIR
     paths:
@@ -62,7 +59,6 @@ build:
 
 lint:
   stage: test
-  needs: ["install"]
   cache:
     key: $CI_COMMIT_REF_SLUG-$CI_PROJECT_DIR
     paths:
