@@ -65,6 +65,11 @@ export const makeRouter = (appContext: AppContext) => {
       console.error(e)
       res.status(500).send(e.message)
     })
+
+    res.on('close', () => {
+      console.log('on close')
+      res.end()
+    })
   })
 
   ticTacToeRouter.post('/play/:battleId', withHandleGameError(async (req, res) => {
