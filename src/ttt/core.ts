@@ -1,6 +1,6 @@
 import { applyAction, flip, getWinner } from './common'
 import abAgent, { baseAgent } from './agent'
-import { getBattle, publishMessage, publishOutgoingMove, setBattle } from './store'
+import { getBattle, publishMessage, setBattle } from './store'
 import { v4 } from 'uuid'
 import redis from '../redis'
 import produce from 'immer'
@@ -150,8 +150,11 @@ export const handlePutSymbol = (ctx: ProcessMoveContext): ProcessMoveContext => 
   if (ctx.input.move.action.type !== TicTacToeActionType.PUT_SYMBOL) return ctx
   return produce(ctx, draft => {
     const move = draft.input.move
-    const state = last(draft.battle.history)!
-    if (typeof (move.action.x) !== 'number' || typeof (move.action.y) !== 'number') {
+    const state = last(draft.battle.history)
+    if (state === undefined) {
+      draft.output.errors.push('no history')
+      return draft
+    } else if (typeof (move.action.x) !== 'number' || typeof (move.action.y) !== 'number') {
       draft.output.errors.push('Expect x and y shall be number for put symbol action')
     } else {
       if (![0, 1, 2].includes(move.action.x) || ![0, 1, 2].includes(move.action.y)) {
@@ -177,18 +180,22 @@ export const checkEndGame = (ctx: ProcessMoveContext): ProcessMoveContext => pro
     draft.battle.result = Result.FLIPPED
     return draft
   } else {
-    const state = last(draft.battle.history)!
-    const winner = getWinner(state)
-    if (winner) {
-      draft.battle.result = winner
+    const state = last(draft.battle.history)
+    if (state !== undefined) {
+      const winner = getWinner(state)
+      if (winner) {
+        draft.battle.result = winner
+      }
     }
     return draft
   }
 })
 
 export const agentMove = (ctx: ProcessMoveContext): ProcessMoveContext => produce(ctx, draft => {
-  const state = last(draft.battle.history)!
-  if (state.turn === flip(draft.battle.externalPlayer) && draft.battle.result === undefined) {
+  const state = last(draft.battle.history)
+  if (state !== undefined
+    && state.turn === flip(draft.battle.externalPlayer)
+    && draft.battle.result === undefined) {
     draft.output.action = config[draft.battle.type].agent(state)
     draft.battle.history.push(applyAction(state, draft.output.action))
     return draft
@@ -207,25 +214,35 @@ export const publishOutput = async (ctx: ProcessMoveContext): Promise<ProcessMov
       }
       await setBattle(draft.redis, battle)
       draft.battle = battle
-      const action = {
-        type: TicTacToeActionType.FLIP_TABLE
-      }
-      await publishOutgoingMove(draft.redis, {
-        id: v4(),
-        battleId: draft.battle.id,
-        action,
-        by: flip(draft.battle.externalPlayer)
+      await publishMessage(draft.redis, draft.battle.id, {
+        action: 'flipTable',
+        player: flip(draft.battle.externalPlayer)
       })
+      // const action = {
+      //   type: TicTacToeActionType.FLIP_TABLE
+      // }
+      // await publishOutgoingMove(draft.redis, {
+      //   id: v4(),
+      //   battleId: draft.battle.id,
+      //   action,
+      //   by: flip(draft.battle.externalPlayer)
+      // })
       return draft
     } else {
       await setBattle(draft.redis, draft.battle)
       if (draft.output.action) {
-        await publishOutgoingMove(draft.redis, {
-          id: v4(),
-          battleId: draft.battle.id,
-          action: draft.output.action,
-          by: flip(draft.battle.externalPlayer)
+        await publishMessage(draft.redis, draft.battle.id, {
+          player: flip(draft.battle.externalPlayer),
+          action: draft.output.action.type,
+          x: draft.output.action.x,
+          y: draft.output.action.y
         })
+        // await publishOutgoingMove(draft.redis, {
+        //   id: v4(),
+        //   battleId: draft.battle.id,
+        //   action: draft.output.action,
+        //   by: flip(draft.battle.externalPlayer)
+        // })
       }
       if (draft.battle.result !== undefined) {
         const message: Record<string, unknown> = {}

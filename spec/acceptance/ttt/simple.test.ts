@@ -134,6 +134,12 @@ describe('ttt', () => {
         expectGameStart('X'),
         receiveEvent(),
         flipTable(),
+        receiveEvent((event) => {
+          expect(event).toEqual({ player: 'X', action: 'flipTable' })
+        }),
+        receiveEvent((event) => {
+          expect(event).toEqual({ player: 'O', action: 'flipTable' })
+        }),
         viewBattle(battle => {
           expect(battle.flippedBy).toEqual('O')
           expect(battle.flippedReason).toEqual('You are not supposed to flip the table now')
@@ -148,6 +154,10 @@ describe('ttt', () => {
         expectGameStart('X'),
         expectPutSymbol(0, 0, 'O'),
         putSymbol(0, 0),
+        expectPutSymbol(0, 0, 'X'),
+        receiveEvent((event) => {
+          expect(event).toEqual({ player: 'O', action: 'flipTable' })
+        }),
         viewBattle(battle => {
           expect(battle.flippedBy).toEqual('O')
           expect(battle.flippedReason).toEqual('location 0,0 is not empty')
@@ -162,6 +172,10 @@ describe('ttt', () => {
         expectGameStart('X'),
         expectPutSymbol(0, 0, 'O'),
         putSymbol(4, 4),
+        expectPutSymbol(4, 4, 'X'),
+        receiveEvent((event) => {
+          expect(event).toEqual({ player: 'O', action: 'flipTable' })
+        }),
         viewBattle(battle => {
           expect(battle.flippedBy).toEqual('O')
           expect(battle.flippedReason).toEqual('location 4,4 is out of range')

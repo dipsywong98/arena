@@ -37,9 +37,7 @@ afterAll(async () => {
   } catch (e) {
     // op op
   }
-  server?.stop(() => {
-    console.log('stopped')
-  })
+  server?.stop()
 })
 
 export const requestForGrade = async (caseType?: CaseType): Promise<string[]> => {
@@ -104,7 +102,7 @@ export const expectGameStart = (youAre: 'O'|'X') =>
 
 export const expectPutSymbol = (x: number, y: number, player: 'O' | 'X') =>
   receiveEvent((event) => {
-    expect(event).toEqual({ type: 'putSymbol', x, y, player })
+    expect(event).toEqual({ action: 'putSymbol', x, y, player })
   })
 
 export const expectWinner = (winner: string) =>

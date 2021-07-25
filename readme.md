@@ -72,7 +72,7 @@ data: {"youAre":"O","id":"15f6301f-cbdd-4084-a810-df2e9c83238f"}
 
 Move event tells you who made what move
 ```
-data: {"player":"O","x":0,"y":0}
+data: {"player":"O","action":"putSymbol",x":0,"y":0}
 ```
 
 Game end event tells you the game end result
@@ -83,7 +83,7 @@ data: {"winner":"O"}
 
 Flip table tells you someone flipped table and who flipped it
 ```
-data: {"flipTable": "O"}
+data: {"player":"O","action":"flipTable"}
 ```
 
 ## Quoridor

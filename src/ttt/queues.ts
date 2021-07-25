@@ -3,7 +3,7 @@ import { Queue, Worker } from 'bullmq'
 import { createBullBoard } from '@bull-board/api'
 import { BullMQAdapter } from '@bull-board/api/bullMQAdapter'
 import { ExpressAdapter } from '@bull-board/express'
-import redis, { makeRedis } from '../redis'
+import redis from '../redis'
 import { processMove } from './core'
 import { Battle, Move, Score } from './types'
 
