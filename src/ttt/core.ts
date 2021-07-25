@@ -154,10 +154,9 @@ export const handlePutSymbol = (ctx: ProcessMoveContext): ProcessMoveContext => 
     if (typeof (move.action.x) !== 'number' || typeof (move.action.y) !== 'number') {
       draft.output.errors.push('Expect x and y shall be number for put symbol action')
     } else {
-      if (move.action.x < 0 || move.action.y < 0 || move.action.x > 2 || move.action.y > 2) {
+      if (![0, 1, 2].includes(move.action.x) || ![0, 1, 2].includes(move.action.y)) {
         draft.output.errors.push(`location ${move.action.x},${move.action.y} is out of range`)
-      }
-      if (state.board[move.action.y][move.action.x] !== null) {
+      } else if (state.board[move.action.y][move.action.x] !== null) {
         draft.output.errors.push(`location ${move.action.x},${move.action.y} is not empty`)
       }
     }

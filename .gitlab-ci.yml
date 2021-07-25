@@ -15,7 +15,7 @@ install:
     - yarn install --frozen-lockfile
   only:
     changes:
-      - package-lock.json
+      - yarn.lock
 
 unit:
   stage: test

@@ -96,9 +96,9 @@ export const makeRouter = (appContext: AppContext) => {
   }))
 
   ticTacToeRouter.get('/view/:id', withHandleGameError(async (req, res) => {
-    let id = req.params.id
+    const id = req.params.id
     const game = await getBattle(appContext.pubRedis, id)
-    res.send(`<pre>${JSON.stringify(game, null, 2)}</pre>`)
+    res.json(game)
   }))
 
   ticTacToeRouter.post('/', (req, res) => {

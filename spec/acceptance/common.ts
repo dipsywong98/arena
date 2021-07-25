@@ -1,4 +1,4 @@
-import { CaseType } from '../../src/ttt/types'
+import { Battle, CaseType } from '../../src/ttt/types'
 import axios from 'axios'
 import arenaApp from '../../src/Server'
 import * as http from 'http'
@@ -56,6 +56,7 @@ type Event = Record<string, unknown>
 type OnEvent = (event: Event, ctx: PlayContext) => void
 
 interface PlayContext {
+  req?: http.ClientRequest
   battleId: string
   events: Event[]
   onceEvents: OnEvent[]
@@ -63,6 +64,22 @@ interface PlayContext {
 
 
 type Step = (ctx: PlayContext) => Promise<void>
+
+export const listenEvent = (): Step => async (ctx: PlayContext) => {
+  ctx.req = http.get(`http://localhost:12345/tic-tac-toe/start/${ctx.battleId}`, res => {
+    res.on('data', data => {
+      const text = new TextDecoder('utf-8').decode(data)
+      const event = JSON.parse(text.replace('data: ', ''))
+      const onceEvent = ctx.onceEvents.pop()
+      if (onceEvent !== undefined) {
+        onceEvent(event, ctx)
+      } else {
+        ctx.events.push(event)
+      }
+    })
+  })
+  return Promise.resolve()
+}
 
 export const receiveEvent = (
   callback?: OnEvent
@@ -95,10 +112,19 @@ export const expectWinner = (winner: string) =>
     expect(event).toEqual({ winner })
   })
 
-export const play = (
+export const putSymbol = (
   x: number, y: number
 ): Step => async (ctx: PlayContext) => {
   await axios.post(`/tic-tac-toe/play/${ctx.battleId}`, { action: 'putSymbol', x, y })
+}
+
+export const flipTable = (): Step => async (ctx: PlayContext) => {
+  await axios.post(`/tic-tac-toe/play/${ctx.battleId}`, { action: 'flipTable' })
+}
+
+export const viewBattle = (cb: (battle: Battle) => unknown): Step => async (ctx: PlayContext) => {
+  const battle = await axios.get(`/tic-tac-toe/view/${ctx.battleId}`)
+  cb(battle.data)
 }
 
 export const startBattle = async (caseType: CaseType, ...steps: Step[]): Promise<void> => {
@@ -108,20 +134,8 @@ export const startBattle = async (caseType: CaseType, ...steps: Step[]): Promise
     events: [],
     onceEvents: []
   }
-  const req = http.get(`http://localhost:12345/tic-tac-toe/start/${battleId}`, res => {
-    res.on('data', data => {
-      const text = new TextDecoder('utf-8').decode(data)
-      const event = JSON.parse(text.replace('data: ', ''))
-      const onceEvent = ctx.onceEvents.pop()
-      if (onceEvent !== undefined) {
-        onceEvent(event, ctx)
-      } else {
-        ctx.events.push(event)
-      }
-    })
-  })
   for (const step of steps) {
     await step(ctx)
   }
-  req.emit('close')
+  ctx.req?.emit('close')
 }

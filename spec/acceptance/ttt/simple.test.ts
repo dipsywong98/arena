@@ -3,9 +3,13 @@ import {
   expectGameStart,
   expectPutSymbol,
   expectWinner,
-  play,
+  flipTable,
+  listenEvent,
+  putSymbol,
+  receiveEvent,
   requestForGrade,
-  startBattle
+  startBattle,
+  viewBattle
 } from '../common'
 
 describe('ttt', () => {
@@ -18,6 +22,7 @@ describe('ttt', () => {
     it('gives me my position when start game', async () => {
       return startBattle(
         CaseType.BASE_AI_O,
+        listenEvent(),
         expectGameStart('X')
       )
     })
@@ -25,6 +30,7 @@ describe('ttt', () => {
     it('can receive ai movement', () => {
       return startBattle(
         CaseType.BASE_AI_O,
+        listenEvent(),
         expectGameStart('X'),
         expectPutSymbol(0, 0, 'O')
       )
@@ -33,9 +39,10 @@ describe('ttt', () => {
     it('can react to player movement', () => {
       return startBattle(
         CaseType.BASE_AI_O,
+        listenEvent(),
         expectGameStart('X'),
         expectPutSymbol(0, 0, 'O'),
-        play(0, 1),
+        putSymbol(0, 1),
         expectPutSymbol(0, 1, 'X'),
         expectPutSymbol(1, 0, 'O')
       )
@@ -47,15 +54,16 @@ describe('ttt', () => {
       // - - X
       return startBattle(
         CaseType.BASE_AI_O,
+        listenEvent(),
         expectGameStart('X'),
         expectPutSymbol(0, 0, 'O'),
-        play(2, 0),
+        putSymbol(2, 0),
         expectPutSymbol(2, 0, 'X'),
         expectPutSymbol(1, 0, 'O'),
-        play(2, 1),
+        putSymbol(2, 1),
         expectPutSymbol(2, 1, 'X'),
         expectPutSymbol(0, 1, 'O'),
-        play(2, 2),
+        putSymbol(2, 2),
         expectPutSymbol(2, 2, 'X'),
         expectWinner('X')
       )
@@ -67,12 +75,13 @@ describe('ttt', () => {
       // - - X
       return startBattle(
         CaseType.BASE_AI_O,
+        listenEvent(),
         expectGameStart('X'),
         expectPutSymbol(0, 0, 'O'),
-        play(2, 2),
+        putSymbol(2, 2),
         expectPutSymbol(2, 2, 'X'),
         expectPutSymbol(1, 0, 'O'),
-        play(2, 1),
+        putSymbol(2, 1),
         expectPutSymbol(2, 1, 'X'),
         expectPutSymbol(2, 0, 'O'),
         expectWinner('O')
@@ -85,22 +94,78 @@ describe('ttt', () => {
       // X O O
       return startBattle(
         CaseType.BASE_AI_X,
+        listenEvent(),
         expectGameStart('O'),
-        play(2, 0),
+        putSymbol(2, 0),
         expectPutSymbol(2, 0, 'O'),
         expectPutSymbol(0, 0, 'X'),
-        play(0, 1),
+        putSymbol(0, 1),
         expectPutSymbol(0, 1, 'O'),
         expectPutSymbol(1, 0, 'X'),
-        play(1, 1),
+        putSymbol(1, 1),
         expectPutSymbol(1, 1, 'O'),
         expectPutSymbol(2, 1, 'X'),
-        play(1, 2),
+        putSymbol(1, 2),
         expectPutSymbol(1, 2, 'O'),
         expectPutSymbol(0, 2, 'X'),
-        play(2, 2),
+        putSymbol(2, 2),
         expectPutSymbol(2, 2, 'O'),
         expectWinner('DRAW')
+      )
+    })
+
+    it('flips when player X play before AI O', () => {
+      return startBattle(
+        CaseType.BASE_AI_O,
+        putSymbol(1, 2),
+        listenEvent(),
+        expectGameStart('X'),
+        viewBattle(battle => {
+          expect(battle.flippedBy).toEqual('O')
+          expect(battle.flippedReason).toEqual('Not your turn')
+        })
+      )
+    })
+
+    it('flips when player X flipped randomly', () => {
+      return startBattle(
+        CaseType.BASE_AI_O,
+        listenEvent(),
+        expectGameStart('X'),
+        receiveEvent(),
+        flipTable(),
+        viewBattle(battle => {
+          expect(battle.flippedBy).toEqual('O')
+          expect(battle.flippedReason).toEqual('You are not supposed to flip the table now')
+        })
+      )
+    })
+
+    it('flips when player X put at occupied position', () => {
+      return startBattle(
+        CaseType.BASE_AI_O,
+        listenEvent(),
+        expectGameStart('X'),
+        expectPutSymbol(0, 0, 'O'),
+        putSymbol(0, 0),
+        viewBattle(battle => {
+          expect(battle.flippedBy).toEqual('O')
+          expect(battle.flippedReason).toEqual('location 0,0 is not empty')
+        })
+      )
+    })
+
+    it('flips when player X put outside of the board', () => {
+      return startBattle(
+        CaseType.BASE_AI_O,
+        listenEvent(),
+        expectGameStart('X'),
+        expectPutSymbol(0, 0, 'O'),
+        putSymbol(4, 4),
+        viewBattle(battle => {
+          expect(battle.flippedBy).toEqual('O')
+          expect(battle.flippedReason).toEqual('location 4,4 is out of range')
+        })
       )
     })
   })
