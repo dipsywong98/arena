@@ -1,6 +1,12 @@
 import { CaseType } from '../../../src/ttt/types'
-import { startBattle, receiveEvent, requestForGrade, play } from '../common'
-import * as http from 'http'
+import {
+  expectGameStart,
+  expectPutSymbol,
+  expectWinner,
+  play,
+  requestForGrade,
+  startBattle
+} from '../common'
 
 describe('ttt', () => {
   describe('simple', () => {
@@ -10,49 +16,91 @@ describe('ttt', () => {
     })
 
     it('gives me my position when start game', async () => {
-      const [battleId] = await requestForGrade(CaseType.BASE_AI_O)
-      await new Promise((resolve) => {
-        const req = http.get(`http://localhost:12345/tic-tac-toe/start/${battleId}`, res => {
-          res.on('data', data => {
-            const text = new TextDecoder('utf-8').decode(data)
-            const message = JSON.parse(text.replace('data: ', ''))
-            expect(message).toEqual({ id: battleId, youAre: 'X' })
-            req.emit('close')
-            resolve(true)
-          })
-        })
-      })
+      return startBattle(
+        CaseType.BASE_AI_O,
+        expectGameStart('X')
+      )
     })
 
     it('can receive ai movement', () => {
       return startBattle(
         CaseType.BASE_AI_O,
-        receiveEvent((event, { battleId }) => {
-          expect(event).toEqual({ id: battleId, youAre: 'X' })
-        }),
-        receiveEvent((event) => {
-          expect(event).toEqual({ type: 'putSymbol', x: 0, y: 0, player: 'O' })
-        })
+        expectGameStart('X'),
+        expectPutSymbol(0, 0, 'O')
       )
     })
 
     it('can react to player movement', () => {
       return startBattle(
         CaseType.BASE_AI_O,
-        receiveEvent((event, { battleId }) => {
-          expect(event).toEqual({ id: battleId, youAre: 'X' })
-        }),
-        receiveEvent((event) => {
-          expect(event).toEqual({ type: 'putSymbol', x: 0, y: 0, player: 'O' })
-        }),
-        play({action: 'putSymbol', x: 0, y: 1}),
-        receiveEvent((event) => {
-          expect(event).toEqual({ type: 'putSymbol', x: 0, y: 1, player: 'X' })
-        }),
-        receiveEvent((event) => {
-          console.log(event)
-          expect(event).toEqual({ type: 'putSymbol', x: 1, y: 0, player: 'O' })
-        })
+        expectGameStart('X'),
+        expectPutSymbol(0, 0, 'O'),
+        play(0, 1),
+        expectPutSymbol(0, 1, 'X'),
+        expectPutSymbol(1, 0, 'O')
+      )
+    })
+
+    it('example: player win', () => {
+      // O O X
+      // O - X
+      // - - X
+      return startBattle(
+        CaseType.BASE_AI_O,
+        expectGameStart('X'),
+        expectPutSymbol(0, 0, 'O'),
+        play(2, 0),
+        expectPutSymbol(2, 0, 'X'),
+        expectPutSymbol(1, 0, 'O'),
+        play(2, 1),
+        expectPutSymbol(2, 1, 'X'),
+        expectPutSymbol(0, 1, 'O'),
+        play(2, 2),
+        expectPutSymbol(2, 2, 'X'),
+        expectWinner('X')
+      )
+    })
+
+    it('example: ai win', () => {
+      // O O O
+      // - - X
+      // - - X
+      return startBattle(
+        CaseType.BASE_AI_O,
+        expectGameStart('X'),
+        expectPutSymbol(0, 0, 'O'),
+        play(2, 2),
+        expectPutSymbol(2, 2, 'X'),
+        expectPutSymbol(1, 0, 'O'),
+        play(2, 1),
+        expectPutSymbol(2, 1, 'X'),
+        expectPutSymbol(2, 0, 'O'),
+        expectWinner('O')
+      )
+    })
+
+    it('example: draw', () => {
+      // X X O
+      // O O X
+      // X O O
+      return startBattle(
+        CaseType.BASE_AI_X,
+        expectGameStart('O'),
+        play(2, 0),
+        expectPutSymbol(2, 0, 'O'),
+        expectPutSymbol(0, 0, 'X'),
+        play(0, 1),
+        expectPutSymbol(0, 1, 'O'),
+        expectPutSymbol(1, 0, 'X'),
+        play(1, 1),
+        expectPutSymbol(1, 1, 'O'),
+        expectPutSymbol(2, 1, 'X'),
+        play(1, 2),
+        expectPutSymbol(1, 2, 'O'),
+        expectPutSymbol(0, 2, 'X'),
+        play(2, 2),
+        expectPutSymbol(2, 2, 'O'),
+        expectWinner('DRAW')
       )
     })
   })

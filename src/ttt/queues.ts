@@ -3,11 +3,10 @@ import { Queue, Worker } from 'bullmq'
 import { createBullBoard } from '@bull-board/api'
 import { BullMQAdapter } from '@bull-board/api/bullMQAdapter'
 import { ExpressAdapter } from '@bull-board/express'
-import { makeRedis } from '../redis'
+import redis, { makeRedis } from '../redis'
 import { processMove } from './core'
 import { Battle, Move, Score } from './types'
 
-const redis = makeRedis()
 // Create a new connection in every instance
 export const battleQueue = new Queue<Battle>('battleQueue', { connection: redis })
 export const scoreQueue = new Queue<Score>('scoreQueue', { connection: redis })

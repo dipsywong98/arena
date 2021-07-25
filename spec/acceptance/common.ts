@@ -5,7 +5,6 @@ import * as http from 'http'
 import { allRedis } from '../../src/redis'
 import { moveWorker } from '../../src/ttt/queues'
 import stoppable from 'stoppable'
-import produce from 'immer'
 
 let server: http.Server & stoppable.WithStop | undefined
 const sentBattleIds: string[] = []
@@ -66,25 +65,40 @@ interface PlayContext {
 type Step = (ctx: PlayContext) => Promise<void>
 
 export const receiveEvent = (
-  callback: OnEvent
-):Step => async (ctx: PlayContext) => {
+  callback?: OnEvent
+): Step => async (ctx: PlayContext) => {
   const event = ctx.events.pop()
   if (event !== undefined) {
-    callback(event, ctx)
+    callback?.(event, ctx)
   } else {
     await new Promise((resolve) => {
       ctx.onceEvents.push((event) => {
-        callback(event, ctx)
+        callback?.(event, ctx)
         resolve(true)
       })
     })
   }
 }
 
+export const expectGameStart = (youAre: 'O'|'X') =>
+  receiveEvent((event, { battleId }) => {
+    expect(event).toEqual({ id: battleId, youAre })
+  })
+
+export const expectPutSymbol = (x: number, y: number, player: 'O' | 'X') =>
+  receiveEvent((event) => {
+    expect(event).toEqual({ type: 'putSymbol', x, y, player })
+  })
+
+export const expectWinner = (winner: string) =>
+  receiveEvent((event) => {
+    expect(event).toEqual({ winner })
+  })
+
 export const play = (
-  payload: Event
-):Step => async (ctx: PlayContext) => {
-  await axios.post(`/tic-tac-toe/play/${ctx.battleId}`, payload)
+  x: number, y: number
+): Step => async (ctx: PlayContext) => {
+  await axios.post(`/tic-tac-toe/play/${ctx.battleId}`, { action: 'putSymbol', x, y })
 }
 
 export const startBattle = async (caseType: CaseType, ...steps: Step[]): Promise<void> => {
@@ -106,7 +120,7 @@ export const startBattle = async (caseType: CaseType, ...steps: Step[]): Promise
       }
     })
   })
-  for(const step of steps) {
+  for (const step of steps) {
     await step(ctx)
   }
   req.emit('close')

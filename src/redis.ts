@@ -7,3 +7,7 @@ export const makeRedis = (): Redis => {
   allRedis.push(redis)
   return redis
 }
+
+const redis = makeRedis()
+
+export default redis

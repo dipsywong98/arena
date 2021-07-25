@@ -2,7 +2,7 @@ import { applyAction, flip, getWinner } from './common'
 import abAgent, { baseAgent } from './agent'
 import { getBattle, publishMessage, publishOutgoingMove, setBattle } from './store'
 import { v4 } from 'uuid'
-import { makeRedis } from '../redis'
+import redis from '../redis'
 import produce from 'immer'
 import { Redis } from 'ioredis'
 import { last, pipe } from 'ramda'
@@ -247,7 +247,6 @@ export const publishOutput = async (ctx: ProcessMoveContext): Promise<ProcessMov
   })
 
 export const processMove = async (move: Move): Promise<unknown> => {
-  const redis = makeRedis()
   const battle = await getBattle(redis, move.battleId)
   if (battle !== null) {
     if (battle.result === undefined) {
@@ -276,7 +275,9 @@ export const processMove = async (move: Move): Promise<unknown> => {
   }
 }
 
+// TODO ensure handle move only if started
 // TODO handle the endgame result
+// TODO refactor to make move payload and event payload consistent
 // TODO shuffle the generated battle ids
 // TODO time limit for submitting next move
 // TODO linter

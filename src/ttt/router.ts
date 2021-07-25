@@ -18,9 +18,9 @@ export const makeRouter = (appContext: AppContext) => {
       const battleIds = await generateBattlesForGrading(appContext, gradeId, isCaseType(caseType) ? caseType : undefined)
       const errors = []
       for (const battleId of battleIds) {
-        try{
+        try {
           await axios.post(`${endpoint}/tic-tac-toe`, { battleId })
-        }catch (e) {
+        } catch (e) {
           errors.push(e.message)
         }
       }
@@ -35,8 +35,8 @@ export const makeRouter = (appContext: AppContext) => {
   ticTacToeRouter.get('/start/:battleId', async (req, res) => {
     const { battleId } = req.params
     const battle = await getBattle(appContext.pubRedis, battleId)
-    if (battle === null ){
-      res.status(404).send({error: 'battle not found'})
+    if (battle === null) {
+      res.status(404).send({ error: 'battle not found' })
       return
     }
     res.setHeader('Cache-Control', 'no-cache')
@@ -45,11 +45,6 @@ export const makeRouter = (appContext: AppContext) => {
     res.setHeader('Connection', 'keep-alive')
     res.flushHeaders()
     const moveId = v4()
-    await appContext.incomingMoveQueue.add(moveId, { action: { type: TicTacToeActionType.START_GAME },
-      battleId,
-      by: battle.externalPlayer,
-      id: moveId
-    })
     res.write(`data: ${JSON.stringify({ youAre: battle.externalPlayer, id: battleId })}\n\n`)
 
     subscribeOutgoingMove(appContext.subRedis, battleId, (move) => {
@@ -65,7 +60,12 @@ export const makeRouter = (appContext: AppContext) => {
       console.error(e)
       res.status(500).send(e.message)
     })
-
+    appContext.incomingMoveQueue.add(moveId, {
+      action: { type: TicTacToeActionType.START_GAME },
+      battleId,
+      by: battle.externalPlayer,
+      id: moveId
+    })
     res.on('close', () => {
       console.log('on close')
       res.end()
@@ -76,7 +76,7 @@ export const makeRouter = (appContext: AppContext) => {
     const { battleId } = req.params
     const battle = await getBattle(appContext.pubRedis, battleId)
     if (battle === null) {
-      res.status(404).send({error: 'Battle not found'})
+      res.status(404).send({ error: 'Battle not found' })
       return
     }
     const { x, y, action } = req.body
