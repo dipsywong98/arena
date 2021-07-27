@@ -1,7 +1,7 @@
 import { CaseType } from '../../../src/ttt/types'
 import {
   expectGameStart,
-  expectPutSymbol,
+  expectPutSymbol, expectTotalScore,
   expectWinner,
   flipTable,
   listenEvent,
@@ -65,7 +65,8 @@ describe('ttt', () => {
         expectPutSymbol(0, 1, 'O'),
         putSymbol(2, 2),
         expectPutSymbol(2, 2, 'X'),
-        expectWinner('X')
+        expectWinner('X'),
+        expectTotalScore(3)
       )
     })
 
@@ -84,7 +85,8 @@ describe('ttt', () => {
         putSymbol(2, 1),
         expectPutSymbol(2, 1, 'X'),
         expectPutSymbol(2, 0, 'O'),
-        expectWinner('O')
+        expectWinner('O'),
+        expectTotalScore(0)
       )
     })
 
@@ -110,7 +112,8 @@ describe('ttt', () => {
         expectPutSymbol(0, 2, 'X'),
         putSymbol(2, 2),
         expectPutSymbol(2, 2, 'O'),
-        expectWinner('DRAW')
+        expectWinner('DRAW'),
+        expectTotalScore(0)
       )
     })
 
@@ -123,7 +126,8 @@ describe('ttt', () => {
         viewBattle(battle => {
           expect(battle.flippedBy).toEqual('O')
           expect(battle.flippedReason).toEqual('Not your turn')
-        })
+        }),
+        expectTotalScore(0)
       )
     })
 

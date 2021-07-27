@@ -61,7 +61,15 @@ export interface TicTacToeAction {
 export interface TestCase {
   initialStateGenerator: (battleId: string, runId: string) => Omit<Battle, 'type'>
   agent: (state: TicTacToeState) => TicTacToeAction
-  score: number
+  score: (battle: Battle) => number
+}
+
+export interface Run {
+  id: string
+  battleIds: string[]
+  callbackUrl: string
+  score?: number
+  message?: string
 }
 
 export interface Battle {
@@ -73,11 +81,11 @@ export interface Battle {
   flippedBy?: Turn
   type: CaseType
   history: TicTacToeState[]
+  score?: number
 }
 
 export interface Score {
-  id: string
-  score: number
+  runId: string
 }
 
 export interface Move {
@@ -100,4 +108,10 @@ export enum Result {
   X_WIN = 'X_WIN',
   DRAW = 'DRAW',
   FLIPPED = 'FLIPPED',
+}
+
+export interface CallbackPayload {
+  runId: string
+  score: number
+  message: string
 }

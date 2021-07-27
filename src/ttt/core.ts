@@ -1,11 +1,11 @@
-import { applyAction, flip, getWinner } from './common'
+import { applyAction, flip, getResult } from './common'
 import abAgent, { baseAgent } from './agent'
 import { getBattle, publishMessage, setBattle } from './store'
 import { v4 } from 'uuid'
 import redis from '../redis'
 import produce from 'immer'
 import { Redis } from 'ioredis'
-import { last, pipe } from 'ramda'
+import { andThen, last, pipe } from 'ramda'
 import {
   AppContext,
   Battle,
@@ -18,6 +18,7 @@ import {
   TicTacToeState,
   Turn
 } from './types'
+import { scoreQueue } from './queues'
 
 const makeInitialStateGenerator = (aiTurn: Turn) =>
   (battleId: string, runId: string): Omit<Battle, 'type'> => ({
@@ -32,62 +33,88 @@ const makeInitialStateGenerator = (aiTurn: Turn) =>
     }]
   })
 
+const playerWin = (battle: Battle) => {
+  if (battle.result === Result.X_WIN) {
+    return battle.externalPlayer === Turn.X
+  }
+  if (battle.result === Result.O_WIN) {
+    return battle.externalPlayer === Turn.O
+  }
+  return false
+}
+
 const config: Record<CaseType, TestCase> = Object.freeze({
   [CaseType.BASE_AI_O]: {
     initialStateGenerator: makeInitialStateGenerator(Turn.O),
     agent (state: TicTacToeState): TicTacToeAction {
       return baseAgent(state)
     },
-    score: 3
+    score: (battle) => {
+      return playerWin(battle) ? 3 : 0
+    }
   },
   [CaseType.BASE_AI_X]: {
     initialStateGenerator: makeInitialStateGenerator(Turn.X),
     agent (state: TicTacToeState): TicTacToeAction {
       return baseAgent(state)
     },
-    score: 3
+    score: (battle) => {
+      return playerWin(battle) ? 3 : 0
+    }
   },
   [CaseType.AB_AI_O]: {
     initialStateGenerator: makeInitialStateGenerator(Turn.O),
     agent (state: TicTacToeState): TicTacToeAction {
       return abAgent(state)
     },
-    score: 3
+    score: (battle) => {
+      return (playerWin(battle) || battle.result === Result.DRAW) ? 3 : 0
+    }
   },
   [CaseType.AB_AI_X]: {
     initialStateGenerator: makeInitialStateGenerator(Turn.X),
     agent (state: TicTacToeState): TicTacToeAction {
       return abAgent(state)
     },
-    score: 3
+    score: (battle) => {
+      return (playerWin(battle) || battle.result === Result.DRAW) ? 3 : 0
+    }
   },
   [CaseType.C_AI_OUT_OF_BOUND]: {
     initialStateGenerator: makeInitialStateGenerator(Turn.X),
     agent (state: TicTacToeState): TicTacToeAction {
       return abAgent(state)
     },
-    score: 3
+    score: () => {
+      return 1
+    }
   },
   [CaseType.C_AI_DUP]: {
     initialStateGenerator: makeInitialStateGenerator(Turn.X),
     agent (state: TicTacToeState): TicTacToeAction {
       return abAgent(state)
     },
-    score: 3
+    score: () => {
+      return 1
+    }
   },
   [CaseType.C_AI_X_FIRST]: {
     initialStateGenerator: makeInitialStateGenerator(Turn.X),
     agent (state: TicTacToeState): TicTacToeAction {
       return abAgent(state)
     },
-    score: 3
+    score: () => {
+      return 1
+    }
   },
   [CaseType.C_AI_TWICE_A_ROW]: {
     initialStateGenerator: makeInitialStateGenerator(Turn.X),
     agent (state: TicTacToeState): TicTacToeAction {
       return abAgent(state)
     },
-    score: 3
+    score: () => {
+      return 1
+    }
   }
 })
 
@@ -182,7 +209,7 @@ export const checkEndGame = (ctx: ProcessMoveContext): ProcessMoveContext => pro
   } else {
     const state = last(draft.battle.history)
     if (state !== undefined) {
-      const winner = getWinner(state)
+      const winner = getResult(state)
       if (winner) {
         draft.battle.result = winner
       }
@@ -218,15 +245,6 @@ export const publishOutput = async (ctx: ProcessMoveContext): Promise<ProcessMov
         action: 'flipTable',
         player: flip(draft.battle.externalPlayer)
       })
-      // const action = {
-      //   type: TicTacToeActionType.FLIP_TABLE
-      // }
-      // await publishOutgoingMove(draft.redis, {
-      //   id: v4(),
-      //   battleId: draft.battle.id,
-      //   action,
-      //   by: flip(draft.battle.externalPlayer)
-      // })
       return draft
     } else {
       await setBattle(draft.redis, draft.battle)
@@ -237,12 +255,6 @@ export const publishOutput = async (ctx: ProcessMoveContext): Promise<ProcessMov
           x: draft.output.action.x,
           y: draft.output.action.y
         })
-        // await publishOutgoingMove(draft.redis, {
-        //   id: v4(),
-        //   battleId: draft.battle.id,
-        //   action: draft.output.action,
-        //   by: flip(draft.battle.externalPlayer)
-        // })
       }
       if (draft.battle.result !== undefined) {
         const message: Record<string, unknown> = {}
@@ -262,6 +274,29 @@ export const publishOutput = async (ctx: ProcessMoveContext): Promise<ProcessMov
     }
   })
 
+const calculateScore = (ctx: ProcessMoveContext): ProcessMoveContext => produce(ctx, draft => {
+  if (draft.battle.result !== undefined) {
+    draft.battle.score = config[draft.battle.type].score(draft.battle)
+  }
+  return draft
+})
+
+const addToScoreQueue = async (ctx: ProcessMoveContext): Promise<ProcessMoveContext> => {
+  if (ctx.battle.result !== undefined) {
+    await scoreQueue.add(v4(), { runId: ctx.battle.runId })
+  }
+  return ctx
+}
+
+const handleError = (e: Error) => (ctx: ProcessMoveContext): ProcessMoveContext => {
+  return produce(ctx, draft => {
+    draft.battle.flippedBy = flip(draft.battle.externalPlayer)
+    draft.battle.flippedReason = 'internal error: ' + e.message
+    draft.battle.score = 0
+    return draft
+  })
+}
+
 export const processMove = async (move: Move): Promise<unknown> => {
   const battle = await getBattle(redis, move.battleId)
   if (battle !== null) {
@@ -274,15 +309,27 @@ export const processMove = async (move: Move): Promise<unknown> => {
           errors: []
         }
       }
-      const { battle: battleNew, input, output } = await pipe(
-        validate,
-        handlePutSymbol,
-        checkEndGame,
-        agentMove,
-        checkEndGame,
-        publishOutput
-      )(ctx)
-      return { battle: battleNew, input, output }
+      try {
+        const { battle: battleNew, input, output } = await pipe(
+          validate,
+          handlePutSymbol,
+          checkEndGame,
+          agentMove,
+          checkEndGame,
+          calculateScore,
+          publishOutput,
+          andThen(addToScoreQueue)
+        )(ctx)
+        return { battle: battleNew, input, output }
+      } catch (e) {
+        console.log(e)
+        const { battle: battleNew, input, output } = await pipe(
+          handleError(e as unknown as Error),
+          publishOutput,
+          andThen(addToScoreQueue)
+        )(ctx)
+        throw e
+      }
     } else {
       return `battle ${move.battleId} has result ${battle.result}`
     }

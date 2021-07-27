@@ -4,10 +4,11 @@ import { generateBattlesForGrading } from './core'
 import {
   getBattle,
   publishMessage,
+  setRun,
   subscribeMessage
 } from './store'
 import { v4 } from 'uuid'
-import { AppContext, isCaseType, isEvaluatePayload, Move, TicTacToeActionType } from './types'
+import { AppContext, isCaseType, isEvaluatePayload, Move, Run, TicTacToeActionType } from './types'
 import logger from '../logger'
 
 export const makeRouter = (appContext: AppContext) => {
@@ -20,9 +21,11 @@ export const makeRouter = (appContext: AppContext) => {
   ticTacToeRouter.post('/rfg', async (req, res) => {
     const payload = req.body
     if (isEvaluatePayload(payload)) {
-      const { teamUrl, runId, caseType } = payload
+      const { teamUrl, runId, caseType, callbackUrl } = payload
       const type = isCaseType(caseType) ? caseType : undefined
       const battleIds = await generateBattlesForGrading(appContext, runId, type)
+      const run: Run = { battleIds, callbackUrl, id: runId }
+      await setRun(appContext.pubRedis, run)
       const errors = []
       for (const battleId of battleIds) {
         try {

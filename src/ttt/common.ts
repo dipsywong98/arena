@@ -25,7 +25,7 @@ export const isEndGame = (state: TicTacToeState): boolean => {
   return state.board.filter(row => row.findIndex(c => c === null) !== -1).length === 0
 }
 
-export const getWinner = (state: TicTacToeState): Result | undefined => {
+export const getResult = (state: TicTacToeState): Result | undefined => {
   for (let i = 0; i < 3; i++) {
     if (state.board[i][0] !== null
       && state.board[i][0] === state.board[i][1]

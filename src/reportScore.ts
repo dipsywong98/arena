@@ -1,4 +1,5 @@
 import axios from 'axios'
+import { CallbackPayload } from './ttt/types'
 
 export const reportScore = async (
   reportUrl: string,
@@ -7,11 +8,13 @@ export const reportScore = async (
   message: string
 ) => {
   const headers = {
-    Authorization: process.env.AUTH_TOKEN
+    Authorization: process.env.AUTH_TOKEN ?? ''
   }
-  await axios.post(reportUrl, {
+  const payload: CallbackPayload = {
     runId,
     score,
     message
-  }, { headers })
+  }
+  console.log(reportUrl)
+  await axios.post(reportUrl, payload, { headers })
 }
