@@ -1,6 +1,21 @@
 import { Redis } from 'ioredis'
 import { Queue } from 'bullmq'
 
+export interface EvaluatePayload {
+  teamUrl: string
+  callbackUrl: string
+  runId: string
+  caseType?: CaseType
+}
+
+export function isEvaluatePayload (payload: unknown | EvaluatePayload): payload is EvaluatePayload {
+  return typeof payload === 'object'
+    && payload !== null
+    && 'teamUrl' in payload
+    && 'callbackUrl' in payload
+    && 'runId' in payload
+}
+
 export enum CaseType {
   BASE_AI_O = 'BASE_AI_O',
   BASE_AI_X = 'BASE_AI_X',
@@ -12,8 +27,8 @@ export enum CaseType {
   C_AI_TWICE_A_ROW = 'C_AI_TWICE_A_ROW'
 }
 
-export function isCaseType (p: string): p is CaseType {
-  return p in CaseType
+export function isCaseType (p: string | undefined): p is CaseType {
+  return p !== undefined && p in CaseType
 }
 
 export enum Turn {
@@ -44,14 +59,14 @@ export interface TicTacToeAction {
 }
 
 export interface TestCase {
-  initialStateGenerator: (battleId: string, gradeId: string) => Omit<Battle, 'type'>
+  initialStateGenerator: (battleId: string, runId: string) => Omit<Battle, 'type'>
   agent: (state: TicTacToeState) => TicTacToeAction
   score: number
 }
 
 export interface Battle {
   id: string
-  gradeId: string
+  runId: string
   externalPlayer: Turn
   result?: Result
   flippedReason?: string

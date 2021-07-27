@@ -7,7 +7,7 @@ import {
   subscribeMessage
 } from './store'
 import { v4 } from 'uuid'
-import { AppContext, isCaseType, Move, TicTacToeActionType } from './types'
+import { AppContext, isCaseType, isEvaluatePayload, Move, TicTacToeActionType } from './types'
 import logger from '../logger'
 
 export const makeRouter = (appContext: AppContext) => {
@@ -18,14 +18,15 @@ export const makeRouter = (appContext: AppContext) => {
 
   // eslint-disable-next-line @typescript-eslint/no-misused-promises
   ticTacToeRouter.post('/rfg', async (req, res) => {
-    const { gradeId, endpoint, caseType } = req.body
-    if (typeof gradeId === 'string' && typeof endpoint === 'string') {
+    const payload = req.body
+    if (isEvaluatePayload(payload)) {
+      const { teamUrl, runId, caseType } = payload
       const type = isCaseType(caseType) ? caseType : undefined
-      const battleIds = await generateBattlesForGrading(appContext, gradeId, type)
+      const battleIds = await generateBattlesForGrading(appContext, runId, type)
       const errors = []
       for (const battleId of battleIds) {
         try {
-          await axios.post(`${endpoint}/tic-tac-toe`, { battleId })
+          await axios.post(`${teamUrl}/tic-tac-toe`, { battleId })
         } catch (e) {
           errors.push(e.message)
         }
@@ -34,7 +35,7 @@ export const makeRouter = (appContext: AppContext) => {
     } else {
       res
         .status(400)
-        .send({ error: 'missing gradeId or endpoint' })
+        .send({ error: 'missing runId or teamUrl' })
     }
   })
 

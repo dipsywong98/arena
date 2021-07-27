@@ -20,9 +20,9 @@ import {
 } from './types'
 
 const makeInitialStateGenerator = (aiTurn: Turn) =>
-  (battleId: string, gradeId: string): Omit<Battle, 'type'> => ({
+  (battleId: string, runId: string): Omit<Battle, 'type'> => ({
     id: battleId,
-    gradeId,
+    runId,
     externalPlayer: flip(aiTurn),
     history: [{
       expectFlip: false,
@@ -93,7 +93,7 @@ const config: Record<CaseType, TestCase> = Object.freeze({
 
 export const generateBattlesForGrading = async (
   appContext: AppContext,
-  gradeId: string,
+  runId: string,
   type?: CaseType
 ): Promise<string[]> => {
   return Promise.all(
@@ -101,7 +101,7 @@ export const generateBattlesForGrading = async (
       .map(async ([type, { initialStateGenerator }]) => {
         const id = v4()
         await setBattle(appContext.pubRedis, {
-          ...initialStateGenerator(id, gradeId),
+          ...initialStateGenerator(id, runId),
           type: type as CaseType
         })
         return id

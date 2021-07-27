@@ -1,4 +1,4 @@
-import { Battle, CaseType } from '../../src/ttt/types'
+import { Battle, CaseType, EvaluatePayload } from '../../src/ttt/types'
 import axios from 'axios'
 import arenaApp from '../../src/Server'
 import * as http from 'http'
@@ -41,11 +41,13 @@ afterAll(async () => {
 })
 
 export const requestForGrade = async (caseType?: CaseType): Promise<string[]> => {
-  const { data: { battleIds } } = await axios.post(`/tic-tac-toe/rfg`, {
-    gradeId: 'some-id',
-    endpoint: `http://localhost:${port}/test`,
+  const payload: EvaluatePayload = {
+    runId: 'some-id',
+    callbackUrl: `http://localhost:${port}/test`,
+    teamUrl: `http://localhost:${port}/test`,
     caseType
-  })
+  }
+  const { data: { battleIds } } = await axios.post(`/tic-tac-toe/rfg`, payload)
   expect(battleIds).toEqual(expect.arrayContaining(sentBattleIds))
   return battleIds as string[]
 }
