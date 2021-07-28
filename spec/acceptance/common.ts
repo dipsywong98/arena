@@ -3,7 +3,7 @@ import axios from 'axios'
 import arenaApp from '../../src/Server'
 import * as http from 'http'
 import { allRedis } from '../../src/redis'
-import { moveWorker, scoreWorker } from '../../src/ttt/queues'
+import { moveWorker, concludeWorker } from '../../src/ttt/queues'
 import stoppable from 'stoppable'
 import { v4 } from 'uuid'
 
@@ -42,7 +42,7 @@ afterAll(() => {
     r.quit().catch(noop)
   })
   moveWorker.close().catch(noop)
-  scoreWorker.close().catch(noop)
+  concludeWorker.close().catch(noop)
   server?.stop()
 })
 

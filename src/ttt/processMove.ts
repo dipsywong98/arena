@@ -1,10 +1,10 @@
 import produce from 'immer'
 import { andThen, last, pipe } from 'ramda'
 import { Battle, Move, Result, TicTacToeAction, TicTacToeActionType, Turn } from './types'
-import { applyAction, flip, getResult } from './common'
+import { applyAction, opposite, getResult } from './common'
 import { getBattle, publishMessage, setBattle } from './store'
 import { Redis } from 'ioredis'
-import { scoreQueue } from './queues'
+import { concludeQueue } from './queues'
 import { v4 } from 'uuid'
 import redis from '../redis'
 import logger from '../logger'
@@ -103,7 +103,7 @@ export const checkEndGame = (ctx: ProcessMoveContext): ProcessMoveContext => pro
 export const agentMove = (ctx: ProcessMoveContext): ProcessMoveContext => produce(ctx, draft => {
   const state = last(draft.battle.history)
   if (state !== undefined
-    && state.turn === flip(draft.battle.externalPlayer)
+    && state.turn === opposite(draft.battle.externalPlayer)
     && draft.battle.result === undefined) {
     draft.output.action = config[draft.battle.type].agent(state)
     draft.battle.history.push(applyAction(state, draft.output.action))
@@ -116,7 +116,7 @@ const calculateScore = (ctx: ProcessMoveContext): ProcessMoveContext => produce(
     draft.battle.score = 0
     draft.battle.result = Result.FLIPPED
     draft.battle.flippedReason = draft.output.errors.join('\n')
-    draft.battle.flippedBy = flip(draft.battle.externalPlayer)
+    draft.battle.flippedBy = opposite(draft.battle.externalPlayer)
   } else if (draft.battle.result !== undefined) {
     draft.battle.score = config[draft.battle.type].score(draft.battle)
   }
@@ -128,14 +128,14 @@ export const publishOutput = async (ctx: ProcessMoveContext): Promise<ProcessMov
       await setBattle(draft.redis, draft.battle)
       await publishMessage(draft.redis, draft.battle.id, {
         action: 'flipTable',
-        player: flip(draft.battle.externalPlayer)
+        player: opposite(draft.battle.externalPlayer)
       })
       return draft
     } else {
       await setBattle(draft.redis, draft.battle)
       if (draft.output.action) {
         await publishMessage(draft.redis, draft.battle.id, {
-          player: flip(draft.battle.externalPlayer),
+          player: opposite(draft.battle.externalPlayer),
           action: draft.output.action.type,
           x: draft.output.action.x,
           y: draft.output.action.y
@@ -160,13 +160,13 @@ export const publishOutput = async (ctx: ProcessMoveContext): Promise<ProcessMov
   })
 const addToScoreQueue = async (ctx: ProcessMoveContext): Promise<ProcessMoveContext> => {
   if (ctx.battle.result !== undefined) {
-    await scoreQueue.add(v4(), { runId: ctx.battle.runId })
+    await concludeQueue.add(v4(), { runId: ctx.battle.runId })
   }
   return ctx
 }
 const handleError = (e: Error) => (ctx: ProcessMoveContext): ProcessMoveContext => {
   return produce(ctx, draft => {
-    draft.battle.flippedBy = flip(draft.battle.externalPlayer)
+    draft.battle.flippedBy = opposite(draft.battle.externalPlayer)
     draft.battle.flippedReason = 'internal error: ' + e.message
     draft.battle.score = 0
     return draft

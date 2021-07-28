@@ -84,7 +84,7 @@ export interface Battle {
   score?: number
 }
 
-export interface Score {
+export interface ConcludeRequest {
   runId: string
 }
 
@@ -98,8 +98,6 @@ export interface Move {
 export interface AppContext {
   pubRedis: Redis
   subRedis: Redis
-  battleQueue: Queue<Battle>
-  scoreQueue: Queue<Score>
   incomingMoveQueue: Queue<Move>
 }
 

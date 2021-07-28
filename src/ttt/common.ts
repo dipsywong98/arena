@@ -1,7 +1,7 @@
 import { Result, TicTacToeAction, TicTacToeActionType, TicTacToeState, Turn } from './types'
 import produce from 'immer'
 
-export const flip = (turn: Turn) => turn === Turn.X ? Turn.O : Turn.X
+export const opposite = (turn: Turn) => turn === Turn.X ? Turn.O : Turn.X
 
 export const isEndGame = (state: TicTacToeState): boolean => {
   for (let i = 0; i < 3; i++) {
@@ -58,7 +58,7 @@ export const applyAction = (state: TicTacToeState, action: TicTacToeAction): Tic
   if (action.type === TicTacToeActionType.PUT_SYMBOL && y !== undefined && x !== undefined) {
     return produce(state, draft => {
       draft.board[y][x] = state.turn
-      draft.turn = flip(state.turn)
+      draft.turn = opposite(state.turn)
     })
   }
   return state

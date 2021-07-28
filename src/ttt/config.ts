@@ -1,4 +1,4 @@
-import { flip } from './common'
+import { opposite } from './common'
 import abAgent, { baseAgent } from './agent'
 import { setBattle } from './store'
 import { v4 } from 'uuid'
@@ -12,13 +12,13 @@ import {
   TicTacToeState,
   Turn
 } from './types'
-import { playerWin } from './handleMove'
+import { playerWin } from './processMove'
 
 const makeInitialStateGenerator = (aiTurn: Turn) =>
   (battleId: string, runId: string): Omit<Battle, 'type'> => ({
     id: battleId,
     runId,
-    externalPlayer: flip(aiTurn),
+    externalPlayer: opposite(aiTurn),
     history: [{
       expectFlip: false,
       turn: Turn.O,

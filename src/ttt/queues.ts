@@ -4,13 +4,11 @@ import { createBullBoard } from '@bull-board/api'
 import { BullMQAdapter } from '@bull-board/api/bullMQAdapter'
 import { ExpressAdapter } from '@bull-board/express'
 import redis from '../redis'
-import { Battle, Move, Score } from './types'
-import { handleScore } from './score'
-import { processMove } from './handleMove'
+import { Move, ConcludeRequest } from './types'
+import { processConclude } from './processConclude'
+import { processMove } from './processMove'
 
 // Create a new connection in every instance
-export const battleQueue = new Queue<Battle>('battleQueue', { connection: redis })
-export const scoreQueue = new Queue<Score>('scoreQueue', { connection: redis })
 export const moveQueue = new Queue<Move>('moveQueue', { connection: redis })
 
 export const moveWorker = new Worker<Move>('moveQueue', async (job) => {
@@ -18,17 +16,17 @@ export const moveWorker = new Worker<Move>('moveQueue', async (job) => {
   return await processMove(move)
 }, { connection: redis })
 
-export const scoreWorker = new Worker<Score>('scoreQueue', async (job) => {
-  const score = job.data
-  return await handleScore(score)
+export const concludeQueue = new Queue<ConcludeRequest>('concludeQueue', { connection: redis })
+export const concludeWorker = new Worker<ConcludeRequest>('concludeQueue', async (job) => {
+  const concludeRequest = job.data
+  return await processConclude(concludeRequest)
 }, { connection: redis })
 
 export const serverAdapter = new ExpressAdapter()
 
 createBullBoard({
   queues: [
-    new BullMQAdapter(battleQueue),
-    new BullMQAdapter(scoreQueue),
+    new BullMQAdapter(concludeQueue),
     new BullMQAdapter(moveQueue)
   ],
   serverAdapter

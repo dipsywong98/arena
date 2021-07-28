@@ -6,16 +6,14 @@ import express from 'express'
 import 'express-async-errors'
 import { makeRouter } from './ttt/router'
 
-import { battleQueue, moveQueue, scoreQueue, serverAdapter } from './ttt/queues'
+import { moveQueue, concludeQueue, serverAdapter } from './ttt/queues'
 import { makeRedis } from './redis'
 import { AppContext } from './ttt/types'
 
 const appContext: AppContext = {
-    battleQueue: battleQueue,
     incomingMoveQueue: moveQueue,
     pubRedis: makeRedis(),
     subRedis: makeRedis(),
-    scoreQueue: scoreQueue
 }
 const ticTacToeRouter = makeRouter(appContext)
 const app = express();

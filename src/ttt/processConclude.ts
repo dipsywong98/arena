@@ -1,17 +1,17 @@
 import { getBattle, getRun, setRun } from './store'
-import { Battle, Score } from './types'
+import { Battle, ConcludeRequest } from './types'
 import redis from '../redis'
 import { difference } from 'ramda'
 import { reportScore } from '../reportScore'
 
-export const handleScore = async (score: Score) => {
-  const { runId } = score
+export const processConclude = async (concludeRequest: ConcludeRequest) => {
+  const { runId } = concludeRequest
   const run = await getRun(redis, runId)
   if (run === null) {
     throw new Error(`no such run or expired: ${runId}`)
   }
   if (run.score !== undefined) {
-    return { message: 'score already calculated' }
+    return { message: `run ${runId} already concluded the total score` }
   }
   const battles = (await Promise.all(
     run.battleIds.map(battleId => getBattle(redis, battleId))
@@ -29,7 +29,7 @@ export const handleScore = async (score: Score) => {
     return `${battle.id}: ${battle.flippedReason ?? `scored ${battle.score}`}`
   }).join('\n---------------\n')
   await reportScore(run.callbackUrl, run.id, totalScore, totalMessage)
-  const enrichedRun = { ...run, score: totalScore, message: totalMessage }
-  await setRun(redis, enrichedRun)
-  return enrichedRun
+  const concludedRun = { ...run, score: totalScore, message: totalMessage }
+  await setRun(redis, concludedRun)
+  return concludedRun
 }
