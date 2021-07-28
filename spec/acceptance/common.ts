@@ -34,20 +34,15 @@ beforeEach(() => {
   sentBattleIds.length = 0
 })
 
-afterAll(async () => {
-  await Promise.all(allRedis.map(async r => {
-    try {
-      await r.quit()
-    } catch (e) {
-      // no op
-    }
-  }))
-  try {
-    await moveWorker.close()
-    await scoreWorker.close()
-  } catch (e) {
-    // op op
+afterAll(() => {
+  const noop = () => {
+    // noop
   }
+  allRedis.map(r => {
+    r.quit().catch(noop)
+  })
+  moveWorker.close().catch(noop)
+  scoreWorker.close().catch(noop)
   server?.stop()
 })
 
@@ -111,7 +106,7 @@ export const receiveEvent = (
   }
 }
 
-export const expectGameStart = (youAre: 'O'|'X') =>
+export const expectGameStart = (youAre: 'O' | 'X') =>
   receiveEvent((event, { battleId }) => {
     expect(event).toEqual({ id: battleId, youAre })
   })
@@ -130,7 +125,7 @@ export const expectTotalScore = (expectedScore: number) => async (context: PlayC
   if (context.runId in callbackEndpointResults) {
     const actualScore = callbackEndpointResults[context.runId]?.score
     expect(actualScore).toEqual(expectedScore)
-  }else {
+  } else {
     await new Promise((resolve => {
       onCallbackCalled[context.runId] = (payload) => {
         expect(payload.score).toEqual(expectedScore)
@@ -168,4 +163,24 @@ export const startBattle = async (caseType: CaseType, ...steps: Step[]): Promise
     await step(ctx)
   }
   ctx.req?.emit('close')
+}
+
+export const startRun = async (stepsForCases: Step[][]): Promise<void> => {
+  const runId = v4()
+  const battleIds = await requestForGrade(runId)
+  expect(stepsForCases.length).toEqual(battleIds.length)
+  const promises = battleIds.map(async (battleId, k) => {
+    const steps = stepsForCases[k]
+    const ctx: PlayContext = {
+      battleId,
+      events: [],
+      onceEvents: [],
+      runId
+    }
+    for (const step of steps) {
+      await step(ctx)
+    }
+    ctx.req?.emit('close')
+  })
+  await Promise.all(promises)
 }

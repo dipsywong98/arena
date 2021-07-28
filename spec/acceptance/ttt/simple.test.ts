@@ -10,8 +10,24 @@ import {
   receiveEvent,
   requestForGrade,
   startBattle,
+  startRun,
   viewBattle
 } from '../common'
+
+const winSequence = [
+  expectGameStart('X'),
+  expectPutSymbol(0, 0, 'O'),
+  putSymbol(2, 0),
+  expectPutSymbol(2, 0, 'X'),
+  expectPutSymbol(1, 0, 'O'),
+  putSymbol(2, 1),
+  expectPutSymbol(2, 1, 'X'),
+  expectPutSymbol(0, 1, 'O'),
+  putSymbol(2, 2),
+  expectPutSymbol(2, 2, 'X'),
+  expectWinner('X'),
+  expectTotalScore(3)
+]
 
 describe('ttt', () => {
   describe('simple', () => {
@@ -56,18 +72,7 @@ describe('ttt', () => {
       return startBattle(
         CaseType.BASE_AI_O,
         listenEvent(),
-        expectGameStart('X'),
-        expectPutSymbol(0, 0, 'O'),
-        putSymbol(2, 0),
-        expectPutSymbol(2, 0, 'X'),
-        expectPutSymbol(1, 0, 'O'),
-        putSymbol(2, 1),
-        expectPutSymbol(2, 1, 'X'),
-        expectPutSymbol(0, 1, 'O'),
-        putSymbol(2, 2),
-        expectPutSymbol(2, 2, 'X'),
-        expectWinner('X'),
-        expectTotalScore(3)
+        ...winSequence
       )
     })
 
@@ -189,6 +194,32 @@ describe('ttt', () => {
         }),
         expectTotalScore(0)
       )
+    })
+
+    it('whole all 9 flip', () => {
+      return startRun([
+        [flipTable()],
+        [flipTable()],
+        [flipTable()],
+        [flipTable()],
+        [flipTable()],
+        [flipTable()],
+        [flipTable()],
+        [flipTable(), expectTotalScore(0)],
+      ])
+    })
+
+    it('whole all 1 win', () => {
+      return startRun([
+        [listenEvent(),...winSequence, expectTotalScore(3)],
+        [flipTable()],
+        [flipTable()],
+        [flipTable()],
+        [flipTable()],
+        [flipTable()],
+        [flipTable()],
+        [flipTable()],
+      ])
     })
   })
 })
