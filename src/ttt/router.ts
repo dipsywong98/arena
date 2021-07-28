@@ -1,6 +1,6 @@
 import { Router } from 'express'
 import axios from 'axios'
-import { generateBattlesForGrading } from './core'
+import { generateBattlesForGrading } from './config'
 import {
   getBattle,
   publishMessage,

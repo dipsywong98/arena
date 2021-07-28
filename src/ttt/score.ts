@@ -10,9 +10,12 @@ export const handleScore = async (score: Score) => {
   if (run === null) {
     throw new Error(`no such run or expired: ${runId}`)
   }
+  if (run.score !== undefined) {
+    return { message: 'score already calculated' }
+  }
   const battles = (await Promise.all(
     run.battleIds.map(battleId => getBattle(redis, battleId))
-  )).filter(battle => battle?.score !== null) as Array<Battle & { score: number }>
+  )).filter(battle => battle?.score !== undefined) as Array<Battle & { score: number }>
   if (battles.length !== run.battleIds.length) {
     const done = battles.map(b => b.id)
     return {
