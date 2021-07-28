@@ -10,4 +10,7 @@ export const makeRedis = (): Redis => {
 
 const redis = makeRedis()
 
+export const pubRedis = makeRedis()
+export const subRedis = makeRedis()
+
 export default redis

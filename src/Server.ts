@@ -4,18 +4,10 @@ import helmet from 'helmet'
 
 import express from 'express'
 import 'express-async-errors'
-import { makeRouter } from './ttt/router'
+import ticTacToeRouter from './ttt/router'
 
-import { moveQueue, concludeQueue, serverAdapter } from './ttt/queues'
-import { makeRedis } from './redis'
-import { AppContext } from './ttt/types'
+import { serverAdapter } from './ttt/queues'
 
-const appContext: AppContext = {
-    incomingMoveQueue: moveQueue,
-    pubRedis: makeRedis(),
-    subRedis: makeRedis(),
-}
-const ticTacToeRouter = makeRouter(appContext)
 const app = express();
 
 /************************************************************************************

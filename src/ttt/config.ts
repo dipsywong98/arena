@@ -1,17 +1,6 @@
 import { opposite } from './common'
 import abAgent, { baseAgent } from './agent'
-import { setBattle } from './store'
-import { v4 } from 'uuid'
-import {
-  AppContext,
-  Battle,
-  CaseType,
-  Result,
-  TestCase,
-  TicTacToeAction,
-  TicTacToeState,
-  Turn
-} from './types'
+import { Battle, CaseType, Result, TestCase, TicTacToeAction, TicTacToeState, Turn } from './types'
 import { playerWin } from './processMove'
 
 const makeInitialStateGenerator = (aiTurn: Turn) =>
@@ -101,23 +90,6 @@ export const config: Record<CaseType, TestCase> = Object.freeze({
     }
   }
 })
-
-export const generateBattlesForGrading = async (
-  appContext: AppContext,
-  runId: string,
-  type?: CaseType
-): Promise<string[]> => {
-  return Promise.all(
-    Object.entries(type !== undefined ? { [type]: config[type] } : config)
-      .map(async ([type, { initialStateGenerator }]) => {
-        const id = v4()
-        await setBattle(appContext.pubRedis, {
-          ...initialStateGenerator(id, runId),
-          type: type as CaseType
-        })
-        return id
-      }))
-}
 
 // TODO ensure handle move only if started
 // TODO handle the endgame result
