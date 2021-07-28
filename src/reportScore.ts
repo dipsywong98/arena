@@ -15,6 +15,5 @@ export const reportScore = async (
     score,
     message
   }
-  console.log(reportUrl)
   await axios.post(reportUrl, payload, { headers })
 }

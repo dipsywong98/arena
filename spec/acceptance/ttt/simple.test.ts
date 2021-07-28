@@ -1,7 +1,8 @@
 import { CaseType } from '../../../src/ttt/types'
 import {
   expectGameStart,
-  expectPutSymbol, expectTotalScore,
+  expectPutSymbol,
+  expectTotalScore,
   expectWinner,
   flipTable,
   listenEvent,
@@ -147,7 +148,8 @@ describe('ttt', () => {
         viewBattle(battle => {
           expect(battle.flippedBy).toEqual('O')
           expect(battle.flippedReason).toEqual('You are not supposed to flip the table now')
-        })
+        }),
+        expectTotalScore(0)
       )
     })
 
@@ -165,7 +167,8 @@ describe('ttt', () => {
         viewBattle(battle => {
           expect(battle.flippedBy).toEqual('O')
           expect(battle.flippedReason).toEqual('location 0,0 is not empty')
-        })
+        }),
+        expectTotalScore(0)
       )
     })
 
@@ -183,7 +186,8 @@ describe('ttt', () => {
         viewBattle(battle => {
           expect(battle.flippedBy).toEqual('O')
           expect(battle.flippedReason).toEqual('location 4,4 is out of range')
-        })
+        }),
+        expectTotalScore(0)
       )
     })
   })

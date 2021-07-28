@@ -19,6 +19,7 @@ import {
   Turn
 } from './types'
 import { scoreQueue } from './queues'
+import logger from '../logger'
 
 const makeInitialStateGenerator = (aiTurn: Turn) =>
   (battleId: string, runId: string): Omit<Battle, 'type'> => ({
@@ -230,17 +231,22 @@ export const agentMove = (ctx: ProcessMoveContext): ProcessMoveContext => produc
   return draft
 })
 
+const calculateScore = (ctx: ProcessMoveContext): ProcessMoveContext => produce(ctx, draft => {
+  if (draft.output.errors.length > 0) {
+    draft.battle.score = 0
+    draft.battle.result = Result.FLIPPED
+    draft.battle.flippedReason = draft.output.errors.join('\n')
+    draft.battle.flippedBy = flip(draft.battle.externalPlayer)
+  } else if (draft.battle.result !== undefined) {
+    draft.battle.score = config[draft.battle.type].score(draft.battle)
+  }
+  return draft
+})
+
 export const publishOutput = async (ctx: ProcessMoveContext): Promise<ProcessMoveContext> =>
   produce(ctx, async draft => {
     if (draft.output.errors.length > 0) {
-      const battle = {
-        ...draft.battle,
-        result: Result.FLIPPED,
-        flippedReason: draft.output.errors.join('\n'),
-        flippedBy: flip(draft.battle.externalPlayer)
-      }
-      await setBattle(draft.redis, battle)
-      draft.battle = battle
+      await setBattle(draft.redis, draft.battle)
       await publishMessage(draft.redis, draft.battle.id, {
         action: 'flipTable',
         player: flip(draft.battle.externalPlayer)
@@ -273,13 +279,6 @@ export const publishOutput = async (ctx: ProcessMoveContext): Promise<ProcessMov
       }
     }
   })
-
-const calculateScore = (ctx: ProcessMoveContext): ProcessMoveContext => produce(ctx, draft => {
-  if (draft.battle.result !== undefined) {
-    draft.battle.score = config[draft.battle.type].score(draft.battle)
-  }
-  return draft
-})
 
 const addToScoreQueue = async (ctx: ProcessMoveContext): Promise<ProcessMoveContext> => {
   if (ctx.battle.result !== undefined) {
@@ -322,8 +321,9 @@ export const processMove = async (move: Move): Promise<unknown> => {
         )(ctx)
         return { battle: battleNew, input, output }
       } catch (e) {
-        console.log(e)
-        const { battle: battleNew, input, output } = await pipe(
+        logger.err(e)
+        // store the score to redis and call for score aggregation
+        await pipe(
           handleError(e as unknown as Error),
           publishOutput,
           andThen(addToScoreQueue)

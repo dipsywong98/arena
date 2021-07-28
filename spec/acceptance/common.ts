@@ -128,7 +128,7 @@ export const expectWinner = (winner: string) =>
 
 export const expectTotalScore = (expectedScore: number) => async (context: PlayContext) => {
   if (context.runId in callbackEndpointResults) {
-    const actualScore = callbackEndpointResults[context.runId]
+    const actualScore = callbackEndpointResults[context.runId]?.score
     expect(actualScore).toEqual(expectedScore)
   }else {
     await new Promise((resolve => {

@@ -22,10 +22,16 @@ export const getBattle = async (redis: Redis, battleId: string): Promise<Battle 
 }
 
 export const setBattle = async (redis: Redis, battle: Battle): Promise<void> => {
-  await redis.set(makeRedisBattleId(battle.id), JSON.stringify(battle), 'EX', 60 * 60) // expire in 1 hour
+  await redis.set(
+    makeRedisBattleId(battle.id),
+    JSON.stringify(battle),
+    'EX',
+    60 * 60
+  ) // expire in 1 hour
 }
 
-export const getRun = async (redis: Redis, runId: string): Promise<Run | null> => {
+export const getRun = async (redis: Redis,
+                             runId: string): Promise<Run | null> => {
   const text = await redis.get(makeRedisRunId(runId))
   if (text === null) {
     return null
@@ -36,14 +42,6 @@ export const getRun = async (redis: Redis, runId: string): Promise<Run | null> =
 export const setRun = async (redis: Redis, run: Run): Promise<void> => {
   await redis.set(makeRedisRunId(run.id), JSON.stringify(run), 'EX', 60 * 60) // expire in 1 hour
 }
-
-// export const registerBattleResult = async (redis: Redis, runId: string, battleId: string, score: number, message: string) => {
-//   await redis.set(`arena:ttt:score:${runId}:${battleId}`, JSON.stringify({ score, message }))
-// }
-//
-// export const getBattleResult = async (redis: Redis, runId: string, battleId: string) => {
-//   return redis.get(`arena:ttt:score:${runId}:${battleId}`)
-// }
 
 export const publishMessage = async (
   redis: Redis,

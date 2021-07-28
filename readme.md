@@ -4,9 +4,11 @@
 
 ## Story
 
-Impired by real life story... Social distancing keeps you away from your friends so you cant play boardgame with your friends physically, 
+Inspired by real life story...
+Social distancing keeps you away from your friends,
+so you can't play boardgames with your friends physically, 
 however at home your friends just play ring fit themselves but not boardgames. 
-Dont be sad there is still Arena can play boardgame with you.
+Don't be sad there is still Arena can play boardgames with you.
 
 ## Challenge description
 
