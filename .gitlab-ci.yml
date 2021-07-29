@@ -45,7 +45,7 @@ acceptance:
     - yarn test:acceptance
 
 build:
-  stage: build
+  stage: test
   cache:
     key: $CI_COMMIT_REF_SLUG-$CI_PROJECT_DIR
     paths:
