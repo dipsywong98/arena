@@ -8,7 +8,7 @@ import ticTacToeRouter from './ttt/router'
 
 import { serverAdapter } from './ttt/queues'
 import { readFileSync } from 'fs'
-import marked from 'marked'
+import marked = require("marked")
 import path from 'path'
 
 const app = express()
