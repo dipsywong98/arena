@@ -1,6 +1,6 @@
 import produce from 'immer'
 import { andThen, last, pipe } from 'ramda'
-import { Battle, Move, Result, TicTacToeAction, TicTacToeActionType, Turn } from './types'
+import { Battle, CaseType, Move, Result, TicTacToeAction, TicTacToeActionType, Turn } from './types'
 import { applyAction, opposite, getResult } from './common'
 import { getBattle, publishMessage, setBattle } from './store'
 import { Redis } from 'ioredis'
@@ -44,9 +44,6 @@ export const validate = (ctx: ProcessMoveContext): ProcessMoveContext => produce
       if (!state.expectFlip) {
         draft.output.errors.push(`You are not supposed to flip the table now`)
       }
-      if (state.turn !== move.by) {
-        draft.output.errors.push('Not your turn')
-      }
     } else if (move.action.type === TicTacToeActionType.START_GAME) {
       if (draft.battle.history.length !== 1) {
         draft.output.errors.push('game already started')
@@ -54,11 +51,15 @@ export const validate = (ctx: ProcessMoveContext): ProcessMoveContext => produce
     } else {
       draft.output.errors.push('unknown action type')
     }
+    if (state.expectFlip && move.action.type !== TicTacToeActionType.FLIP_TABLE) {
+      draft.output.errors.push('You should have flipped the table now')
+    }
   }
   return draft
 })
 export const handlePutSymbol = (ctx: ProcessMoveContext): ProcessMoveContext => {
   if (ctx.input.move.action.type !== TicTacToeActionType.PUT_SYMBOL) return ctx
+  if (ctx.output.errors.length > 0) return ctx
   return produce(ctx, draft => {
     const move = draft.input.move
     const state = last(draft.battle.history)
@@ -103,10 +104,19 @@ export const checkEndGame = (ctx: ProcessMoveContext): ProcessMoveContext => pro
 export const agentMove = (ctx: ProcessMoveContext): ProcessMoveContext => produce(ctx, draft => {
   const state = last(draft.battle.history)
   if (state !== undefined
-    && state.turn === opposite(draft.battle.externalPlayer)
+    && (
+      state.turn === opposite(draft.battle.externalPlayer)
+      || draft.battle.type === CaseType.C_AI_X_FIRST
+    )
     && draft.battle.result === undefined) {
-    draft.output.action = config[draft.battle.type].agent(state)
-    draft.battle.history.push(applyAction(state, draft.output.action))
+    let action = config[draft.battle.type].agent(state)
+    let expectFlip = false
+    if ('cheat' in action) {
+      action = action.cheat
+      expectFlip = true
+    }
+    draft.battle.history.push({ ...applyAction(state, action), expectFlip })
+    draft.output.action = action
     return draft
   }
   return draft
@@ -138,10 +148,16 @@ export const publishOutput = async (ctx: ProcessMoveContext): Promise<ProcessMov
           player: opposite(draft.battle.externalPlayer),
           action: draft.output.action.type,
           x: draft.output.action.x,
-          y: draft.output.action.y
+          y: draft.output.action.y,
+          action2: draft.output.action.action2 !== undefined ? {
+            player: opposite(draft.battle.externalPlayer),
+            action: draft.output.action.action2.type,
+            x: draft.output.action.action2.x,
+            y: draft.output.action.action2.y,
+          } : undefined
         })
       }
-      if (draft.battle.result !== undefined) {
+      if (draft.battle.result !== undefined && draft.battle.result !== Result.FLIPPED) {
         const message: Record<string, unknown> = {}
         switch (draft.battle.result) {
           case Result.O_WIN:

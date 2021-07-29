@@ -29,8 +29,7 @@ const winSequence = [
   expectTotalScore(3)
 ]
 
-describe('ttt', () => {
-  describe('simple', () => {
+describe('ttt-simple', () => {
     it('request for grade will generate 8 battles', async () => {
       const battleIds = await requestForGrade()
       expect(battleIds).toHaveLength(8)
@@ -222,4 +221,3 @@ describe('ttt', () => {
       ])
     })
   })
-})

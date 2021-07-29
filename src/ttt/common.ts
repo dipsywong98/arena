@@ -55,11 +55,19 @@ export const getResult = (state: TicTacToeState): Result | undefined => {
 export const applyAction = (state: TicTacToeState, action: TicTacToeAction): TicTacToeState => {
   const y = action.y
   const x = action.x
+  let nextState = state
   if (action.type === TicTacToeActionType.PUT_SYMBOL && y !== undefined && x !== undefined) {
-    return produce(state, draft => {
-      draft.board[y][x] = state.turn
+    nextState = produce(state, draft => {
+      try{
+        draft.board[y][x] = state.turn
+      } catch (e) {
+        // outside of the board just ignore it
+      }
       draft.turn = opposite(state.turn)
     })
   }
-  return state
+  if (action.action2 !== undefined) {
+    nextState = applyAction({ ...nextState, turn: state.turn }, action.action2)
+  }
+  return nextState
 }

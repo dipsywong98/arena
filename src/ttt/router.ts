@@ -21,7 +21,7 @@ ticTacToeRouter.post('/rfg', async (req, res) => {
   } else {
     res
       .status(400)
-      .send({ error: 'missing runId or teamUrl' })
+      .send({ error: 'missing runId, callbackUrl or teamUrl' })
   }
 })
 
@@ -42,7 +42,11 @@ ticTacToeRouter.get('/start/:battleId', async (req, res) => {
   res.write(`data: ${JSON.stringify({ youAre: battle.externalPlayer, id: battleId })}\n\n`)
 
   subscribeMessage(subRedis, battleId, (message) => {
-    res.write(`data: ${message}\n\n`)
+    const { action2, ...rest } = JSON.parse(message)
+    res.write(`data: ${JSON.stringify(rest)}\n\n`)
+    if (action2 !== undefined) {
+      res.write(`data: ${JSON.stringify(action2)}\n\n`)
+    }
   }).catch(e => {
     logger.err(e)
     res.status(500).send(e.message)

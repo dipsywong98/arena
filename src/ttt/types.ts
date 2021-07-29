@@ -56,11 +56,12 @@ export interface TicTacToeAction {
   type: TicTacToeActionType,
   x?: number
   y?: number
+  action2?: TicTacToeAction
 }
 
 export interface TestCase {
   initialStateGenerator: (battleId: string, runId: string) => Omit<Battle, 'type'>
-  agent: (state: TicTacToeState) => TicTacToeAction
+  agent: (state: TicTacToeState) => TicTacToeAction | { cheat: TicTacToeAction }
   score: (battle: Battle) => number
 }
 
