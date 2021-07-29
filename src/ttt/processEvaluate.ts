@@ -30,7 +30,7 @@ export async function processEvaluate<ReqBody> (payload: ReqBody & EvaluatePaylo
   const errors = []
   for (const battleId of battleIds) {
     try {
-      await axios.post(`${teamUrl}/tic-tac-toe`, { battleId })
+      await axios.post(`${teamUrl.replace(/\/$/, '')}/tic-tac-toe`, { battleId })
     } catch (e) {
       errors.push(e.message)
     }

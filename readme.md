@@ -6,8 +6,8 @@
 
 Inspired by real life story...
 Social distancing keeps you away from your friends,
-so you can't play boardgames with your friends physically, 
-however at home your friends just play ring fit themselves but not boardgames. 
+so you can't play boardgames with your friends physically,
+however at home your friends just play ring fit themselves but not boardgames.
 Don't be sad there is still Arena can play boardgames with you.
 
 ## Challenge description
@@ -111,13 +111,13 @@ Walls can be placed directly between two spaces, in any groove not already occup
 
 ### Specification
 
-You maybe `white` or `black` player, 
+You maybe `white` or `black` player,
 white will start first and start at `(4,0)`, and black start at `(4,8)`.
 White will win if it reaches `(*, 8)` and black win if it reaches `(*, 0)`.
 
 For walls, each player will have 10, and the coordinate of wall will be the coordinate of the top-left most square the wall adjacent to, together with its orientation, as illustrated below.
 
-![](quoridor.png)
+![](static/quoridor.png)
 
 ### How to play
 
@@ -147,7 +147,7 @@ Move your pawn:
 }
 ```
 
-Where `0 <= x, y <= 8` and integer, `(x, y)` is the location that you want to move your pawn to. 
+Where `0 <= x, y <= 8` and integer, `(x, y)` is the location that you want to move your pawn to.
 
 Place wall:
 ```json

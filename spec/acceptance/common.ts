@@ -56,7 +56,7 @@ export const requestForGrade = async (
     teamUrl: `http://localhost:${port}/test`,
     caseType
   }
-  const { data: { battleIds } } = await axios.post(`/tic-tac-toe/rfg`, payload)
+  const { data: { battleIds } } = await axios.post(`/tic-tac-toe/evaluate`, payload)
   expect(battleIds).toEqual(expect.arrayContaining(sentBattleIds))
   return battleIds as string[]
 }

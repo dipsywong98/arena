@@ -13,7 +13,7 @@ ticTacToeRouter.get('/hi', (request, response) => {
 })
 
 // eslint-disable-next-line @typescript-eslint/no-misused-promises
-ticTacToeRouter.post('/rfg', async (req, res) => {
+ticTacToeRouter.post('/evaluate', async (req, res) => {
   const payload = req.body
   if (isEvaluatePayload(payload)) {
     const { battleIds, errors } = await processEvaluate(payload)
@@ -108,6 +108,10 @@ ticTacToeRouter.get('/view/:id', (req, res) => {
 
 ticTacToeRouter.post('/', (req, res) => {
   res.send('OK')
+})
+
+ticTacToeRouter.get('/', (req, res) => {
+  res.redirect('/')
 })
 
 export default ticTacToeRouter
