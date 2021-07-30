@@ -149,6 +149,5 @@ export const config: Record<CaseType, TestCase> = Object.freeze({
 
 // TODO ensure handle move only if started
 // TODO shuffle the generated battle ids
-// TODO time limit for submitting next move
 // TODO compass coordinate system
-// TODO gitlab ci
+// TODO more support endpoint and auth

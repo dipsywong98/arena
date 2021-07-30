@@ -21,6 +21,15 @@ export const generateBattlesForGrading = async (
       }))
 }
 
+const shuffle = <T>(array: T[]) => {
+  const copy = [...array]
+  for (let i = copy.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [copy[i], copy[j]] = [copy[j], copy[i]]
+  }
+  return copy
+}
+
 export async function processEvaluate<ReqBody> (payload: ReqBody & EvaluatePayload) {
   const { teamUrl, runId, caseType, callbackUrl } = payload
   const type = isCaseType(caseType) ? caseType : undefined
@@ -28,7 +37,7 @@ export async function processEvaluate<ReqBody> (payload: ReqBody & EvaluatePaylo
   const run: Run = { battleIds, callbackUrl, id: runId }
   await setRun(pubRedis, run)
   const errors = []
-  for (const battleId of battleIds) {
+  for (const battleId of shuffle(battleIds)) {
     try {
       await axios.post(`${teamUrl.replace(/\/$/, '')}/tic-tac-toe`, { battleId })
     } catch (e) {
