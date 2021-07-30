@@ -13,6 +13,10 @@ const makeChannel = (channelName: string, battleId: string) => {
   return `areana:ttt:channel:${channelName}:${battleId}`
 }
 
+const makeRedisTimerKey = (battleId: string) => {
+  return `arena:ttt:timer:${battleId}`
+}
+
 export const getBattle = async (redis: Redis, battleId: string): Promise<Battle | null> => {
   const text = await redis.get(makeRedisBattleId(battleId))
   if (text === null) {
@@ -62,4 +66,18 @@ export const subscribeMessage = async (
       callback(message)
     }
   })
+}
+
+export const timerReset = async (redis: Redis, battleId: string) => {
+  await redis.set(makeRedisTimerKey(battleId), Date.now())
+}
+
+export const timerRead = async (redis: Redis, battleId: string) => {
+  const now = Date.now()
+  const string = await redis.get(makeRedisTimerKey(battleId))
+  if (string === null) {
+    return 0
+  } else {
+    return now - Number(string)
+  }
 }

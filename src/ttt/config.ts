@@ -10,6 +10,8 @@ import {
 } from './types'
 import { playerWin } from './processMove'
 
+export const INITIAL_CLOCK_MS = 18 * 1000
+
 const makeInitialStateGenerator = (aiTurn: Turn) =>
   (battleId: string, runId: string): Omit<Battle, 'type'> => ({
     id: battleId,
@@ -20,8 +22,11 @@ const makeInitialStateGenerator = (aiTurn: Turn) =>
       turn: Turn.O,
       board: [[null, null, null], [null, null, null], [null, null, null]],
       createdAt: Date.now()
-    }]
+    }],
+    clock: INITIAL_CLOCK_MS
   })
+
+export const TURN_ADD_MS = 2 * 1000
 
 export const config: Record<CaseType, TestCase> = Object.freeze({
   [CaseType.BASE_AI_O]: {

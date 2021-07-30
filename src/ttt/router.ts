@@ -1,11 +1,17 @@
 import { Router } from 'express'
-import { getBattle, publishMessage, subscribeMessage } from './store'
+import { getBattle,
+  publishMessage,
+  subscribeMessage,
+  timerReset,
+  timerRead,
+  setBattle } from './store'
 import { v4 } from 'uuid'
 import { isEvaluatePayload, Move, TicTacToeActionType } from './types'
 import logger from '../logger'
-import { pubRedis, subRedis } from '../redis'
+import redis, { pubRedis, subRedis } from '../redis'
 import { moveQueue } from './queues'
 import { processEvaluate } from './processEvaluate'
+import { TURN_ADD_MS } from './config'
 
 const ticTacToeRouter = Router()
 ticTacToeRouter.get('/hi', (request, response) => {
@@ -42,10 +48,20 @@ ticTacToeRouter.get('/start/:battleId', async (req, res) => {
   res.write(`data: ${JSON.stringify({ youAre: battle.externalPlayer, id: battleId })}\n\n`)
 
   subscribeMessage(subRedis, battleId, (message) => {
-    const { action2, ...rest } = JSON.parse(message)
-    res.write(`data: ${JSON.stringify(rest)}\n\n`)
-    if (action2 !== undefined) {
-      res.write(`data: ${JSON.stringify(action2)}\n\n`)
+    try{
+      const { action2, ...rest } = JSON.parse(message)
+      res.write(`data: ${JSON.stringify(rest)}\n\n`)
+      if (action2 !== undefined) {
+        res.write(`data: ${JSON.stringify(action2)}\n\n`)
+      }
+      // this timerReset is ok because even
+      //   if this message is published by player sending move to us
+      // player should not send another move to us immediately
+      // so next time the player send us move and we stop timer to get the elapsed time
+      // arena should have already reset the timer
+      timerReset(redis, battleId)
+    }catch (e) {
+      logger.err(e)
     }
   }).catch(e => {
     logger.err(e)
@@ -55,7 +71,8 @@ ticTacToeRouter.get('/start/:battleId', async (req, res) => {
     action: { type: TicTacToeActionType.START_GAME },
     battleId,
     by: battle.externalPlayer,
-    id: moveId
+    id: moveId,
+    elapsed: 0
   })
   res.on('close', () => {
     res.end()
@@ -65,38 +82,40 @@ ticTacToeRouter.get('/start/:battleId', async (req, res) => {
 // eslint-disable-next-line @typescript-eslint/no-misused-promises
 ticTacToeRouter.post('/play/:battleId', async (req, res) => {
   const { battleId } = req.params
+  const elapsed = await timerRead(redis, battleId)
   const battle = await getBattle(pubRedis, battleId)
   if (battle === null) {
     res.status(404).send({ error: 'Battle not found' })
     return
   }
+  if (battle.clock - elapsed < 0) {
+    battle.clock -= elapsed
+  } else {
+    battle.clock -= elapsed
+    battle.clock += TURN_ADD_MS
+  }
+  await setBattle(redis, battle)
   const { x, y, action } = req.body
   const moveId = v4()
   const move: Move = {
     id: moveId,
     battleId,
     action: { type: action, x, y },
-    by: battle.externalPlayer
+    by: battle.externalPlayer,
+    elapsed
   }
-  moveQueue.add(moveId, move)
-    .then(() =>
-      publishMessage(
-        pubRedis,
-        battleId,
-        {
-          player: battle.externalPlayer,
-          action,
-          x,
-          y
-        })
-    )
-    .then(() => {
-      res.json({ message: 'received your command', moveId })
+  await moveQueue.add(moveId, move)
+  await publishMessage(
+    pubRedis,
+    battleId,
+    {
+      player: battle.externalPlayer,
+      action,
+      x,
+      y
     })
-    .catch((e) => {
-      logger.err(e)
-      res.status(500).json({ message: 'rejected your command', moveId })
-    })
+
+  res.json({ message: 'received your command', moveId, clock: battle.clock })
 })
 
 ticTacToeRouter.get('/view/:id', (req, res) => {

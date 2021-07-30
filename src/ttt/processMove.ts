@@ -34,6 +34,9 @@ interface ProcessMoveContext {
 
 export const validate = (ctx: ProcessMoveContext): ProcessMoveContext => produce(ctx, (draft) => {
   const move = draft.input.move
+  if (ctx.battle.clock < 0) {
+    draft.output.errors.push('You ran out of time')
+  }
   const state = last(draft.battle.history)
   if (state === undefined) {
     draft.output.errors.push('Battle has no history')

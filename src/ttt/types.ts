@@ -1,6 +1,3 @@
-import { Redis } from 'ioredis'
-import { Queue } from 'bullmq'
-
 export interface EvaluatePayload {
   teamUrl: string
   callbackUrl: string
@@ -83,6 +80,7 @@ export interface Battle {
   type: CaseType
   history: TicTacToeState[]
   score?: number
+  clock: number
 }
 
 export interface ConcludeRequest {
@@ -94,12 +92,7 @@ export interface Move {
   battleId: string
   by: Turn
   action: TicTacToeAction
-}
-
-export interface AppContext {
-  pubRedis: Redis
-  subRedis: Redis
-  incomingMoveQueue: Queue<Move>
+  elapsed: number
 }
 
 export enum Result {

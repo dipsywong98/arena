@@ -135,6 +135,11 @@ export const expectTotalScore = (expectedScore: number) => async (context: PlayC
   }
 }
 
+export const expectFlipTable = (player: 'X' | 'O') =>
+  receiveEvent((event) => {
+    expect(event).toEqual({ player, action: 'flipTable' })
+  })
+
 export const putSymbol = (
   x: number, y: number
 ): Step => async (ctx: PlayContext) => {
@@ -148,6 +153,11 @@ export const flipTable = (): Step => async (ctx: PlayContext) => {
 export const viewBattle = (cb: (battle: Battle) => unknown): Step => async (ctx: PlayContext) => {
   const battle = await axios.get(`/tic-tac-toe/view/${ctx.battleId}`)
   cb(battle.data)
+}
+
+export const setNow = (ms: number): Step => async () => {
+  Date.now = jest.fn(() => ms)
+  return Promise.resolve()
 }
 
 export const startBattle = async (caseType: CaseType, ...steps: Step[]): Promise<void> => {
