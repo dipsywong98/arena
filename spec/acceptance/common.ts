@@ -7,6 +7,7 @@ import { moveWorker, concludeWorker } from '../../src/ttt/queues'
 import stoppable from 'stoppable'
 import { v4 } from 'uuid'
 import { CallbackPayload, EvaluatePayload } from '../../src/common/types'
+import { quoridorConcludeWorker, quoridorMoveWorker } from '../../src/quoridor/queues'
 
 let server: http.Server & stoppable.WithStop | undefined
 const sentBattleIds: string[] = []
@@ -44,6 +45,8 @@ afterAll(() => {
   })
   moveWorker.close().catch(noop)
   concludeWorker.close().catch(noop)
+  quoridorMoveWorker.close().catch(noop)
+  quoridorConcludeWorker.close().catch(noop)
   server?.stop()
 })
 
@@ -80,7 +83,7 @@ export const listenEvent = (): Step => async (ctx: PlayContext) => {
     res.on('data', data => {
       const text = new TextDecoder('utf-8').decode(data)
       const event = JSON.parse(text.replace('data: ', ''))
-      const onceEvent = ctx.onceEvents.pop()
+      const onceEvent = ctx.onceEvents.shift()
       if (onceEvent !== undefined) {
         onceEvent(event, ctx)
       } else {
@@ -94,7 +97,7 @@ export const listenEvent = (): Step => async (ctx: PlayContext) => {
 export const receiveEvent = (
   callback?: OnEvent
 ): Step => async (ctx: PlayContext) => {
-  const event = ctx.events.pop()
+  const event = ctx.events.shift()
   if (event !== undefined) {
     callback?.(event, ctx)
   } else {

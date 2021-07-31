@@ -7,7 +7,8 @@ describe('quoridor', () => {
     it('can prevent lose', () => {
       const action = pipe(initState, movePawn(2, 1), abAgent)()
       expect(action).toEqual({
-        x: 1,
+        type: "putWall",
+        x: expect.anything(),
         y: 0,
         o: '-'
       })
@@ -15,6 +16,7 @@ describe('quoridor', () => {
     it('can win', () => {
       const action = pipe(initState, movePawn(2, 1), movePawn(4, 1), abAgent)()
       expect(action).toEqual({
+        type: 'move',
         x: 2,
         y: 0,
       })
