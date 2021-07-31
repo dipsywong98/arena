@@ -5,11 +5,16 @@ import helmet from 'helmet'
 import express from 'express'
 import 'express-async-errors'
 import ticTacToeRouter from './ttt/router'
+import quoridorRouter from './quoridor/router'
 
-import { serverAdapter } from './ttt/queues'
 import { readFileSync } from 'fs'
-import marked = require("marked")
 import path from 'path'
+import { ExpressAdapter } from '@bull-board/express'
+import { createBullBoard } from '@bull-board/api'
+import { BullMQAdapter } from '@bull-board/api/bullMQAdapter'
+import { concludeQueue, moveQueue } from './ttt/queues'
+import { quoridorConcludeQueue, quoridorMoveQueue } from './quoridor/queues'
+import marked = require('marked')
 
 const app = express()
 
@@ -31,8 +36,23 @@ if (process.env.NODE_ENV === 'production') {
   app.use(helmet())
 }
 
-app.use('/tic-tac-toe', ticTacToeRouter)
+export const serverAdapter = new ExpressAdapter()
+
+createBullBoard({
+  queues: [
+    new BullMQAdapter(concludeQueue),
+    new BullMQAdapter(moveQueue),
+    new BullMQAdapter(quoridorConcludeQueue),
+    new BullMQAdapter(quoridorMoveQueue)
+  ],
+  serverAdapter
+})
+
+serverAdapter.setBasePath('/admin/queues')
+
 app.use('/admin/queues', serverAdapter.getRouter())
+app.use('/tic-tac-toe', ticTacToeRouter)
+app.use('/quoridor', quoridorRouter)
 const viewsDir = path.join(__dirname, '..', 'static')
 app.use('/static', express.static(viewsDir))
 

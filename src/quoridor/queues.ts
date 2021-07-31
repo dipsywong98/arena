@@ -5,15 +5,18 @@ import { processConclude } from './processConclude'
 import { processMove } from './processMove'
 
 // Create a new connection in every instance
-export const moveQueue = new Queue<Move>('moveQueue', { connection: redis })
+export const quoridorMoveQueue = new Queue<Move>('quoridorMoveQueue', { connection: redis })
 
-export const moveWorker = new Worker<Move>('moveQueue', async (job) => {
+export const quoridorMoveWorker = new Worker<Move>('quoridorMoveQueue', async (job) => {
   const move = job.data
   return await processMove(move)
 }, { connection: redis })
 
-export const concludeQueue = new Queue<ConcludeRequest>('concludeQueue', { connection: redis })
-export const concludeWorker = new Worker<ConcludeRequest>('concludeQueue', async (job) => {
+export const quoridorConcludeQueue = new Queue<ConcludeRequest>(
+  'quoridorConcludeQueue', { connection: redis })
+export const quoridorConcludeWorker = new Worker<ConcludeRequest>(
+  'quoridorConcludeQueue', async (job) => {
   const concludeRequest = job.data
   return await processConclude(concludeRequest)
 }, { connection: redis })
+

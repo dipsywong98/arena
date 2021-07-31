@@ -8,21 +8,21 @@ import {
   timerReset
 } from './store'
 import { v4 } from 'uuid'
-import { Move, TicTacToeActionType } from './types'
+import { ActionType, Move } from './types'
 import logger from '../common/logger'
 import redis, { pubRedis, subRedis } from '../common/redis'
-import { moveQueue } from './queues'
+import { quoridorMoveQueue } from './queues'
 import { processEvaluate } from './processEvaluate'
 import { TURN_ADD_MS } from './config'
 import { isEvaluatePayload } from '../common/types'
 
-const ticTacToeRouter = Router()
-ticTacToeRouter.get('/hi', (request, response) => {
+const quoridorRouter = Router()
+quoridorRouter.get('/hi', (request, response) => {
   response.send({ hi: 'hi' })
 })
 
 // eslint-disable-next-line @typescript-eslint/no-misused-promises
-ticTacToeRouter.post('/evaluate', async (req, res) => {
+quoridorRouter.post('/evaluate', async (req, res) => {
   const payload = req.body
   if (isEvaluatePayload(payload)) {
     const { battleIds, errors } = await processEvaluate(payload)
@@ -35,7 +35,7 @@ ticTacToeRouter.post('/evaluate', async (req, res) => {
 })
 
 // eslint-disable-next-line @typescript-eslint/no-misused-promises
-ticTacToeRouter.get('/start/:battleId', async (req, res) => {
+quoridorRouter.get('/start/:battleId', async (req, res) => {
   const { battleId } = req.params
   const battle = await getBattle(pubRedis, battleId)
   if (battle === null) {
@@ -67,8 +67,8 @@ ticTacToeRouter.get('/start/:battleId', async (req, res) => {
       logger.err(e)
     }
   })
-  await moveQueue.add(moveId, {
-    action: { type: TicTacToeActionType.START_GAME },
+  await quoridorMoveQueue.add(moveId, {
+    action: { type: ActionType.START_GAME },
     battleId,
     by: battle.externalPlayer,
     id: moveId,
@@ -80,7 +80,7 @@ ticTacToeRouter.get('/start/:battleId', async (req, res) => {
 })
 
 // eslint-disable-next-line @typescript-eslint/no-misused-promises
-ticTacToeRouter.post('/play/:battleId', async (req, res) => {
+quoridorRouter.post('/play/:battleId', async (req, res) => {
   const { battleId } = req.params
   const elapsed = await timerRead(redis, battleId)
   const battle = await getBattle(pubRedis, battleId)
@@ -104,7 +104,7 @@ ticTacToeRouter.post('/play/:battleId', async (req, res) => {
     by: battle.externalPlayer,
     elapsed
   }
-  await moveQueue.add(moveId, move)
+  await quoridorMoveQueue.add(moveId, move)
   await publishMessage(
     pubRedis,
     battleId,
@@ -118,19 +118,19 @@ ticTacToeRouter.post('/play/:battleId', async (req, res) => {
   res.json({ message: 'received your command', moveId, clock: battle.clock })
 })
 
-ticTacToeRouter.get('/view/:id', (req, res) => {
+quoridorRouter.get('/view/:id', (req, res) => {
   const id = req.params.id
   getBattle(pubRedis, id).then(game => {
     res.json(game)
   })
 })
 
-ticTacToeRouter.post('/', (req, res) => {
+quoridorRouter.post('/', (req, res) => {
   res.send('OK')
 })
 
-ticTacToeRouter.get('/', (req, res) => {
+quoridorRouter.get('/', (req, res) => {
   res.redirect('/')
 })
 
-export default ticTacToeRouter
+export default quoridorRouter

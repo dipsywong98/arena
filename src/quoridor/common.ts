@@ -1,6 +1,6 @@
 import produce from 'immer'
 import PriorityQueue from 'priorityqueuejs'
-import { Action, Coord, Node, Orientation, Player, State, Turn } from './types'
+import { Action, ActionType, Coord, Node, Orientation, Player, Result, State, Turn } from './types'
 
 export const SIZE = 9
 export const INITIAL_WALLS = 10
@@ -23,7 +23,8 @@ export const initState = (): State => ({
     [Turn.WHITE]: initPlayer(0),
     [Turn.BLACK]: initPlayer(SIZE - 1)
   },
-  turn: Turn.BLACK
+  turn: Turn.BLACK,
+  expectFlip: false
 })
 
 export const putWall = (x: number, y: number, o: Orientation) => (state: State): State =>
@@ -52,7 +53,7 @@ export const movePawn = (x: number, y: number) => (state: State) =>
     return draft
   })
 
-export const applyAction = (state: State, action: Action) => {
+export const applyAction = (state: State, action: Action): State => {
   if (action.o !== undefined) {
     return putWall(action.x, action.y, action.o)(state)
   } else {
@@ -204,12 +205,22 @@ export const allPossibleWalls = (state: State): Action[] => {
   for(let y = 0; y < SIZE - 1; y++) {
     for(let x= 0; x < SIZE - 1; x++) {
       if (canPutWall(state, x, y, Orientation.HORIZONTAL)) {
-        a.push({x,y,o:Orientation.HORIZONTAL})
+        a.push({x,y,o:Orientation.HORIZONTAL,type: ActionType.PUT_WALL})
       }
       if (canPutWall(state, x, y, Orientation.VERTICAL)) {
-        a.push({x,y,o:Orientation.VERTICAL})
+        a.push({x,y,o:Orientation.VERTICAL,type: ActionType.PUT_WALL})
       }
     }
   }
   return a
+}
+
+export const getResult = (state: State): Result | undefined => {
+  if (state.players[Turn.BLACK].y === 0) {
+    return Result.BLACK_WIN
+  }
+  if (state.players[Turn.WHITE].y === SIZE - 1) {
+    return Result.WHITE_WIN
+  }
+  return undefined
 }

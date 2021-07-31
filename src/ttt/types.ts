@@ -1,13 +1,3 @@
-import { EvaluatePayload } from '../common/types'
-
-export function isEvaluatePayload (payload: unknown | EvaluatePayload): payload is EvaluatePayload {
-  return typeof payload === 'object'
-    && payload !== null
-    && 'teamUrl' in payload
-    && 'callbackUrl' in payload
-    && 'runId' in payload
-}
-
 export enum CaseType {
   BASE_AI_O = 'BASE_AI_O',
   BASE_AI_X = 'BASE_AI_X',

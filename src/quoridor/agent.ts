@@ -1,14 +1,16 @@
-import { Action, State, Turn } from './types'
+import { Action, ActionType, State, Turn } from './types'
 import {
   allPossibleWalls,
   applyAction,
-  getWalkableNeighborCoords, isEndGame,
+  getWalkableNeighborCoords,
+  isEndGame,
   opposite,
   pathLength,
   SIZE
 } from './common'
 import { alphaBetaTree } from '../common/AlphaBetaTree'
 import logger from '../common/logger'
+import { shuffle } from '../common/shuffle'
 
 const scorer = (me: Turn) => (state: State): number => {
   const { y } = state.players[state.turn]
@@ -39,7 +41,8 @@ const scorer = (me: Turn) => (state: State): number => {
 
 const generator = (state: State): Action[] => {
   const neighbors = getWalkableNeighborCoords(state, state.turn)
-  const walls = state.players[state.turn].walls > 0 ? allPossibleWalls(state) : []
+    .map(({x, y}) => ({x,y,type: ActionType.MOVE}))
+  const walls = state.players[state.turn].walls > 0 ? shuffle(allPossibleWalls(state)) : []
   return neighbors.concat(walls)
 }
 
