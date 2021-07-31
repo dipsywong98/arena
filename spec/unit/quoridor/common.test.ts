@@ -34,7 +34,7 @@ describe('quoridor', () => {
         ])
     })
     it('wall case', () => {
-      const state1 = putWall(initState(), 4, 0, Orientation.HORIZONTAL)
+      const state1 = putWall(4, 0, Orientation.HORIZONTAL)(initState())
       expect(getWalkableNeighborCoords(state1, Turn.WHITE))
         .toEqual([
           {x: 5, y: 0},
@@ -56,7 +56,7 @@ describe('quoridor', () => {
         ])
     })
     it('jump pawn has wall', () => {
-      const state = produce(putWall(initState(), 4, 4, Orientation.VERTICAL), draft => {
+      const state = produce(putWall(4, 4, Orientation.VERTICAL)(initState()), draft => {
         draft.players[Turn.WHITE].x = 4
         draft.players[Turn.WHITE].y = 4
         draft.players[Turn.BLACK].x = 3

@@ -1,4 +1,4 @@
-import { alphaBetaTree } from '../AlphaBetaTree'
+import { alphaBetaTree } from '../common/AlphaBetaTree'
 import { applyAction, isEndGame } from './common'
 import { TicTacToeAction, TicTacToeActionType, TicTacToeState, Turn } from './types'
 

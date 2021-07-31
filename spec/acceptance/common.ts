@@ -1,11 +1,12 @@
-import { Battle, CallbackPayload, CaseType, EvaluatePayload } from '../../src/ttt/types'
+import { Battle, CaseType} from '../../src/ttt/types'
 import axios from 'axios'
 import arenaApp from '../../src/Server'
 import * as http from 'http'
-import { allRedis } from '../../src/redis'
+import { allRedis } from '../../src/common/redis'
 import { moveWorker, concludeWorker } from '../../src/ttt/queues'
 import stoppable from 'stoppable'
 import { v4 } from 'uuid'
+import { CallbackPayload, EvaluatePayload } from '../../src/common/types'
 
 let server: http.Server & stoppable.WithStop | undefined
 const sentBattleIds: string[] = []

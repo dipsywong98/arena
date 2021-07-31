@@ -1,10 +1,11 @@
-import { CaseType, EvaluatePayload, isCaseType, Run } from './types'
+import { CaseType, isCaseType, Run } from './types'
 import { setBattle, setRun } from './store'
-import { pubRedis } from '../redis'
+import { pubRedis } from '../common/redis'
 import axios from 'axios'
 import { config } from './config'
 import { v4 } from 'uuid'
-import { shuffle } from '../shuffle'
+import { shuffle } from '../common/shuffle'
+import { EvaluatePayload } from '../common/types'
 
 export const generateBattlesForGrading = async (
   runId: string,

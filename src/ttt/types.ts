@@ -1,9 +1,4 @@
-export interface EvaluatePayload {
-  teamUrl: string
-  callbackUrl: string
-  runId: string
-  caseType?: CaseType
-}
+import { EvaluatePayload } from '../common/types'
 
 export function isEvaluatePayload (payload: unknown | EvaluatePayload): payload is EvaluatePayload {
   return typeof payload === 'object'
@@ -102,8 +97,3 @@ export enum Result {
   FLIPPED = 'FLIPPED',
 }
 
-export interface CallbackPayload {
-  runId: string
-  score: number
-  message: string
-}

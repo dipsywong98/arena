@@ -6,8 +6,8 @@ import { getBattle, publishMessage, setBattle } from './store'
 import { Redis } from 'ioredis'
 import { concludeQueue } from './queues'
 import { v4 } from 'uuid'
-import redis from '../redis'
-import logger from '../logger'
+import redis from '../common/redis'
+import logger from '../common/logger'
 import { config } from './config'
 
 export const playerWin = (battle: Battle) => {

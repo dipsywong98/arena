@@ -7,8 +7,8 @@ import {
   pathLength,
   SIZE
 } from './common'
-import { alphaBetaTree } from '../AlphaBetaTree'
-import logger from '../logger'
+import { alphaBetaTree } from '../common/AlphaBetaTree'
+import logger from '../common/logger'
 
 const scorer = (me: Turn) => (state: State): number => {
   const { y } = state.players[state.turn]

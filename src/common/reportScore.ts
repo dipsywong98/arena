@@ -1,5 +1,5 @@
 import axios from 'axios'
-import { CallbackPayload } from './ttt/types'
+import { CallbackPayload } from './types'
 
 export const reportScore = async (
   reportUrl: string,

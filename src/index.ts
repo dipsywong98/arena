@@ -1,7 +1,7 @@
 import dotenv from 'dotenv'
 dotenv.config()
 import app from '@server'
-import logger from './logger'
+import logger from './common/logger'
 
 
 // Start the server

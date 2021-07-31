@@ -1,8 +1,8 @@
 import { getBattle, getRun, setRun } from './store'
 import { Battle, ConcludeRequest } from './types'
-import redis from '../redis'
+import redis from '../common/redis'
 import { difference } from 'ramda'
-import { reportScore } from '../reportScore'
+import { reportScore } from '../common/reportScore'
 
 export const processConclude = async (concludeRequest: ConcludeRequest) => {
   const { runId } = concludeRequest
