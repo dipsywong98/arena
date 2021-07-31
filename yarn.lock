@@ -2,7 +2,6 @@
 # yarn lockfile v1
 
 
-
 "@babel/code-frame@7.12.11":
   version "7.12.11"
   resolved "https://registry.yarnpkg.com/@babel/code-frame/-/code-frame-7.12.11.tgz#f4ad435aa263db935b8f10f2c552d23fb716a63f"
@@ -971,6 +970,11 @@
   version "2.3.2"
   resolved "https://registry.yarnpkg.com/@types/prettier/-/prettier-2.3.2.tgz#fc8c2825e4ed2142473b4a81064e6e081463d1b3"
   integrity sha512-eI5Yrz3Qv4KPUa/nSIAi0h+qX0XyewOliug5F2QAtuRg6Kjg6jfmxe1GIwoIRhZspD1A0RP8ANrPwvEXXtRFog==
+
+"@types/priorityqueuejs@^1.0.1":
+  version "1.0.1"
+  resolved "https://registry.yarnpkg.com/@types/priorityqueuejs/-/priorityqueuejs-1.0.1.tgz#6eaac3247a4c5cefc94482e5d87c3730b35f5053"
+  integrity sha1-bqrDJHpMXO/JRILl2Hw3MLNfUFM=
 
 "@types/qs@*":
   version "6.9.7"
@@ -3970,6 +3974,11 @@ pretty-format@^27.0.6:
     ansi-regex "^5.0.0"
     ansi-styles "^5.0.0"
     react-is "^17.0.1"
+
+priorityqueuejs@^2.0.0:
+  version "2.0.0"
+  resolved "https://registry.yarnpkg.com/priorityqueuejs/-/priorityqueuejs-2.0.0.tgz#96064040edd847ee9dd3013d8e16297399a6bd4f"
+  integrity sha512-19BMarhgpq3x4ccvVi8k2QpJZcymo/iFUcrhPd4V96kYGovOdTsWwy7fxChYi4QY+m2EnGBWSX9Buakz+tWNQQ==
 
 progress@^2.0.0:
   version "2.0.3"
