@@ -123,11 +123,12 @@ export const expectPutSymbol = (position: string, player: string) =>
     expect(event).toEqual({ action: 'putSymbol', position, player })
   })
 
-export const expectPawnMove = (x: number, y: number, player: string) =>
+export const expectPawnMove = (position: string, player: string) =>
   receiveEvent((event) => {
     expect(event).toEqual({
-      ...externalizeAction(
-        { type: QuoridorActionType.MOVE, x, y }), player
+      action: QuoridorActionType.MOVE,
+      position,
+      player
     })
   })
 
@@ -167,11 +168,10 @@ export const putSymbol = (
 
 export const flipTable = (): Step => play({ action: 'flipTable' })
 
-export const movePawn = (x: number, y: number): Step => play(externalizeAction({
-  type: QuoridorActionType.MOVE,
-  x,
-  y
-}))
+export const movePawn = (position: string): Step => play({
+  action: QuoridorActionType.MOVE,
+  position
+})
 
 export const viewBattle = (cb: (battle: TicTacToeBattle) => unknown): Step => (
   async (ctx: PlayContext) => {

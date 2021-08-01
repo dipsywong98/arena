@@ -80,7 +80,7 @@ describe('quoridor-simple', () => {
   it('flips when player second play before AI first', () => {
     return startBattle('quoridor',
       QuoridorCaseType.BASE_AI_FIRST,
-      movePawn(4, 7),
+      movePawn('E2'),
       listenEvent(),
       expectGameStart('second'),
       viewBattle(battle => {
@@ -109,12 +109,12 @@ describe('quoridor-simple', () => {
       QuoridorCaseType.BASE_AI_SECOND,
       listenEvent(),
       expectGameStart('first'),
-      movePawn(5, 0),
-      expectPawnMove(5, 0, 'first'),
+      movePawn('F9'),
+      expectPawnMove('F9', 'first'),
       expectFlipTable('second'),
       viewBattle(battle => {
         expect(battle.flippedBy).toEqual('second')
-        expect(battle.flippedReason).toEqual('Cannot move to 5,0')
+        expect(battle.flippedReason).toEqual('Cannot move to F9')
       }),
       expectTotalScore(0))
   })

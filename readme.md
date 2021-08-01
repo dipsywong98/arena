@@ -129,6 +129,7 @@ First will win if it reaches row `9` and second win if it reaches row `1`.
 
 For walls, each player will have 10
 
+![](static/quoridor-view.png)
 ![](static/quoridor.png)
 
 ### How to play

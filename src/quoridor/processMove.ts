@@ -191,7 +191,9 @@ export const handleMovePawn = (ctx: ProcessMoveContext): ProcessMoveContext => {
       } else {
         const neighbors = getWalkableNeighborCoords(state, state.turn)
         if (neighbors.find(({ x, y }) => x === x1 && y === y1) === undefined) {
-          draft.output.errors.push(`Cannot move to ${x1},${y1}`)
+          draft.output.errors.push(
+            `Cannot move to ${externalizeAction(action).position ?? 'undefined'}`
+          )
         }
       }
     }
