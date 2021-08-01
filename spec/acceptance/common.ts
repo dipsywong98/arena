@@ -1,4 +1,4 @@
-import { Battle, CaseType} from '../../src/ttt/types'
+import { Battle, TicTacToeAction } from '../../src/ttt/types'
 import axios from 'axios'
 import arenaApp from '../../src/Server'
 import * as http from 'http'
@@ -8,6 +8,21 @@ import stoppable from 'stoppable'
 import { v4 } from 'uuid'
 import { CallbackPayload, EvaluatePayload } from '../../src/common/types'
 import { quoridorConcludeWorker, quoridorMoveWorker } from '../../src/quoridor/queues'
+import { QuoridorActionPayload } from '../../src/quoridor/types'
+
+type Event = Record<string, unknown>
+type OnEvent = (event: Event, ctx: PlayContext) => void
+
+interface PlayContext {
+  game: string
+  req?: http.ClientRequest
+  battleId: string
+  events: Event[]
+  onceEvents: OnEvent[]
+  runId: string
+}
+
+type Step = (ctx: PlayContext) => Promise<void>
 
 let server: http.Server & stoppable.WithStop | undefined
 const sentBattleIds: string[] = []
@@ -51,35 +66,22 @@ afterAll(() => {
 })
 
 export const requestForGrade = async (
-  runId = 'some-id',
-  caseType?: CaseType
-): Promise<string[]> => {
+  game: string,
+  runId = 'some-id'
+  , caseType?: string): Promise<string[]> => {
   const payload: EvaluatePayload = {
     runId,
     callbackUrl: `http://localhost:${port}/test/callback`,
     teamUrl: `http://localhost:${port}/test`,
     caseType
   }
-  const { data: { battleIds } } = await axios.post(`/tic-tac-toe/evaluate`, payload)
+  const { data: { battleIds } } = await axios.post(`/${game}/evaluate`, payload)
   expect(battleIds).toEqual(expect.arrayContaining(sentBattleIds))
   return battleIds as string[]
 }
 
-type Event = Record<string, unknown>
-type OnEvent = (event: Event, ctx: PlayContext) => void
-
-interface PlayContext {
-  req?: http.ClientRequest
-  battleId: string
-  events: Event[]
-  onceEvents: OnEvent[]
-  runId: string
-}
-
-type Step = (ctx: PlayContext) => Promise<void>
-
 export const listenEvent = (): Step => async (ctx: PlayContext) => {
-  ctx.req = http.get(`http://localhost:12345/tic-tac-toe/start/${ctx.battleId}`, res => {
+  ctx.req = http.get(`http://localhost:12345/${ctx.game}/start/${ctx.battleId}`, res => {
     res.on('data', data => {
       const text = new TextDecoder('utf-8').decode(data)
       const event = JSON.parse(text.replace('data: ', ''))
@@ -110,14 +112,19 @@ export const receiveEvent = (
   }
 }
 
-export const expectGameStart = (youAre: 'O' | 'X') =>
+export const expectGameStart = (youAre: string) =>
   receiveEvent((event, { battleId }) => {
     expect(event).toEqual({ id: battleId, youAre })
   })
 
-export const expectPutSymbol = (x: number, y: number, player: 'O' | 'X') =>
+export const expectPutSymbol = (x: number, y: number, player: string) =>
   receiveEvent((event) => {
     expect(event).toEqual({ action: 'putSymbol', x, y, player })
+  })
+
+export const expectPawnMove = (x: number, y: number, player: string) =>
+  receiveEvent((event) => {
+    expect(event).toEqual({ action: 'move', x, y, player })
   })
 
 export const expectWinner = (winner: string) =>
@@ -139,23 +146,25 @@ export const expectTotalScore = (expectedScore: number) => async (context: PlayC
   }
 }
 
-export const expectFlipTable = (player: 'X' | 'O') =>
+export const expectFlipTable = (player: string) =>
   receiveEvent((event) => {
     expect(event).toEqual({ player, action: 'flipTable' })
   })
 
+export const play = (payload: Record<string, unknown>): Step => async (ctx: PlayContext) => {
+  await axios.post(`/${ctx.game}/play/${ctx.battleId}`, payload)
+}
+
 export const putSymbol = (
   x: number, y: number
-): Step => async (ctx: PlayContext) => {
-  await axios.post(`/tic-tac-toe/play/${ctx.battleId}`, { action: 'putSymbol', x, y })
-}
+): Step => play({ action: 'putSymbol', x, y })
 
-export const flipTable = (): Step => async (ctx: PlayContext) => {
-  await axios.post(`/tic-tac-toe/play/${ctx.battleId}`, { action: 'flipTable' })
-}
+export const flipTable = (): Step => play({ action: 'flipTable' })
+
+export const movePawn = (x: number, y: number): Step => play({ action: 'move', x, y })
 
 export const viewBattle = (cb: (battle: Battle) => unknown): Step => async (ctx: PlayContext) => {
-  const battle = await axios.get(`/tic-tac-toe/view/${ctx.battleId}`)
+  const battle = await axios.get(`/${ctx.game}/view/${ctx.battleId}`)
   cb(battle.data)
 }
 
@@ -164,10 +173,15 @@ export const setNow = (ms: number): Step => async () => {
   return Promise.resolve()
 }
 
-export const startBattle = async (caseType: CaseType, ...steps: Step[]): Promise<void> => {
+export const startBattle = async (
+  game: string,
+  caseType: string,
+  ...steps: Step[]
+): Promise<void> => {
   const runId = v4()
-  const [battleId] = await requestForGrade(runId, caseType)
+  const [battleId] = await requestForGrade(game, runId, caseType)
   const ctx: PlayContext = {
+    game,
     battleId,
     events: [],
     onceEvents: [],
@@ -179,13 +193,14 @@ export const startBattle = async (caseType: CaseType, ...steps: Step[]): Promise
   ctx.req?.emit('close')
 }
 
-export const startRun = async (stepsForCases: Step[][]): Promise<void> => {
+export const startRun = async (game: string, stepsForCases: Step[][]): Promise<void> => {
   const runId = v4()
-  const battleIds = await requestForGrade(runId)
+  const battleIds = await requestForGrade(game, runId)
   expect(stepsForCases.length).toEqual(battleIds.length)
   const promises = battleIds.map(async (battleId, k) => {
     const steps = stepsForCases[k]
     const ctx: PlayContext = {
+      game,
       battleId,
       events: [],
       onceEvents: [],
@@ -198,3 +213,34 @@ export const startRun = async (stepsForCases: Step[][]): Promise<void> => {
   })
   await Promise.all(promises)
 }
+
+export const autoPlay = <S, A extends TicTacToeAction | QuoridorActionPayload> (
+  { init, apply, agent }: {
+    init: () => S, apply: (s: S, a: A) => S, agent: (s: S) => A
+  }): Step =>
+  async (ctx: PlayContext) => {
+    let state = init()
+    let me: unknown | undefined
+    let flag = false
+    while (!flag) {
+      await receiveEvent((value) => {
+        if (value.youAre !== undefined) {
+          me = value.youAre
+          if (me === 'O' || me === 'black') {
+            const react = agent(state)
+            play({ ...react, action: react.type })(ctx)
+          }
+        }
+        if (value.action !== undefined) {
+          state = apply(state, { ...value, type: value.action } as A)
+          if (value.player !== me) {
+            const react = agent(state)
+            play({ ...react, action: react.type })(ctx)
+          }
+        }
+        if (value.action === 'flipTable' || value.winner !== undefined) {
+          flag = true
+        }
+      })(ctx)
+    }
+  }

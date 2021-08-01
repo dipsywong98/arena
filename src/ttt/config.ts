@@ -12,17 +12,21 @@ import { playerWin } from './processMove'
 
 export const INITIAL_CLOCK_MS = 18 * 1000
 
+export const initState = () => {
+  return {
+    expectFlip: false,
+    turn: Turn.O,
+    board: [[null, null, null], [null, null, null], [null, null, null]],
+    createdAt: Date.now()
+  }
+}
+
 const makeInitialStateGenerator = (aiTurn: Turn) =>
   (battleId: string, runId: string): Omit<Battle, 'type'> => ({
     id: battleId,
     runId,
     externalPlayer: opposite(aiTurn),
-    history: [{
-      expectFlip: false,
-      turn: Turn.O,
-      board: [[null, null, null], [null, null, null], [null, null, null]],
-      createdAt: Date.now()
-    }],
+    history: [initState()],
     clock: INITIAL_CLOCK_MS
   })
 

@@ -1,6 +1,6 @@
 import { pipe } from 'ramda'
 import { initState, movePawn } from '../../../src/quoridor/common'
-import { abAgent } from '../../../src/quoridor/agent'
+import { abAgent, baseAgent } from '../../../src/quoridor/agent'
 
 describe('quoridor', () => {
   describe('abAgent', () => {
@@ -22,4 +22,12 @@ describe('quoridor', () => {
       })
     })
   })
+
+  describe('baseAgent', () => {
+    it('can give some action', () => {
+      const action = pipe(initState, movePawn(2, 1), baseAgent)()
+      expect(action).toBeTruthy()
+    })
+  })
 })
+

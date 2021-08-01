@@ -46,6 +46,11 @@ const generator = (state: State): Action[] => {
   return neighbors.concat(walls)
 }
 
+const moveOnlyGenerator = (state: State): Action[] => {
+  return getWalkableNeighborCoords(state, state.turn)
+    .map(({ x, y }) => ({ x, y, type: ActionType.MOVE }))
+}
+
 export const baseAgent = (state: State): Action => {
   const moves = generator(state)
   return moves[Math.floor(Math.random() * moves.length)]
@@ -56,6 +61,26 @@ export const abAgent = (state: State): Action => {
     const alphaBetaTreeResult = alphaBetaTree({
       state,
       generator,
+      isEndGame,
+      scorer: scorer(state.turn),
+      depth: 2,
+      maximize: true,
+      alpha: -Infinity,
+      beta: Infinity,
+      apply: applyAction
+    })
+    return alphaBetaTreeResult.action ?? baseAgent(state)
+  } catch (e) {
+    logger.err(e)
+    return moveOnlyAgent(state)
+  }
+}
+
+export const moveOnlyAgent = (state: State): Action => {
+  try {
+    const alphaBetaTreeResult = alphaBetaTree({
+      state,
+      generator: moveOnlyGenerator,
       isEndGame,
       scorer: scorer(state.turn),
       depth: 2,
