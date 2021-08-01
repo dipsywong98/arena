@@ -1,4 +1,6 @@
-export enum CaseType {
+import { Action, Battle, Move, State, TestCase } from '../common/types'
+
+export enum QuoridorCaseType {
   BASE_AI_BLACK = 'BASE_AI_BLACK',
   BASE_AI_WHITE = 'BASE_AI_WHITE',
   AB_AI_BLACK = 'AB_AI_BLACK',
@@ -6,21 +8,17 @@ export enum CaseType {
   C_AI_WHITE_FIRST = 'C_AI_WHITE_FIRST'
 }
 
-export function isCaseType (p: string | undefined): p is CaseType {
-  return p !== undefined && p in CaseType
+export function isCaseType (p: string | undefined): p is QuoridorCaseType {
+  return p !== undefined && p in QuoridorCaseType
 }
 
-export interface TestCase {
-  initialStateGenerator: (battleId: string, runId: string) => Omit<Battle, 'type'>
-  agent: (state: State) => Action | { cheat: Action }
-  score: (battle: Battle) => number
-}
+export type QuoridorTestCase = TestCase<QuoridorState, QActionInternal, QuoridorBattle>
 
 export interface Player extends Coord {
   walls: number
 }
 
-export enum Turn {
+export enum QuoridorTurn {
   BLACK = 'black',
   WHITE = 'white'
 }
@@ -32,10 +30,10 @@ export enum Orientation {
   HORIZONTAL = '-'
 }
 
-export interface State {
+export interface QuoridorState extends State {
   walls: Walls
-  players: Record<Turn, Player>
-  turn: Turn
+  players: Record<QuoridorTurn, Player>
+  turn: QuoridorTurn
   expectFlip: boolean
 }
 
@@ -49,59 +47,30 @@ export interface Node extends Coord {
   targetDistance: number
 }
 
-export interface Action extends Coord {
-  type: ActionType
+export interface QActionInternal extends Coord {
+  type: QuoridorActionType
   o?: Orientation
 }
 
-export interface QuoridorActionPayload {
-  type: ActionType
+export interface QuoridorAction extends Action {
+  type: QuoridorActionType
   x?: number
   y?: number
   o?: Orientation
-  action2?: QuoridorActionPayload
+  action2?: QuoridorAction
 }
 
-export interface Run {
-  id: string
-  battleIds: string[]
-  callbackUrl: string
-  score?: number
-  message?: string
-}
+export type QuoridorBattle = Battle<
+  QuoridorCaseType, QuoridorResult, QuoridorState, QuoridorTurn>
+export type QuoridorMove = Move<QuoridorAction, QuoridorTurn>
 
-export interface Battle {
-  id: string
-  runId: string
-  externalPlayer: Turn
-  result?: Result
-  flippedReason?: string
-  flippedBy?: Turn
-  type: CaseType
-  history: State[]
-  score?: number
-  clock: number
-}
-
-export interface ConcludeRequest {
-  runId: string
-}
-
-export interface Move {
-  id: string
-  battleId: string
-  by: Turn
-  action: QuoridorActionPayload
-  elapsed: number
-}
-
-export enum Result {
+export enum QuoridorResult {
   BLACK_WIN = 'BLACK_WIN',
   WHITE_WIN = 'WHITE_WIN',
   FLIPPED = 'FLIPPED',
 }
 
-export enum ActionType {
+export enum QuoridorActionType {
   START_GAME = 'startGame', // internal
   MOVE = 'move',
   PUT_WALL = 'putWall',

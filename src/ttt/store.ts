@@ -1,5 +1,6 @@
 import { Redis } from 'ioredis'
-import { Battle, Run } from './types'
+import { TicTacToeBattle } from './types'
+import { Run } from '../common/types'
 
 const makeRedisBattleId = (battleId: string) => {
   return `arena:ttt:battle:${battleId}`
@@ -17,15 +18,17 @@ const makeRedisTimerKey = (battleId: string) => {
   return `arena:ttt:timer:${battleId}`
 }
 
-export const getBattle = async (redis: Redis, battleId: string): Promise<Battle | null> => {
+export const getBattle = async (
+  redis: Redis, battleId: string
+): Promise<TicTacToeBattle | null> => {
   const text = await redis.get(makeRedisBattleId(battleId))
   if (text === null) {
     return null
   }
-  return JSON.parse(text) as Battle
+  return JSON.parse(text) as TicTacToeBattle
 }
 
-export const setBattle = async (redis: Redis, battle: Battle): Promise<void> => {
+export const setBattle = async (redis: Redis, battle: TicTacToeBattle): Promise<void> => {
   await redis.set(
     makeRedisBattleId(battle.id),
     JSON.stringify(battle),

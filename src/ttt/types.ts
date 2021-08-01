@@ -1,4 +1,6 @@
-export enum CaseType {
+import { Action, Battle, Move, State, TestCase } from '../common/types'
+
+export enum TicTacToeCaseType {
   BASE_AI_O = 'BASE_AI_O',
   BASE_AI_X = 'BASE_AI_X',
   AB_AI_O = 'AB_AI_O',
@@ -9,19 +11,19 @@ export enum CaseType {
   C_AI_TWICE_A_ROW = 'C_AI_TWICE_A_ROW'
 }
 
-export function isCaseType (p: string | undefined): p is CaseType {
-  return p !== undefined && p in CaseType
+export function isCaseType (p: string | undefined): p is TicTacToeCaseType {
+  return p !== undefined && p in TicTacToeCaseType
 }
 
-export enum Turn {
+export enum TicTacToeTurn {
   O = 'O',
   X = 'X'
 }
 
-export type Board = Array<Array<Turn | null>>
+export type Board = Array<Array<TicTacToeTurn | null>>
 
-export interface TicTacToeState {
-  turn: Turn
+export interface TicTacToeState extends State {
+  turn: TicTacToeTurn
   board: Board
   expectFlip: boolean
   createdAt: number
@@ -34,53 +36,20 @@ export enum TicTacToeActionType {
   END_GAME = 'endGame'// internal
 }
 
-export interface TicTacToeAction {
+export interface TicTacToeAction extends Action {
   type: TicTacToeActionType,
   x?: number
   y?: number
   action2?: TicTacToeAction
 }
 
-export interface TestCase {
-  initialStateGenerator: (battleId: string, runId: string) => Omit<Battle, 'type'>
-  agent: (state: TicTacToeState) => TicTacToeAction | { cheat: TicTacToeAction }
-  score: (battle: Battle) => number
-}
+export type TicTacToeTestCase = TestCase<TicTacToeState, TicTacToeAction, TicTacToeBattle>
+export type TicTacToeBattle = (
+  Battle<TicTacToeCaseType, TicTacToeResult, TicTacToeState, TicTacToeTurn>
+)
+export type TicTacToeMove = Move<TicTacToeAction, TicTacToeTurn>
 
-export interface Run {
-  id: string
-  battleIds: string[]
-  callbackUrl: string
-  score?: number
-  message?: string
-}
-
-export interface Battle {
-  id: string
-  runId: string
-  externalPlayer: Turn
-  result?: Result
-  flippedReason?: string
-  flippedBy?: Turn
-  type: CaseType
-  history: TicTacToeState[]
-  score?: number
-  clock: number
-}
-
-export interface ConcludeRequest {
-  runId: string
-}
-
-export interface Move {
-  id: string
-  battleId: string
-  by: Turn
-  action: TicTacToeAction
-  elapsed: number
-}
-
-export enum Result {
+export enum TicTacToeResult {
   O_WIN = 'O_WIN',
   X_WIN = 'X_WIN',
   DRAW = 'DRAW',

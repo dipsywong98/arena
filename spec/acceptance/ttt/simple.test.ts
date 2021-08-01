@@ -1,5 +1,5 @@
 import { abAgent } from '../../../src/ttt/agent'
-import { CaseType } from '../../../src/ttt/types'
+import { TicTacToeCaseType } from '../../../src/ttt/types'
 import {
   autoPlay,
   expectFlipTable,
@@ -42,13 +42,13 @@ describe('ttt-simple', () => {
 
   it('gives me my position when start game', async () => {
     return startBattle('tic-tac-toe',
-      CaseType.BASE_AI_O,
+      TicTacToeCaseType.BASE_AI_O,
       listenEvent(), expectGameStart('X'))
   })
 
   it('can receive ai movement', () => {
     return startBattle('tic-tac-toe',
-      CaseType.BASE_AI_O,
+      TicTacToeCaseType.BASE_AI_O,
       listenEvent(),
       expectGameStart('X'),
       expectPutSymbol(0, 0, 'O'))
@@ -56,7 +56,7 @@ describe('ttt-simple', () => {
 
   it('can react to player movement', () => {
     return startBattle('tic-tac-toe',
-      CaseType.BASE_AI_O,
+      TicTacToeCaseType.BASE_AI_O,
       listenEvent(),
       expectGameStart('X'),
       expectPutSymbol(0, 0, 'O'),
@@ -71,7 +71,7 @@ describe('ttt-simple', () => {
     // - - X
     return startBattle(
       'tic-tac-toe',
-      CaseType.BASE_AI_O,
+      TicTacToeCaseType.BASE_AI_O,
       listenEvent(),
       ...winSequence
     )
@@ -82,7 +82,7 @@ describe('ttt-simple', () => {
     // - - X
     // - - X
     return startBattle('tic-tac-toe',
-      CaseType.BASE_AI_O,
+      TicTacToeCaseType.BASE_AI_O,
       listenEvent(),
       expectGameStart('X'),
       expectPutSymbol(0, 0, 'O'),
@@ -100,7 +100,7 @@ describe('ttt-simple', () => {
     // X X O
     // O O X
     // X O O
-    return startBattle('tic-tac-toe', CaseType.BASE_AI_X,
+    return startBattle('tic-tac-toe', TicTacToeCaseType.BASE_AI_X,
       listenEvent(),
       expectGameStart('O'),
       putSymbol(2, 0),
@@ -123,7 +123,7 @@ describe('ttt-simple', () => {
 
   it('flips when player X play before AI O', () => {
     return startBattle('tic-tac-toe',
-      CaseType.BASE_AI_O, putSymbol(1, 2),
+      TicTacToeCaseType.BASE_AI_O, putSymbol(1, 2),
       listenEvent(),
       expectGameStart('X'),
       viewBattle(battle => {
@@ -135,7 +135,7 @@ describe('ttt-simple', () => {
 
   it('flips when player X flipped randomly', () => {
     return startBattle('tic-tac-toe',
-      CaseType.BASE_AI_O,
+      TicTacToeCaseType.BASE_AI_O,
       listenEvent(),
       expectGameStart('X'),
       receiveEvent(),
@@ -151,7 +151,7 @@ describe('ttt-simple', () => {
 
   it('flips when player X put at occupied position', () => {
     return startBattle('tic-tac-toe',
-      CaseType.BASE_AI_O,
+      TicTacToeCaseType.BASE_AI_O,
       listenEvent(),
       expectGameStart('X'),
       expectPutSymbol(0, 0, 'O'),
@@ -167,7 +167,7 @@ describe('ttt-simple', () => {
 
   it('flips when player X put outside of the board', () => {
     return startBattle('tic-tac-toe',
-      CaseType.BASE_AI_O,
+      TicTacToeCaseType.BASE_AI_O,
       listenEvent(),
       expectGameStart('X'),
       expectPutSymbol(0, 0, 'O'),
@@ -211,7 +211,7 @@ describe('ttt-simple', () => {
 
   it('autoplay', () => {
     return startBattle('tic-tac-toe',
-      CaseType.BASE_AI_O,
+      TicTacToeCaseType.BASE_AI_O,
       listenEvent(),
       autoPlay({init: initState, apply: applyAction, agent: abAgent}),
       viewBattle(battle => {

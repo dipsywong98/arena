@@ -1,15 +1,15 @@
-import { CaseType, isCaseType, Run } from './types'
+import { isCaseType, QuoridorCaseType } from './types'
 import { setBattle, setRun } from './store'
 import { pubRedis } from '../common/redis'
 import axios from 'axios'
 import { config } from './config'
 import { v4 } from 'uuid'
 import { shuffle } from '../common/shuffle'
-import { EvaluatePayload } from '../common/types'
+import { EvaluatePayload, Run } from '../common/types'
 
 export const generateBattlesForGrading = async (
   runId: string,
-  type?: CaseType
+  type?: QuoridorCaseType
 ): Promise<string[]> => {
   return Promise.all(
     Object.entries(type !== undefined ? { [type]: config[type] } : config)
@@ -17,7 +17,7 @@ export const generateBattlesForGrading = async (
         const id = v4()
         await setBattle(pubRedis, {
           ...initialStateGenerator(id, runId),
-          type: type as CaseType
+          type: type as QuoridorCaseType
         })
         return id
       }))

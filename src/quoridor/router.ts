@@ -8,7 +8,7 @@ import {
   timerReset
 } from './store'
 import { v4 } from 'uuid'
-import { ActionType, Move } from './types'
+import { QuoridorActionType, QuoridorMove } from './types'
 import logger from '../common/logger'
 import redis, { pubRedis, subRedis } from '../common/redis'
 import { quoridorMoveQueue } from './queues'
@@ -68,7 +68,7 @@ quoridorRouter.get('/start/:battleId', async (req, res) => {
     }
   })
   await quoridorMoveQueue.add(moveId, {
-    action: { type: ActionType.START_GAME },
+    action: { type: QuoridorActionType.START_GAME },
     battleId,
     by: battle.externalPlayer,
     id: moveId,
@@ -97,7 +97,7 @@ quoridorRouter.post('/play/:battleId', async (req, res) => {
   await setBattle(redis, battle)
   const { x, y, action } = req.body
   const moveId = v4()
-  const move: Move = {
+  const move: QuoridorMove = {
     id: moveId,
     battleId,
     action: { type: action, x, y },

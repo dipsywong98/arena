@@ -1,13 +1,14 @@
 import { Queue, Worker } from 'bullmq'
 import redis from '../common/redis'
-import { ConcludeRequest, Move } from './types'
+import { TicTacToeMove } from './types'
 import { processConclude } from './processConclude'
 import { processMove } from './processMove'
+import { ConcludeRequest } from '../common/types'
 
 // Create a new connection in every instance
-export const moveQueue = new Queue<Move>('moveQueue', { connection: redis })
+export const moveQueue = new Queue<TicTacToeMove>('moveQueue', { connection: redis })
 
-export const moveWorker = new Worker<Move>('moveQueue', async (job) => {
+export const moveWorker = new Worker<TicTacToeMove>('moveQueue', async (job) => {
   const move = job.data
   return await processMove(move)
 }, { connection: redis })

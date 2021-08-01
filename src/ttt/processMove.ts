@@ -1,7 +1,15 @@
 import produce from 'immer'
 import { andThen, last, pipe } from 'ramda'
-import { Battle, CaseType, Move, Result, TicTacToeAction, TicTacToeActionType, Turn } from './types'
-import { applyAction, opposite, getResult } from './common'
+import {
+  TicTacToeAction,
+  TicTacToeActionType,
+  TicTacToeBattle,
+  TicTacToeCaseType,
+  TicTacToeMove,
+  TicTacToeResult,
+  TicTacToeTurn
+} from './types'
+import { applyAction, getResult, opposite } from './common'
 import { getBattle, publishMessage, setBattle } from './store'
 import { Redis } from 'ioredis'
 import { concludeQueue } from './queues'
@@ -10,21 +18,21 @@ import redis from '../common/redis'
 import logger from '../common/logger'
 import { config } from './config'
 
-export const playerWin = (battle: Battle) => {
-  if (battle.result === Result.X_WIN) {
-    return battle.externalPlayer === Turn.X
+export const playerWin = (battle: TicTacToeBattle) => {
+  if (battle.result === TicTacToeResult.X_WIN) {
+    return battle.externalPlayer === TicTacToeTurn.X
   }
-  if (battle.result === Result.O_WIN) {
-    return battle.externalPlayer === Turn.O
+  if (battle.result === TicTacToeResult.O_WIN) {
+    return battle.externalPlayer === TicTacToeTurn.O
   }
   return false
 }
 
 interface ProcessMoveContext {
   redis: Redis
-  battle: Battle
+  battle: TicTacToeBattle
   input: {
-    move: Move
+    move: TicTacToeMove
   }
   output: {
     errors: string[]
@@ -91,7 +99,7 @@ export const handlePutSymbol = (ctx: ProcessMoveContext): ProcessMoveContext => 
 }
 export const checkEndGame = (ctx: ProcessMoveContext): ProcessMoveContext => produce(ctx, draft => {
   if (ctx.input.move.action.type === TicTacToeActionType.FLIP_TABLE) {
-    draft.battle.result = Result.FLIPPED
+    draft.battle.result = TicTacToeResult.FLIPPED
     return draft
   } else {
     const state = last(draft.battle.history)
@@ -109,7 +117,7 @@ export const agentMove = (ctx: ProcessMoveContext): ProcessMoveContext => produc
   if (state !== undefined
     && (
       state.turn === opposite(draft.battle.externalPlayer)
-      || draft.battle.type === CaseType.C_AI_X_FIRST
+      || draft.battle.type === TicTacToeCaseType.C_AI_X_FIRST
     )
     && draft.battle.result === undefined) {
     let action = config[draft.battle.type].agent(state)
@@ -127,7 +135,7 @@ export const agentMove = (ctx: ProcessMoveContext): ProcessMoveContext => produc
 const calculateScore = (ctx: ProcessMoveContext): ProcessMoveContext => produce(ctx, draft => {
   if (draft.output.errors.length > 0) {
     draft.battle.score = 0
-    draft.battle.result = Result.FLIPPED
+    draft.battle.result = TicTacToeResult.FLIPPED
     draft.battle.flippedReason = draft.output.errors.join('\n')
     draft.battle.flippedBy = opposite(draft.battle.externalPlayer)
   } else if (draft.battle.result !== undefined) {
@@ -160,16 +168,16 @@ export const publishOutput = async (ctx: ProcessMoveContext): Promise<ProcessMov
           } : undefined
         })
       }
-      if (draft.battle.result !== undefined && draft.battle.result !== Result.FLIPPED) {
+      if (draft.battle.result !== undefined && draft.battle.result !== TicTacToeResult.FLIPPED) {
         const message: Record<string, unknown> = {}
         switch (draft.battle.result) {
-          case Result.O_WIN:
+          case TicTacToeResult.O_WIN:
             message.winner = 'O'
             break
-          case Result.X_WIN:
+          case TicTacToeResult.X_WIN:
             message.winner = 'X'
             break
-          case Result.DRAW:
+          case TicTacToeResult.DRAW:
             message.winner = 'DRAW'
             break
         }
@@ -191,7 +199,7 @@ const handleError = (e: Error) => (ctx: ProcessMoveContext): ProcessMoveContext 
     return draft
   })
 }
-export const processMove = async (move: Move): Promise<unknown> => {
+export const processMove = async (move: TicTacToeMove): Promise<unknown> => {
   const battle = await getBattle(redis, move.battleId)
   if (battle !== null) {
     if (battle.result === undefined) {

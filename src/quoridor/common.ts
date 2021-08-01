@@ -1,6 +1,16 @@
 import produce from 'immer'
 import PriorityQueue from 'priorityqueuejs'
-import { Action, ActionType, Coord, Node, Orientation, Player, Result, State, Turn } from './types'
+import {
+  Coord,
+  Node,
+  Orientation,
+  Player,
+  QActionInternal,
+  QuoridorActionType,
+  QuoridorResult,
+  QuoridorState,
+  QuoridorTurn
+} from './types'
 
 export const SIZE = 9
 export const INITIAL_WALLS = 10
@@ -17,35 +27,37 @@ export const make2dArray = <T> (size: number, value: T): T[][] => {
     .map(() => Array(size).fill(value) as T[])
 }
 
-export const initState = (): State => ({
+export const initState = (): QuoridorState => ({
   walls: make2dArray(SIZE * 2 + 1, false),
   players: {
-    [Turn.WHITE]: initPlayer(0),
-    [Turn.BLACK]: initPlayer(SIZE - 1)
+    [QuoridorTurn.WHITE]: initPlayer(0),
+    [QuoridorTurn.BLACK]: initPlayer(SIZE - 1)
   },
-  turn: Turn.BLACK,
-  expectFlip: false
+  turn: QuoridorTurn.BLACK,
+  expectFlip: false,
+  createdAt: Date.now()
 })
 
-export const putWall = (x: number, y: number, o: Orientation) => (state: State): State =>
-  produce(state, draft => {
-    if (o === Orientation.HORIZONTAL) {
-      draft.walls[2 * y + 1][2 * x]
-        = draft.walls[2 * y + 1][2 * x + 1]
-        = draft.walls[2 * y + 1][2 * x + 2]
-        = true
-    } else {
-      draft.walls[2 * y][2 * x + 1]
-        = draft.walls[2 * y + 1][2 * x + 1]
-        = draft.walls[2 * y + 2][2 * x + 1]
-        = true
-    }
-    draft.players[draft.turn].walls--
-    draft.turn = opposite(draft.turn)
-    return draft
-  })
-
-export const movePawn = (x: number, y: number) => (state: State) =>
+export const putWall = (x: number, y: number, o: Orientation) => (
+  (state: QuoridorState): QuoridorState =>
+    produce(state, draft => {
+      if (o === Orientation.HORIZONTAL) {
+        draft.walls[2 * y + 1][2 * x]
+          = draft.walls[2 * y + 1][2 * x + 1]
+          = draft.walls[2 * y + 1][2 * x + 2]
+          = true
+      } else {
+        draft.walls[2 * y][2 * x + 1]
+          = draft.walls[2 * y + 1][2 * x + 1]
+          = draft.walls[2 * y + 2][2 * x + 1]
+          = true
+      }
+      draft.players[draft.turn].walls--
+      draft.turn = opposite(draft.turn)
+      return draft
+    })
+)
+export const movePawn = (x: number, y: number) => (state: QuoridorState) =>
   produce(state, draft => {
     draft.players[draft.turn].x = x
     draft.players[draft.turn].y = y
@@ -53,7 +65,7 @@ export const movePawn = (x: number, y: number) => (state: State) =>
     return draft
   })
 
-export const applyAction = (state: State, action: Action): State => {
+export const applyAction = (state: QuoridorState, action: QActionInternal): QuoridorState => {
   if (action.o !== undefined) {
     return putWall(action.x, action.y, action.o)(state)
   } else {
@@ -61,19 +73,23 @@ export const applyAction = (state: State, action: Action): State => {
   }
 }
 
-export const isEndGame = (state: State) => {
+export const isEndGame = (state: QuoridorState) => {
   const { y } = state.players[state.turn]
   const enemy = state.players[opposite(state.turn)]
-  const targetYp = state.turn === Turn.BLACK ? 0 : SIZE - 1
+  const targetYp = state.turn === QuoridorTurn.BLACK ? 0 : SIZE - 1
   const targetYq = SIZE - 1 - targetYp
   return y === targetYp || enemy.y === targetYq
 }
 
-export const canPutWall = (state: State, x: number, y: number, o: Orientation): boolean => {
+export const canPutWall = (state: QuoridorState, x: number, y: number, o: Orientation): boolean => {
   return isWallNotOverlap(state, x, y, o) && isWallHavePath(state, x, y, o)
 }
 
-export const isWallNotOverlap = (state: State, x: number, y: number, o: Orientation): boolean => {
+export const isWallNotOverlap = (
+  state: QuoridorState,
+  x: number,
+  y: number,
+  o: Orientation): boolean => {
   //within placeable range
   if (x < 0 || y < 0) {
     return false
@@ -112,14 +128,21 @@ export const isWallNotOverlap = (state: State, x: number, y: number, o: Orientat
   return true
 }
 
-export const isWallHavePath = (state: State, x: number, y: number, o: Orientation): boolean => {
+export const isWallHavePath = (
+  state: QuoridorState,
+  x: number,
+  y: number,
+  o: Orientation
+): boolean => {
   const nextState = putWall(x, y, o)(state)
-  return pathLength(nextState, Turn.WHITE) >= 0 && pathLength(nextState, Turn.WHITE) >= 0
+  const whiteHavePath = pathLength(nextState, QuoridorTurn.WHITE) >= 0
+  const blackHavePath = pathLength(nextState, QuoridorTurn.BLACK) >= 0
+  return whiteHavePath && blackHavePath
 }
 
-export const pathLength = (state: State, turn: Turn): number => {
+export const pathLength = (state: QuoridorState, turn: QuoridorTurn): number => {
   const { x: sourceX, y: sourceY } = state.players[turn]
-  const targetY = turn === Turn.BLACK ? 0 : SIZE - 1
+  const targetY = turn === QuoridorTurn.BLACK ? 0 : SIZE - 1
   const queue = new PriorityQueue<Node>((a, b) => {
     return (b.sourceDistance + b.targetDistance) - (a.sourceDistance + a.targetDistance)
   })
@@ -155,9 +178,14 @@ export const pathLength = (state: State, turn: Turn): number => {
 export const dx = [0, 1, 0, -1]
 export const dy = [-1, 0, 1, 0]
 
-export const opposite = (turn: Turn) => turn === Turn.BLACK ? Turn.WHITE : Turn.BLACK
+export const opposite = (turn: QuoridorTurn) => (
+  turn === QuoridorTurn.BLACK ? QuoridorTurn.WHITE : QuoridorTurn.BLACK
+)
 
-export const getWalkableNeighborCoords = (state: State, turn: Turn, source?: Coord): Coord[] => {
+export const getWalkableNeighborCoords = (
+  state: QuoridorState,
+  turn: QuoridorTurn,
+  source?: Coord): Coord[] => {
   const { x, y } = source ?? state.players[turn]
   const nodes: Array<Coord> = []
   const opponent = state.players[opposite(turn)]
@@ -177,7 +205,12 @@ export const getWalkableNeighborCoords = (state: State, turn: Turn, source?: Coo
   return nodes
 }
 
-export const isWalkable = (state: State, x0: number, y0: number, x1: number, y1: number) => {
+export const isWalkable = (
+  state: QuoridorState,
+  x0: number,
+  y0: number,
+  x1: number,
+  y1: number) => {
   if (x1 < 0 || y1 < 0 || x1 >= SIZE || y1 >= SIZE) {
     return false
   }
@@ -191,7 +224,7 @@ export const isWalkable = (state: State, x0: number, y0: number, x1: number, y1:
 }
 
 export const pushIfWalkable = (
-  mutableArray: Coord[], state: State, x0: number, y0: number, x1: number, y1: number
+  mutableArray: Coord[], state: QuoridorState, x0: number, y0: number, x1: number, y1: number
 ) => {
   if (isWalkable(state, x0, y0, x1, y1)) {
     mutableArray.push({ x: x1, y: y1 })
@@ -200,27 +233,27 @@ export const pushIfWalkable = (
   return false
 }
 
-export const allPossibleWalls = (state: State): Action[] => {
+export const allPossibleWalls = (state: QuoridorState): QActionInternal[] => {
   const a = []
-  for(let y = 0; y < SIZE - 1; y++) {
-    for(let x= 0; x < SIZE - 1; x++) {
+  for (let y = 0; y < SIZE - 1; y++) {
+    for (let x = 0; x < SIZE - 1; x++) {
       if (canPutWall(state, x, y, Orientation.HORIZONTAL)) {
-        a.push({x,y,o:Orientation.HORIZONTAL,type: ActionType.PUT_WALL})
+        a.push({ x, y, o: Orientation.HORIZONTAL, type: QuoridorActionType.PUT_WALL })
       }
       if (canPutWall(state, x, y, Orientation.VERTICAL)) {
-        a.push({x,y,o:Orientation.VERTICAL,type: ActionType.PUT_WALL})
+        a.push({ x, y, o: Orientation.VERTICAL, type: QuoridorActionType.PUT_WALL })
       }
     }
   }
   return a
 }
 
-export const getResult = (state: State): Result | undefined => {
-  if (state.players[Turn.BLACK].y === 0) {
-    return Result.BLACK_WIN
+export const getResult = (state: QuoridorState): QuoridorResult | undefined => {
+  if (state.players[QuoridorTurn.BLACK].y === 0) {
+    return QuoridorResult.BLACK_WIN
   }
-  if (state.players[Turn.WHITE].y === SIZE - 1) {
-    return Result.WHITE_WIN
+  if (state.players[QuoridorTurn.WHITE].y === SIZE - 1) {
+    return QuoridorResult.WHITE_WIN
   }
   return undefined
 }

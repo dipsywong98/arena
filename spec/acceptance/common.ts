@@ -1,14 +1,14 @@
-import { Battle, TicTacToeAction } from '../../src/ttt/types'
+import { TicTacToeAction, TicTacToeBattle } from '../../src/ttt/types'
 import axios from 'axios'
 import arenaApp from '../../src/Server'
 import * as http from 'http'
 import { allRedis } from '../../src/common/redis'
-import { moveWorker, concludeWorker } from '../../src/ttt/queues'
+import { concludeWorker, moveWorker } from '../../src/ttt/queues'
 import stoppable from 'stoppable'
 import { v4 } from 'uuid'
 import { CallbackPayload, EvaluatePayload } from '../../src/common/types'
 import { quoridorConcludeWorker, quoridorMoveWorker } from '../../src/quoridor/queues'
-import { QuoridorActionPayload } from '../../src/quoridor/types'
+import { QuoridorAction } from '../../src/quoridor/types'
 
 type Event = Record<string, unknown>
 type OnEvent = (event: Event, ctx: PlayContext) => void
@@ -163,10 +163,11 @@ export const flipTable = (): Step => play({ action: 'flipTable' })
 
 export const movePawn = (x: number, y: number): Step => play({ action: 'move', x, y })
 
-export const viewBattle = (cb: (battle: Battle) => unknown): Step => async (ctx: PlayContext) => {
-  const battle = await axios.get(`/${ctx.game}/view/${ctx.battleId}`)
-  cb(battle.data)
-}
+export const viewBattle = (cb: (battle: TicTacToeBattle) => unknown): Step => (
+  async (ctx: PlayContext) => {
+    const battle = await axios.get(`/${ctx.game}/view/${ctx.battleId}`)
+    cb(battle.data)
+  })
 
 export const setNow = (ms: number): Step => async () => {
   Date.now = jest.fn(() => ms)
@@ -214,7 +215,7 @@ export const startRun = async (game: string, stepsForCases: Step[][]): Promise<v
   await Promise.all(promises)
 }
 
-export const autoPlay = <S, A extends TicTacToeAction | QuoridorActionPayload> (
+export const autoPlay = <S, A extends TicTacToeAction | QuoridorAction> (
   { init, apply, agent }: {
     init: () => S, apply: (s: S, a: A) => S, agent: (s: S) => A
   }): Step =>

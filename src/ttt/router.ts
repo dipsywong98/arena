@@ -8,7 +8,7 @@ import {
   timerReset
 } from './store'
 import { v4 } from 'uuid'
-import { Move, TicTacToeActionType } from './types'
+import { TicTacToeActionType, TicTacToeMove } from './types'
 import logger from '../common/logger'
 import redis, { pubRedis, subRedis } from '../common/redis'
 import { moveQueue } from './queues'
@@ -97,7 +97,7 @@ ticTacToeRouter.post('/play/:battleId', async (req, res) => {
   await setBattle(redis, battle)
   const { x, y, action } = req.body
   const moveId = v4()
-  const move: Move = {
+  const move: TicTacToeMove = {
     id: moveId,
     battleId,
     action: { type: action, x, y },

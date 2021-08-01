@@ -1,13 +1,20 @@
 import {
-  autoPlay, expectFlipTable,
-  expectGameStart, expectTotalScore, flipTable,
-  listenEvent, movePawn,
+  autoPlay,
+  expectFlipTable,
+  expectGameStart,
+  expectPawnMove,
+  expectTotalScore,
+  flipTable,
+  listenEvent,
+  movePawn,
   receiveEvent,
   requestForGrade,
-  startBattle, viewBattle, expectPawnMove, startRun
+  startBattle,
+  startRun,
+  viewBattle
 } from '../common'
-import { CaseType } from '../../../src/quoridor/types'
-import { initState, applyAction } from '../../../src/quoridor/common'
+import { QuoridorCaseType } from '../../../src/quoridor/types'
+import { applyAction, initState } from '../../../src/quoridor/common'
 import { moveOnlyAgent } from '../../../src/quoridor/agent'
 
 describe('quoridor-simple', () => {
@@ -18,14 +25,14 @@ describe('quoridor-simple', () => {
 
   it('gives me my position when start game', async () => {
     return startBattle('quoridor',
-      CaseType.BASE_AI_WHITE,
+      QuoridorCaseType.BASE_AI_WHITE,
       listenEvent(),
       expectGameStart('black'))
   })
 
   it('can receive AI movement', async () => {
     return startBattle('quoridor',
-      CaseType.BASE_AI_BLACK,
+      QuoridorCaseType.BASE_AI_BLACK,
       listenEvent(),
       expectGameStart('white'),
       receiveEvent(event => {
@@ -36,7 +43,7 @@ describe('quoridor-simple', () => {
 
   it('can react to player movement', async () => {
     return startBattle('quoridor',
-      CaseType.BASE_AI_BLACK,
+      QuoridorCaseType.BASE_AI_BLACK,
       listenEvent(),
       expectGameStart('white'),
       receiveEvent(event => {
@@ -47,7 +54,7 @@ describe('quoridor-simple', () => {
 
   it('autoplay', () => {
     return startBattle('quoridor',
-      CaseType.BASE_AI_WHITE,
+      QuoridorCaseType.BASE_AI_WHITE,
       listenEvent(),
       autoPlay({ init: initState, apply: applyAction, agent: moveOnlyAgent }),
       viewBattle(battle => {
@@ -59,7 +66,7 @@ describe('quoridor-simple', () => {
 
   it('flips when player white play before AI black', () => {
     return startBattle('quoridor',
-      CaseType.BASE_AI_BLACK,
+      QuoridorCaseType.BASE_AI_BLACK,
       movePawn(4, 7),
       listenEvent(),
       expectGameStart('white'),
@@ -72,7 +79,7 @@ describe('quoridor-simple', () => {
 
   it('flips when player X flipped randomly', () => {
     return startBattle('quoridor',
-      CaseType.BASE_AI_WHITE,
+      QuoridorCaseType.BASE_AI_WHITE,
       listenEvent(),
       expectGameStart('black'),
       flipTable(),
@@ -87,7 +94,7 @@ describe('quoridor-simple', () => {
 
   it('flips when player move to invalid position', () => {
     return startBattle('quoridor',
-      CaseType.BASE_AI_WHITE,
+      QuoridorCaseType.BASE_AI_WHITE,
       listenEvent(),
       expectGameStart('black'),
       movePawn(5, 0),

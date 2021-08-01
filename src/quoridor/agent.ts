@@ -1,4 +1,4 @@
-import { Action, ActionType, State, Turn } from './types'
+import { QActionInternal, QuoridorActionType, QuoridorState, QuoridorTurn } from './types'
 import {
   allPossibleWalls,
   applyAction,
@@ -12,10 +12,10 @@ import { alphaBetaTree } from '../common/AlphaBetaTree'
 import logger from '../common/logger'
 import { shuffle } from '../common/shuffle'
 
-const scorer = (me: Turn) => (state: State): number => {
+const scorer = (me: QuoridorTurn) => (state: QuoridorState): number => {
   const { y } = state.players[state.turn]
   const enemy = state.players[opposite(state.turn)]
-  const targetYp = me === Turn.BLACK ? 0 : SIZE - 1
+  const targetYp = me === QuoridorTurn.BLACK ? 0 : SIZE - 1
   const targetYq = SIZE - 1 - targetYp
   if (y === targetYp) {
     return 1000
@@ -39,24 +39,24 @@ const scorer = (me: Turn) => (state: State): number => {
   return (plmax - plp) / plmax - (plmax - plq) / plmax
 }
 
-const generator = (state: State): Action[] => {
+const generator = (state: QuoridorState): QActionInternal[] => {
   const neighbors = getWalkableNeighborCoords(state, state.turn)
-    .map(({x, y}) => ({x,y,type: ActionType.MOVE}))
+    .map(({x, y}) => ({x,y,type: QuoridorActionType.MOVE}))
   const walls = state.players[state.turn].walls > 0 ? shuffle(allPossibleWalls(state)) : []
   return neighbors.concat(walls)
 }
 
-const moveOnlyGenerator = (state: State): Action[] => {
+const moveOnlyGenerator = (state: QuoridorState): QActionInternal[] => {
   return getWalkableNeighborCoords(state, state.turn)
-    .map(({ x, y }) => ({ x, y, type: ActionType.MOVE }))
+    .map(({ x, y }) => ({ x, y, type: QuoridorActionType.MOVE }))
 }
 
-export const baseAgent = (state: State): Action => {
+export const baseAgent = (state: QuoridorState): QActionInternal => {
   const moves = generator(state)
   return moves[Math.floor(Math.random() * moves.length)]
 }
 
-export const abAgent = (state: State): Action => {
+export const abAgent = (state: QuoridorState): QActionInternal => {
   try {
     const alphaBetaTreeResult = alphaBetaTree({
       state,
@@ -76,7 +76,7 @@ export const abAgent = (state: State): Action => {
   }
 }
 
-export const moveOnlyAgent = (state: State): Action => {
+export const moveOnlyAgent = (state: QuoridorState): QActionInternal => {
   try {
     const alphaBetaTreeResult = alphaBetaTree({
       state,

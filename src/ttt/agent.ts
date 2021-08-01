@@ -1,8 +1,8 @@
 import { alphaBetaTree } from '../common/AlphaBetaTree'
 import { applyAction, isEndGame } from './common'
-import { TicTacToeAction, TicTacToeActionType, TicTacToeState, Turn } from './types'
+import { TicTacToeAction, TicTacToeActionType, TicTacToeState, TicTacToeTurn } from './types'
 
-const scorer = (me: Turn) => (state: TicTacToeState): number => {
+const scorer = (me: TicTacToeTurn) => (state: TicTacToeState): number => {
   for (let i = 0; i < 3; i++) {
     if (state.board[i][0] === state.board[i][1] && state.board[i][1] === state.board[i][2]) {
       return state.board[i][0] === me ? 100 : -100

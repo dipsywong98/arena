@@ -1,5 +1,6 @@
 import { Redis } from 'ioredis'
-import { Battle, Run } from './types'
+import { QuoridorBattle } from './types'
+import { Run } from '../common/types'
 
 const makeRedisBattleId = (battleId: string) => {
   return `arena:quoridor:battle:${battleId}`
@@ -17,15 +18,15 @@ const makeRedisTimerKey = (battleId: string) => {
   return `arena:quoridor:timer:${battleId}`
 }
 
-export const getBattle = async (redis: Redis, battleId: string): Promise<Battle | null> => {
+export const getBattle = async (redis: Redis, battleId: string): Promise<QuoridorBattle | null> => {
   const text = await redis.get(makeRedisBattleId(battleId))
   if (text === null) {
     return null
   }
-  return JSON.parse(text) as Battle
+  return JSON.parse(text) as QuoridorBattle
 }
 
-export const setBattle = async (redis: Redis, battle: Battle): Promise<void> => {
+export const setBattle = async (redis: Redis, battle: QuoridorBattle): Promise<void> => {
   await redis.set(
     makeRedisBattleId(battle.id),
     JSON.stringify(battle),

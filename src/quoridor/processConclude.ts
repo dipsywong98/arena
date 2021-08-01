@@ -1,8 +1,9 @@
 import { getBattle, getRun, setRun } from './store'
-import { Battle, ConcludeRequest } from './types'
+import { QuoridorBattle } from './types'
 import redis from '../common/redis'
 import { difference } from 'ramda'
 import { reportScore } from '../common/reportScore'
+import { ConcludeRequest } from '../common/types'
 
 export const processConclude = async (concludeRequest: ConcludeRequest) => {
   const { runId } = concludeRequest
@@ -15,7 +16,7 @@ export const processConclude = async (concludeRequest: ConcludeRequest) => {
   }
   const battles = (await Promise.all(
     run.battleIds.map(battleId => getBattle(redis, battleId))
-  )).filter(battle => battle?.score !== undefined) as Array<Battle & { score: number }>
+  )).filter(battle => battle?.score !== undefined) as Array<QuoridorBattle & { score: number }>
   if (battles.length !== run.battleIds.length) {
     const done = battles.map(b => b.id)
     return {

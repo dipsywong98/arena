@@ -8,13 +8,13 @@ import {
   startBattle,
   viewBattle
 } from '../common'
-import { CaseType } from '../../../src/ttt/types'
+import { TicTacToeCaseType } from '../../../src/ttt/types'
 import { INITIAL_CLOCK_MS, TURN_ADD_MS } from '../../../src/ttt/config'
 
 describe('ttt-timer', () => {
   it('initially is INITIAL_CLOCK_MS', () => {
     return startBattle('tic-tac-toe',
-      CaseType.BASE_AI_O,
+      TicTacToeCaseType.BASE_AI_O,
       listenEvent(),
       viewBattle(battle => {
         expect(battle.clock).toEqual(INITIAL_CLOCK_MS)
@@ -22,7 +22,7 @@ describe('ttt-timer', () => {
   })
   it('advance by TURN_ADD_MS for each move', () => {
     return startBattle('tic-tac-toe',
-      CaseType.BASE_AI_O, setNow(100000),
+      TicTacToeCaseType.BASE_AI_O, setNow(100000),
       listenEvent(),
       expectGameStart('X'),
       expectPutSymbol(0, 0, 'O'),
@@ -41,7 +41,7 @@ describe('ttt-timer', () => {
   })
   it('flipTable when time limit exceed', () => {
     return startBattle('tic-tac-toe',
-      CaseType.BASE_AI_O, setNow(100000),
+      TicTacToeCaseType.BASE_AI_O, setNow(100000),
       listenEvent(),
       expectGameStart('X'),
       expectPutSymbol(0, 0, 'O'),

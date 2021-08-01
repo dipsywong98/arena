@@ -1,12 +1,12 @@
 import { opposite } from './common'
 import abAgent, { baseAgent } from './agent'
 import {
-  Battle,
-  CaseType,
-  Result,
-  TestCase,
   TicTacToeActionType,
-  Turn
+  TicTacToeBattle,
+  TicTacToeCaseType,
+  TicTacToeResult,
+  TicTacToeTestCase,
+  TicTacToeTurn
 } from './types'
 import { playerWin } from './processMove'
 
@@ -15,14 +15,14 @@ export const INITIAL_CLOCK_MS = 18 * 1000
 export const initState = () => {
   return {
     expectFlip: false,
-    turn: Turn.O,
+    turn: TicTacToeTurn.O,
     board: [[null, null, null], [null, null, null], [null, null, null]],
     createdAt: Date.now()
   }
 }
 
-const makeInitialStateGenerator = (aiTurn: Turn) =>
-  (battleId: string, runId: string): Omit<Battle, 'type'> => ({
+const makeInitialStateGenerator = (aiTurn: TicTacToeTurn) =>
+  (battleId: string, runId: string): Omit<TicTacToeBattle, 'type'> => ({
     id: battleId,
     runId,
     externalPlayer: opposite(aiTurn),
@@ -32,37 +32,37 @@ const makeInitialStateGenerator = (aiTurn: Turn) =>
 
 export const TURN_ADD_MS = 2 * 1000
 
-export const config: Record<CaseType, TestCase> = Object.freeze({
-  [CaseType.BASE_AI_O]: {
-    initialStateGenerator: makeInitialStateGenerator(Turn.O),
+export const config: Record<TicTacToeCaseType, TicTacToeTestCase> = Object.freeze({
+  [TicTacToeCaseType.BASE_AI_O]: {
+    initialStateGenerator: makeInitialStateGenerator(TicTacToeTurn.O),
     agent: baseAgent,
     score: (battle) => {
       return playerWin(battle) ? 3 : 0
     }
   },
-  [CaseType.BASE_AI_X]: {
-    initialStateGenerator: makeInitialStateGenerator(Turn.X),
+  [TicTacToeCaseType.BASE_AI_X]: {
+    initialStateGenerator: makeInitialStateGenerator(TicTacToeTurn.X),
     agent: baseAgent,
     score: (battle) => {
       return playerWin(battle) ? 3 : 0
     }
   },
-  [CaseType.AB_AI_O]: {
-    initialStateGenerator: makeInitialStateGenerator(Turn.O),
+  [TicTacToeCaseType.AB_AI_O]: {
+    initialStateGenerator: makeInitialStateGenerator(TicTacToeTurn.O),
     agent: abAgent,
     score: (battle) => {
-      return (playerWin(battle) || battle.result === Result.DRAW) ? 3 : 0
+      return (playerWin(battle) || battle.result === TicTacToeResult.DRAW) ? 3 : 0
     }
   },
-  [CaseType.AB_AI_X]: {
-    initialStateGenerator: makeInitialStateGenerator(Turn.X),
+  [TicTacToeCaseType.AB_AI_X]: {
+    initialStateGenerator: makeInitialStateGenerator(TicTacToeTurn.X),
     agent: abAgent,
     score: (battle) => {
-      return (playerWin(battle) || battle.result === Result.DRAW) ? 3 : 0
+      return (playerWin(battle) || battle.result === TicTacToeResult.DRAW) ? 3 : 0
     }
   },
-  [CaseType.C_AI_OUT_OF_BOUND]: {
-    initialStateGenerator: makeInitialStateGenerator(Turn.X),
+  [TicTacToeCaseType.C_AI_OUT_OF_BOUND]: {
+    initialStateGenerator: makeInitialStateGenerator(TicTacToeTurn.X),
     agent () {
       return {
         cheat: {
@@ -74,8 +74,8 @@ export const config: Record<CaseType, TestCase> = Object.freeze({
       return 1
     }
   },
-  [CaseType.C_AI_DUP]: {
-    initialStateGenerator: makeInitialStateGenerator(Turn.X),
+  [TicTacToeCaseType.C_AI_DUP]: {
+    initialStateGenerator: makeInitialStateGenerator(TicTacToeTurn.X),
     agent (state) {
       for (let y = 0; y < 3; y++) {
         for (let x = 0; x < 3; x++) {
@@ -94,8 +94,8 @@ export const config: Record<CaseType, TestCase> = Object.freeze({
       return 1
     }
   },
-  [CaseType.C_AI_X_FIRST]: {
-    initialStateGenerator: makeInitialStateGenerator(Turn.X),
+  [TicTacToeCaseType.C_AI_X_FIRST]: {
+    initialStateGenerator: makeInitialStateGenerator(TicTacToeTurn.X),
     agent: () => {
       return {
         cheat: {
@@ -107,8 +107,8 @@ export const config: Record<CaseType, TestCase> = Object.freeze({
       return 1
     }
   },
-  [CaseType.C_AI_TWICE_A_ROW]: {
-    initialStateGenerator: makeInitialStateGenerator(Turn.O),
+  [TicTacToeCaseType.C_AI_TWICE_A_ROW]: {
+    initialStateGenerator: makeInitialStateGenerator(TicTacToeTurn.O),
     agent (state) {
       if (state.board[0][0] !== null) {
         const points = [
