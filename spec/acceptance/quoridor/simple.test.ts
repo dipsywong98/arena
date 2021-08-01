@@ -14,7 +14,12 @@ import {
   viewBattle
 } from '../common'
 import { QuoridorCaseType } from '../../../src/quoridor/types'
-import { applyAction, externalizeAction, initState, internalizeAction } from '../../../src/quoridor/common'
+import {
+  applyAction,
+  externalizeAction,
+  initState,
+  internalizeAction
+} from '../../../src/quoridor/common'
 import { moveOnlyAgent } from '../../../src/quoridor/agent'
 
 const autoPlay1 = autoPlay({
