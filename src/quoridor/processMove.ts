@@ -10,7 +10,15 @@ import {
   QuoridorResult,
   QuoridorTurn
 } from './types'
-import { applyAction, canPutWall, getResult, getWalkableNeighborCoords, opposite } from './common'
+import {
+  applyAction,
+  canPutWall,
+  externalizeAction,
+  getResult,
+  getWalkableNeighborCoords,
+  internalizeAction,
+  opposite
+} from './common'
 import { getBattle, publishMessage, setBattle } from './store'
 import { Redis } from 'ioredis'
 import { quoridorConcludeQueue } from './queues'
@@ -20,11 +28,11 @@ import logger from '../common/logger'
 import { config } from './config'
 
 export const playerWin = (battle: QuoridorBattle) => {
-  if (battle.result === QuoridorResult.BLACK_WIN) {
-    return battle.externalPlayer === QuoridorTurn.BLACK
+  if (battle.result === QuoridorResult.FIRST_WIN) {
+    return battle.externalPlayer === QuoridorTurn.FIRST
   }
-  if (battle.result === QuoridorResult.WHITE_WIN) {
-    return battle.externalPlayer === QuoridorTurn.WHITE
+  if (battle.result === QuoridorResult.SECOND_WIN) {
+    return battle.externalPlayer === QuoridorTurn.SECOND
   }
   return false
 }
@@ -33,7 +41,8 @@ interface ProcessMoveContext {
   redis: Redis
   battle: QuoridorBattle
   input: {
-    move: QuoridorMove
+    action: QuoridorAction
+    by: QuoridorTurn
   }
   output: {
     errors: string[]
@@ -42,7 +51,7 @@ interface ProcessMoveContext {
 }
 
 export const validate = (ctx: ProcessMoveContext): ProcessMoveContext => produce(ctx, (draft) => {
-  const move = draft.input.move
+  const action = draft.input.action
   if (ctx.battle.clock < 0) {
     draft.output.errors.push('You ran out of time')
   }
@@ -50,27 +59,27 @@ export const validate = (ctx: ProcessMoveContext): ProcessMoveContext => produce
   if (state === undefined) {
     draft.output.errors.push('Battle has no history')
   } else {
-    if ([QuoridorActionType.MOVE, QuoridorActionType.PUT_WALL].includes(move.action.type)) {
+    if ([QuoridorActionType.MOVE, QuoridorActionType.PUT_WALL].includes(action.type)) {
       // check in handlePutSymbol or handlePutWall
-    } else if (move.action.type === QuoridorActionType.FLIP_TABLE) {
+    } else if (action.type === QuoridorActionType.FLIP_TABLE) {
       if (!state.expectFlip) {
         draft.output.errors.push(`You are not supposed to flip the table now`)
       }
-    } else if (move.action.type === QuoridorActionType.START_GAME) {
+    } else if (action.type === QuoridorActionType.START_GAME) {
       if (draft.battle.history.length !== 1) {
         draft.output.errors.push('game already started')
       }
     } else {
       draft.output.errors.push('unknown action type')
     }
-    if (state.expectFlip && move.action.type !== QuoridorActionType.FLIP_TABLE) {
+    if (state.expectFlip && action.type !== QuoridorActionType.FLIP_TABLE) {
       draft.output.errors.push('You should have flipped the table now')
     }
   }
   return draft
 })
 export const checkEndGame = (ctx: ProcessMoveContext): ProcessMoveContext => produce(ctx, draft => {
-  if (ctx.input.move.action.type === QuoridorActionType.FLIP_TABLE) {
+  if (ctx.input.action.type === QuoridorActionType.FLIP_TABLE) {
     draft.battle.result = QuoridorResult.FLIPPED
     return draft
   } else {
@@ -89,7 +98,7 @@ export const agentMove = (ctx: ProcessMoveContext): ProcessMoveContext => produc
   if (state !== undefined
     && (
       state.turn === opposite(draft.battle.externalPlayer)
-      || draft.battle.type === QuoridorCaseType.C_AI_WHITE_FIRST
+      || draft.battle.type === QuoridorCaseType.C_AI_SECOND_FIRST
     )
     && draft.battle.result === undefined) {
     let action = config[draft.battle.type].agent(state)
@@ -127,29 +136,23 @@ export const publishOutput = async (ctx: ProcessMoveContext): Promise<ProcessMov
     } else {
       await setBattle(draft.redis, draft.battle)
       if (draft.output.action) {
-        await publishMessage(draft.redis, draft.battle.id, {
-          player: opposite(draft.battle.externalPlayer),
-          action: draft.output.action.type,
-          x: draft.output.action.x,
-          y: draft.output.action.y,
-          o: draft.output.action.o,
-          action2: draft.output.action.action2 !== undefined ? {
-            player: opposite(draft.battle.externalPlayer),
-            action: draft.output.action.action2.type,
-            x: draft.output.action.action2.x,
-            y: draft.output.action.action2.y,
-            o: draft.output.action.o
-          } : undefined
-        })
+        await publishMessage(draft.redis, draft.battle.id,
+          externalizeAction(draft.output.action, opposite(draft.battle.externalPlayer), {
+            action2: draft.output.action.action2 !== undefined
+              ? externalizeAction(
+                draft.output.action.action2,
+                opposite(draft.battle.externalPlayer))
+              : undefined
+          }))
       }
       if (draft.battle.result !== undefined && draft.battle.result !== QuoridorResult.FLIPPED) {
         const message: Record<string, unknown> = {}
         switch (draft.battle.result) {
-          case QuoridorResult.WHITE_WIN:
-            message.winner = 'WHITE'
+          case QuoridorResult.SECOND_WIN:
+            message.winner = 'SECOND'
             break
-          case QuoridorResult.BLACK_WIN:
-            message.winner = 'BLACK'
+          case QuoridorResult.FIRST_WIN:
+            message.winner = 'FIRST'
             break
         }
         await publishMessage(draft.redis, draft.battle.id, message)
@@ -171,19 +174,19 @@ const handleError = (e: Error) => (ctx: ProcessMoveContext): ProcessMoveContext 
   })
 }
 export const handleMovePawn = (ctx: ProcessMoveContext): ProcessMoveContext => {
-  if (ctx.input.move.action.type !== QuoridorActionType.MOVE) return ctx
+  if (ctx.input.action.type !== QuoridorActionType.MOVE) return ctx
   if (ctx.output.errors.length > 0) return ctx
   return produce(ctx, draft => {
-    const move = draft.input.move
+    const action = draft.input.action
     const state = last(draft.battle.history)
-    const x1 = move.action.x
-    const y1 = move.action.y
+    const x1 = action.x
+    const y1 = action.y
     if (state === undefined) {
       draft.output.errors.push('no history')
       return draft
     } else {
       if (typeof x1 !== 'number' || typeof y1 !== 'number') {
-        draft.output.errors.push('Expect x and y shall be number for move action')
+        draft.output.errors.push('Expect x and y shall be number for action action')
         return draft
       } else {
         const neighbors = getWalkableNeighborCoords(state, state.turn)
@@ -192,27 +195,27 @@ export const handleMovePawn = (ctx: ProcessMoveContext): ProcessMoveContext => {
         }
       }
     }
-    if (state.turn !== move.by) {
+    if (state.turn !== ctx.input.by) {
       draft.output.errors.push('Not your turn')
     }
     if (draft.output.errors.length > 0) {
       return draft
     }
-    const current = applyAction(state, { type: move.action.type, x: x1, y: y1 })
+    const current = applyAction(state, { type: action.type, x: x1, y: y1 })
     draft.battle.history.push(current)
     return draft
   })
 }
 
 export const handlePutWall = (ctx: ProcessMoveContext): ProcessMoveContext => {
-  if (ctx.input.move.action.type !== QuoridorActionType.PUT_WALL) return ctx
+  if (ctx.input.action.type !== QuoridorActionType.PUT_WALL) return ctx
   if (ctx.output.errors.length > 0) return ctx
   return produce(ctx, draft => {
-    const move = draft.input.move
+    const action = draft.input.action
     const state = last(draft.battle.history)
-    const x1 = move.action.x
-    const y1 = move.action.y
-    const o = move.action.o
+    const x1 = action.x
+    const y1 = action.y
+    const o = action.o
     if (state === undefined) {
       draft.output.errors.push('no history')
       return draft
@@ -231,13 +234,13 @@ export const handlePutWall = (ctx: ProcessMoveContext): ProcessMoveContext => {
         }
       }
     }
-    if (state.turn !== move.by) {
+    if (state.turn !== ctx.input.by) {
       draft.output.errors.push('Not your turn')
     }
     if (draft.output.errors.length > 0) {
       return draft
     }
-    const current = applyAction(state, { type: move.action.type, x: x1, y: y1 })
+    const current = applyAction(state, { type: action.type, x: x1, y: y1 })
     draft.battle.history.push(current)
     return draft
   })
@@ -247,13 +250,22 @@ export const processMove = async (move: QuoridorMove): Promise<unknown> => {
   const battle = await getBattle(redis, move.battleId)
   if (battle !== null) {
     if (battle.result === undefined) {
+      let action = { type: QuoridorActionType.INVALID_ACTION }, error
+      try {
+        action = internalizeAction(move.action)
+      } catch (e) {
+        error = e.message
+      }
       const ctx: ProcessMoveContext = {
         redis,
         battle,
-        input: { move },
+        input: { action, by: move.by },
         output: {
           errors: []
         }
+      }
+      if (error !== undefined) {
+        ctx.output.errors.push(error)
       }
       try {
         const { battle: battleNew, input, output } = await pipe(

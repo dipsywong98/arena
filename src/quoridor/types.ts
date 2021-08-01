@@ -1,11 +1,11 @@
 import { Action, Battle, Move, State, TestCase } from '../common/types'
 
 export enum QuoridorCaseType {
-  BASE_AI_BLACK = 'BASE_AI_BLACK',
-  BASE_AI_WHITE = 'BASE_AI_WHITE',
-  AB_AI_BLACK = 'AB_AI_BLACK',
-  AB_AI_WHITE = 'AB_AI_WHITE',
-  C_AI_WHITE_FIRST = 'C_AI_WHITE_FIRST'
+  BASE_AI_FIRST = 'BASE_AI_FIRST',
+  BASE_AI_SECOND = 'BASE_AI_SECOND',
+  AB_AI_FIRST = 'AB_AI_FIRST',
+  AB_AI_SECOND = 'AB_AI_SECOND',
+  C_AI_SECOND_FIRST = 'C_AI_SECOND_FIRST'
 }
 
 export function isCaseType (p: string | undefined): p is QuoridorCaseType {
@@ -19,8 +19,8 @@ export interface Player extends Coord {
 }
 
 export enum QuoridorTurn {
-  BLACK = 'black',
-  WHITE = 'white'
+  FIRST = 'first',
+  SECOND = 'second'
 }
 
 export type Walls = Array<Array<boolean>>
@@ -62,11 +62,11 @@ export interface QuoridorAction extends Action {
 
 export type QuoridorBattle = Battle<
   QuoridorCaseType, QuoridorResult, QuoridorState, QuoridorTurn>
-export type QuoridorMove = Move<QuoridorAction, QuoridorTurn>
+export type QuoridorMove = Move<ExternalAction, QuoridorTurn>
 
 export enum QuoridorResult {
-  BLACK_WIN = 'BLACK_WIN',
-  WHITE_WIN = 'WHITE_WIN',
+  FIRST_WIN = 'FIRST_WIN',
+  SECOND_WIN = 'SECOND_WIN',
   FLIPPED = 'FLIPPED',
 }
 
@@ -75,5 +75,11 @@ export enum QuoridorActionType {
   MOVE = 'move',
   PUT_WALL = 'putWall',
   FLIP_TABLE = 'flipTable',
-  END_GAME = 'endGame'// internal
+  INVALID_ACTION = 'invalidAction'// internal
+}
+
+export interface ExternalAction {
+  action: QuoridorActionType
+  position?: string
+  [other: string]: unknown
 }

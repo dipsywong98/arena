@@ -23,36 +23,36 @@ const makeInitialStateGenerator = (aiTurn: QuoridorTurn) =>
 export const TURN_ADD_MS = 2 * 1000
 
 export const config: Record<QuoridorCaseType, QuoridorTestCase> = Object.freeze({
-  [QuoridorCaseType.BASE_AI_BLACK]: {
-    initialStateGenerator: makeInitialStateGenerator(QuoridorTurn.BLACK),
+  [QuoridorCaseType.BASE_AI_FIRST]: {
+    initialStateGenerator: makeInitialStateGenerator(QuoridorTurn.FIRST),
     agent: baseAgent,
     score: (battle) => {
       return playerWin(battle) ? 3 : 0
     }
   },
-  [QuoridorCaseType.BASE_AI_WHITE]: {
-    initialStateGenerator: makeInitialStateGenerator(QuoridorTurn.WHITE),
+  [QuoridorCaseType.BASE_AI_SECOND]: {
+    initialStateGenerator: makeInitialStateGenerator(QuoridorTurn.SECOND),
     agent: baseAgent,
     score: (battle) => {
       return playerWin(battle) ? 3 : 0
     }
   },
-  [QuoridorCaseType.AB_AI_BLACK]: {
-    initialStateGenerator: makeInitialStateGenerator(QuoridorTurn.BLACK),
+  [QuoridorCaseType.AB_AI_FIRST]: {
+    initialStateGenerator: makeInitialStateGenerator(QuoridorTurn.FIRST),
     agent: abAgent,
     score: (battle) => {
       return playerWin(battle) ? 3 : 0
     }
   },
-  [QuoridorCaseType.AB_AI_WHITE]: {
-    initialStateGenerator: makeInitialStateGenerator(QuoridorTurn.WHITE),
+  [QuoridorCaseType.AB_AI_SECOND]: {
+    initialStateGenerator: makeInitialStateGenerator(QuoridorTurn.SECOND),
     agent: abAgent,
     score: (battle) => {
       return playerWin(battle) ? 3 : 0
     }
   },
-  [QuoridorCaseType.C_AI_WHITE_FIRST]: {
-    initialStateGenerator: makeInitialStateGenerator(QuoridorTurn.WHITE),
+  [QuoridorCaseType.C_AI_SECOND_FIRST]: {
+    initialStateGenerator: makeInitialStateGenerator(QuoridorTurn.SECOND),
     agent: () => {
       return {
         cheat: {

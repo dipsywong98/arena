@@ -30,7 +30,7 @@ quoridor cheater (10 marks): (player scores if they flip table right after this)
 
 1 for teleporting pawn
 
-1 for ai being black but went first
+1 for ai being first but went first
 
 1 scores for ai move twice a row
 
@@ -44,13 +44,13 @@ quoridor cheater (10 marks): (player scores if they flip table right after this)
 
 quoridor baseline (20 marks): choose random move from all possible movements
 
-10 scores for winning baseline with black
+10 scores for winning baseline with first
 
-10 scores for winning baseline with white
+10 scores for winning baseline with second
 
 quoridor advanced (40 + 10 marks): alpha beta tree
 
-for black and white each case has 20 + 5 marks
+for first and second each case has 20 + 5 marks
 
 |surviving # turns | score |
 |------------------|-------|

@@ -2,10 +2,12 @@ import produce from 'immer'
 import PriorityQueue from 'priorityqueuejs'
 import {
   Coord,
+  ExternalAction,
   Node,
   Orientation,
   Player,
   QActionInternal,
+  QuoridorAction,
   QuoridorActionType,
   QuoridorResult,
   QuoridorState,
@@ -30,10 +32,10 @@ export const make2dArray = <T> (size: number, value: T): T[][] => {
 export const initState = (): QuoridorState => ({
   walls: make2dArray(SIZE * 2 + 1, false),
   players: {
-    [QuoridorTurn.WHITE]: initPlayer(0),
-    [QuoridorTurn.BLACK]: initPlayer(SIZE - 1)
+    [QuoridorTurn.SECOND]: initPlayer(0),
+    [QuoridorTurn.FIRST]: initPlayer(SIZE - 1)
   },
-  turn: QuoridorTurn.BLACK,
+  turn: QuoridorTurn.FIRST,
   expectFlip: false,
   createdAt: Date.now()
 })
@@ -76,7 +78,7 @@ export const applyAction = (state: QuoridorState, action: QActionInternal): Quor
 export const isEndGame = (state: QuoridorState) => {
   const { y } = state.players[state.turn]
   const enemy = state.players[opposite(state.turn)]
-  const targetYp = state.turn === QuoridorTurn.BLACK ? 0 : SIZE - 1
+  const targetYp = state.turn === QuoridorTurn.FIRST ? 0 : SIZE - 1
   const targetYq = SIZE - 1 - targetYp
   return y === targetYp || enemy.y === targetYq
 }
@@ -135,14 +137,14 @@ export const isWallHavePath = (
   o: Orientation
 ): boolean => {
   const nextState = putWall(x, y, o)(state)
-  const whiteHavePath = pathLength(nextState, QuoridorTurn.WHITE) >= 0
-  const blackHavePath = pathLength(nextState, QuoridorTurn.BLACK) >= 0
-  return whiteHavePath && blackHavePath
+  const secondHavePath = pathLength(nextState, QuoridorTurn.SECOND) >= 0
+  const firstHavePath = pathLength(nextState, QuoridorTurn.FIRST) >= 0
+  return secondHavePath && firstHavePath
 }
 
 export const pathLength = (state: QuoridorState, turn: QuoridorTurn): number => {
   const { x: sourceX, y: sourceY } = state.players[turn]
-  const targetY = turn === QuoridorTurn.BLACK ? 0 : SIZE - 1
+  const targetY = turn === QuoridorTurn.FIRST ? 0 : SIZE - 1
   const queue = new PriorityQueue<Node>((a, b) => {
     return (b.sourceDistance + b.targetDistance) - (a.sourceDistance + a.targetDistance)
   })
@@ -179,7 +181,7 @@ export const dx = [0, 1, 0, -1]
 export const dy = [-1, 0, 1, 0]
 
 export const opposite = (turn: QuoridorTurn) => (
-  turn === QuoridorTurn.BLACK ? QuoridorTurn.WHITE : QuoridorTurn.BLACK
+  turn === QuoridorTurn.FIRST ? QuoridorTurn.SECOND : QuoridorTurn.FIRST
 )
 
 export const getWalkableNeighborCoords = (
@@ -214,10 +216,10 @@ export const isWalkable = (
   if (x1 < 0 || y1 < 0 || x1 >= SIZE || y1 >= SIZE) {
     return false
   }
-  if (state.players.black.x === x1 && state.players.black.y === y1) {
+  if (state.players.first.x === x1 && state.players.first.y === y1) {
     return false
   }
-  if (state.players.white.x === x1 && state.players.white.y === y1) {
+  if (state.players.second.x === x1 && state.players.second.y === y1) {
     return false
   }
   return !state.walls[y0 + y1][x0 + x1]
@@ -249,11 +251,106 @@ export const allPossibleWalls = (state: QuoridorState): QActionInternal[] => {
 }
 
 export const getResult = (state: QuoridorState): QuoridorResult | undefined => {
-  if (state.players[QuoridorTurn.BLACK].y === 0) {
-    return QuoridorResult.BLACK_WIN
+  if (state.players[QuoridorTurn.FIRST].y === 0) {
+    return QuoridorResult.FIRST_WIN
   }
-  if (state.players[QuoridorTurn.WHITE].y === SIZE - 1) {
-    return QuoridorResult.WHITE_WIN
+  if (state.players[QuoridorTurn.SECOND].y === SIZE - 1) {
+    return QuoridorResult.SECOND_WIN
   }
   return undefined
+}
+
+export const internalizeAction = (action: ExternalAction): QuoridorAction => {
+  if (action.action === QuoridorActionType.MOVE) {
+    if (action.position !== undefined) {
+      const [a, b] = action.position.split('')
+      const x = 'ABCDEFGHI'.indexOf(a.toUpperCase())
+      const y = 9 - Number.parseInt(b)
+      if (x >= 0 && y === y) {
+        return {
+          type: action.action,
+          x,
+          y
+        }
+      }
+    }
+    throw new Error(`${action.position ?? 'undefined'} is not a valid position`)
+
+  } else if (action.action === QuoridorActionType.PUT_WALL) {
+    if (action.position !== undefined) {
+      const [a, b, c] = action.position.split('')
+      const x = 'ABCDEFGHI'.indexOf(a.toUpperCase())
+      const y = 8 - Number.parseInt(b)
+      const o = {
+        v: Orientation.VERTICAL,
+        h: Orientation.HORIZONTAL
+      }[c]
+      if (x >= 0 && y === y && o !== undefined) {
+        return {
+          type: action.action,
+          x,
+          y,
+          o
+        }
+      }
+    }
+    throw new Error(`${action.position ?? 'undefined'} is not a valid position`)
+  } else {
+    return {
+      type: action.action
+    }
+  }
+}
+
+export const externalizeAction = (
+  action: QuoridorAction,
+  player?: string,
+  rest?: Record<string, unknown>): ExternalAction => {
+  if (action.type === QuoridorActionType.MOVE) {
+    const { x, y } = action
+    if (x !== undefined && y !== undefined) {
+      const a = 'ABCDEFGHI'[x]
+      const b = 9 - y
+        return {
+          action: action.type,
+          position: `${a}${b}`,
+          player,
+          ...rest
+      }
+    }
+    return {
+      action: action.type,
+      position: '',
+      player,
+      ...rest
+    }
+  } else if (action.type === QuoridorActionType.PUT_WALL) {
+    const { x, y, o } = action
+    if (x !== undefined && y !== undefined && o !== undefined) {
+      const a = 'ABCDEFGHI'[x]
+      const b = 8 - y
+      const c = {
+        [Orientation.VERTICAL]: 'v',
+        [Orientation.HORIZONTAL]: 'h'
+      }[o]
+      return {
+        action: action.type,
+        position: `${a}${b}${c}`,
+        player,
+        ...rest
+      }
+    }
+    return {
+      action: action.type,
+      position: '',
+      player,
+      ...rest
+    }
+  } else {
+    return {
+      action: action.type,
+      player,
+      ...rest
+    }
+  }
 }

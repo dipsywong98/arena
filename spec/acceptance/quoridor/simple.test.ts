@@ -14,15 +14,15 @@ import {
   viewBattle
 } from '../common'
 import { QuoridorCaseType } from '../../../src/quoridor/types'
-import { applyAction, initState } from '../../../src/quoridor/common'
+import { applyAction, externalizeAction, initState, internalizeAction } from '../../../src/quoridor/common'
 import { moveOnlyAgent } from '../../../src/quoridor/agent'
 
 const autoPlay1 = autoPlay({
   init: initState,
   apply: applyAction,
   agent: moveOnlyAgent,
-  externalizeAction: a => a,
-  internalizeAction: <T> (a: T) => a
+  externalizeAction,
+  internalizeAction
 })
 
 describe('quoridor-simple', () => {
@@ -33,67 +33,67 @@ describe('quoridor-simple', () => {
 
   it('gives me my position when start game', async () => {
     return startBattle('quoridor',
-      QuoridorCaseType.BASE_AI_WHITE,
+      QuoridorCaseType.BASE_AI_SECOND,
       listenEvent(),
-      expectGameStart('black'))
+      expectGameStart('first'))
   })
 
   it('can receive AI movement', async () => {
     return startBattle('quoridor',
-      QuoridorCaseType.BASE_AI_BLACK,
+      QuoridorCaseType.BASE_AI_FIRST,
       listenEvent(),
-      expectGameStart('white'),
+      expectGameStart('second'),
       receiveEvent(event => {
-        expect(event.player).toEqual('black')
+        expect(event.player).toEqual('first')
       })
     )
   })
 
   it('can react to player movement', async () => {
     return startBattle('quoridor',
-      QuoridorCaseType.BASE_AI_BLACK,
+      QuoridorCaseType.BASE_AI_FIRST,
       listenEvent(),
-      expectGameStart('white'),
+      expectGameStart('second'),
       receiveEvent(event => {
-        expect(event.player).toEqual('black')
+        expect(event.player).toEqual('first')
       })
     )
   })
 
   it('autoplay', () => {
     return startBattle('quoridor',
-      QuoridorCaseType.BASE_AI_WHITE,
+      QuoridorCaseType.BASE_AI_SECOND,
       listenEvent(),
       autoPlay1,
       viewBattle(battle => {
-        expect(battle.result).toEqual('BLACK_WIN')
+        expect(battle.result).toEqual('FIRST_WIN')
       }),
       expectTotalScore(3)
     )
   })
 
-  it('flips when player white play before AI black', () => {
+  it('flips when player second play before AI first', () => {
     return startBattle('quoridor',
-      QuoridorCaseType.BASE_AI_BLACK,
+      QuoridorCaseType.BASE_AI_FIRST,
       movePawn(4, 7),
       listenEvent(),
-      expectGameStart('white'),
+      expectGameStart('second'),
       viewBattle(battle => {
-        expect(battle.flippedBy).toEqual('black')
+        expect(battle.flippedBy).toEqual('first')
         expect(battle.flippedReason).toEqual('Not your turn')
       }))
   })
 
   it('flips when player X flipped randomly', () => {
     return startBattle('quoridor',
-      QuoridorCaseType.BASE_AI_WHITE,
+      QuoridorCaseType.BASE_AI_SECOND,
       listenEvent(),
-      expectGameStart('black'),
+      expectGameStart('first'),
       flipTable(),
-      expectFlipTable('black'),
-      expectFlipTable('white'),
+      expectFlipTable('first'),
+      expectFlipTable('second'),
       viewBattle(battle => {
-        expect(battle.flippedBy).toEqual('white')
+        expect(battle.flippedBy).toEqual('second')
         expect(battle.flippedReason).toEqual('You are not supposed to flip the table now')
       }),
       expectTotalScore(0))
@@ -101,14 +101,14 @@ describe('quoridor-simple', () => {
 
   it('flips when player move to invalid position', () => {
     return startBattle('quoridor',
-      QuoridorCaseType.BASE_AI_WHITE,
+      QuoridorCaseType.BASE_AI_SECOND,
       listenEvent(),
-      expectGameStart('black'),
+      expectGameStart('first'),
       movePawn(5, 0),
-      expectPawnMove(5, 0, 'black'),
-      expectFlipTable('white'),
+      expectPawnMove(5, 0, 'first'),
+      expectFlipTable('second'),
       viewBattle(battle => {
-        expect(battle.flippedBy).toEqual('white')
+        expect(battle.flippedBy).toEqual('second')
         expect(battle.flippedReason).toEqual('Cannot move to 5,0')
       }),
       expectTotalScore(0))

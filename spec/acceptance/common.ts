@@ -8,8 +8,9 @@ import stoppable from 'stoppable'
 import { v4 } from 'uuid'
 import { CallbackPayload, EvaluatePayload } from '../../src/common/types'
 import { quoridorConcludeWorker, quoridorMoveWorker } from '../../src/quoridor/queues'
-import { QuoridorAction } from '../../src/quoridor/types'
+import { QuoridorAction, QuoridorActionType } from '../../src/quoridor/types'
 import { coordToCompass } from '../../src/ttt/common'
+import { externalizeAction } from '../../src/quoridor/common'
 
 type Event = Record<string, unknown>
 type OnEvent = (event: Event, ctx: PlayContext) => void
@@ -125,7 +126,7 @@ export const expectPutSymbol = (position: string, player: string) =>
 
 export const expectPawnMove = (x: number, y: number, player: string) =>
   receiveEvent((event) => {
-    expect(event).toEqual({ action: 'move', x, y, player })
+    expect(event).toEqual({ ...externalizeAction ({ type: QuoridorActionType.MOVE, x, y }), player })
   })
 
 export const expectWinner = (winner: string) =>
@@ -164,7 +165,7 @@ export const putSymbol = (
 
 export const flipTable = (): Step => play({ action: 'flipTable' })
 
-export const movePawn = (x: number, y: number): Step => play({ action: 'move', x, y })
+export const movePawn = (x: number, y: number): Step => play(externalizeAction({ type: QuoridorActionType.MOVE, x, y }))
 
 export const viewBattle = (cb: (battle: TicTacToeBattle) => unknown): Step => (
   async (ctx: PlayContext) => {
@@ -223,7 +224,7 @@ export const autoPlay = <S, A extends TicTacToeAction | QuoridorAction> (
     init: () => S,
     apply: (s: S, a: A) => S,
     agent: (s: S) => A,
-    externalizeAction: (a: A) => ExternalAction | QuoridorAction,
+    externalizeAction: (a: A) => any,
     internalizeAction: (a: any) => any,
   }): Step =>
   async (ctx: PlayContext) => {
@@ -234,7 +235,7 @@ export const autoPlay = <S, A extends TicTacToeAction | QuoridorAction> (
       await receiveEvent((value) => {
         if (value.youAre !== undefined) {
           me = value.youAre
-          if (me === 'O' || me === 'black') {
+          if (me === 'O' || me === 'first') {
             const react = agent(state)
             play({ ...externalizeAction(react), action: react.type })(ctx)
           }

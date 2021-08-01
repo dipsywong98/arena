@@ -15,7 +15,7 @@ import { shuffle } from '../common/shuffle'
 const scorer = (me: QuoridorTurn) => (state: QuoridorState): number => {
   const { y } = state.players[state.turn]
   const enemy = state.players[opposite(state.turn)]
-  const targetYp = me === QuoridorTurn.BLACK ? 0 : SIZE - 1
+  const targetYp = me === QuoridorTurn.FIRST ? 0 : SIZE - 1
   const targetYq = SIZE - 1 - targetYp
   if (y === targetYp) {
     return 1000

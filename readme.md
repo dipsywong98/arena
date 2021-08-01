@@ -27,9 +27,9 @@ win the baseline AI, at least draw with the advanced AI and flip the table when 
 The good old tic-tac-toe rule, two players `O` and `X`, `O` go first, and then take turn to put their symbol to an empty
 box in the 3x3 grid, the first to get three in a row/column/diagonal wins, otherwise when the grid is full it's a draw.
 
-### Specification
+### Notation
 
-We use a compass notation for positions
+Use this compass notation when requesting and handling response with arena tic-tac-toe.
 
 ```
 |NW|N |NE|
@@ -114,19 +114,20 @@ Quoridor is played on a game board of 81 square spaces (9x9). Each player is rep
 
 The distinguishing characteristic of Quoridor is its twenty walls. Walls are flat two-space-wide pieces which can be placed in the groove that runs between the spaces. Walls block the path of all pawns, which must go around them. The walls are divided equally among the players at the start of the game, and once placed, cannot be moved or removed. On a turn, a player may either move their pawn, or, if possible, place a wall.
 
-Legal pawn moves
 Legal pawn moves according to the location of the opponent and the walls.
 Pawns can be moved to any space at a right angle (but not diagonally). If adjacent to another pawn, the pawn may jump over that pawn. If an adjacent pawn has a third pawn or a wall on the other side of it, the player may move to either space that is immediately adjacent (left or right) to the first pawn. Multiple pawns may not be jumped. Walls may not be jumped, including when moving laterally due to a pawn or wall being behind a jumped pawn.
 
 Walls can be placed directly between two spaces, in any groove not already occupied by a wall. However, a wall may not be placed which cuts off the only remaining path of any pawn to the side of the board it must reach.
 
-### Specification
+### Notation
 
-You maybe `white` or `black` player,
-white will start first and start at `(4,0)`, and black start at `(4,8)`.
-White will win if it reaches `(*, 8)` and black win if it reaches `(*, 0)`.
+We use the [standard quoridor notation](https://quoridorstrats.wordpress.com/notation/) for the arena quoridor game.
 
-For walls, each player will have 10, and the coordinate of wall will be the coordinate of the top-left most square the wall adjacent to, together with its orientation, as illustrated below.
+You maybe `first` or `second` player, 
+first player will start at `E1`, and second start at `E9`.
+First will win if it reaches row `9` and second win if it reaches row `1`.
+
+For walls, each player will have 10
 
 ![](static/quoridor.png)
 
@@ -153,27 +154,21 @@ Move your pawn:
 ```json
 {
   "action": "move",
-  "x": 1,
-  "y": 1
+  "position": "E8"
 }
 ```
 
-Where `0 <= x, y <= 8` and integer, `(x, y)` is the location that you want to move your pawn to.
+Where `position` is the chess notation location that you want to move your pawn to.
 
 Place wall:
 ```json
 {
    "action": "putWall",
-   "x": 1,
-   "y": 1,
-   "o": "H"
+   "position": "A8h"
 }
 ```
 
-Where `(x,y,o)` is a valid wall coordinate as stated in the specification,
-that is `(x,y)` is the location of the top left most location of the wall's adj locations,
-and `o` is either `"H"` or `"V"` indicating whether is the wall horizontal or vertical,
-and all adj locations of this wall are all within the board.
+Where `position` is a 3 character standard quoridor notation indicating the wall's placement
 
 5. Invalid moves are considered as surrendering, and the opponent should flip the table. To flip table, `POST`
    to `{arenaEndpoint}/quoridor/play/{battleId}` with payload
@@ -188,29 +183,29 @@ and all adj locations of this wall are all within the board.
 
 Initial event tells your color
 ```
-data: {"youAre":"white","id":"15f6301f-cbdd-4084-a810-df2e9c83238f"}
+data: {"youAre":"second","id":"15f6301f-cbdd-4084-a810-df2e9c83238f"}
 ```
 
 ```
-data: {"youAre":"black","id":"15f6301f-cbdd-4084-a810-df2e9c83238f"}
+data: {"youAre":"first","id":"15f6301f-cbdd-4084-a810-df2e9c83238f"}
 ```
 
 Move event tells you who made what move
 ```
-data: {"player":"white","x":0,"y":0,"action": "move"}
+data: {"player":"second","position":"E8","action": "move"}
 ```
 ```
-data: {"player":"black","x":0,"y":0,"action": "putWall"}
+data: {"player":"first","position":"E6v","action": "putWall"}
 ```
 
 Game end event tells you the game end result
 ```
-data: {"winner":"black"}
-data: {"winner":"white"}
+data: {"winner":"first"}
+data: {"winner":"second"}
 ```
 
 Flip table tells you someone flipped table and who flipped it
 ```
-data: {"player":"black","action":"flipTable"}
+data: {"player":"first","action":"flipTable"}
 ```
 
