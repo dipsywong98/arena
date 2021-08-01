@@ -109,12 +109,12 @@ describe('quoridor-simple', () => {
       QuoridorCaseType.BASE_AI_SECOND,
       listenEvent(),
       expectGameStart('first'),
-      movePawn('F9'),
-      expectPawnMove('F9', 'first'),
+      movePawn('f9'),
+      expectPawnMove('f9', 'first'),
       expectFlipTable('second'),
       viewBattle(battle => {
         expect(battle.flippedBy).toEqual('second')
-        expect(battle.flippedReason).toEqual('Cannot move to F9')
+        expect(battle.flippedReason).toEqual('Cannot move to f9')
       }),
       expectTotalScore(0))
   })

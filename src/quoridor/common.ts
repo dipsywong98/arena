@@ -264,7 +264,7 @@ export const internalizeAction = (action: ExternalAction): QuoridorAction => {
   if (action.action === QuoridorActionType.MOVE) {
     if (action.position !== undefined) {
       const [a, b] = action.position.split('')
-      const x = 'ABCDEFGHI'.indexOf(a.toUpperCase())
+      const x = 'abcdefhi'.indexOf(a.toLowerCase())
       const y = 9 - Number.parseInt(b)
       if (x >= 0 && y === y) {
         return {
@@ -279,7 +279,7 @@ export const internalizeAction = (action: ExternalAction): QuoridorAction => {
   } else if (action.action === QuoridorActionType.PUT_WALL) {
     if (action.position !== undefined) {
       const [a, b, c] = action.position.split('')
-      const x = 'ABCDEFGHI'.indexOf(a.toUpperCase())
+      const x = 'abcdefhi'.indexOf(a.toLowerCase())
       const y = 8 - Number.parseInt(b)
       const o = {
         v: Orientation.VERTICAL,
@@ -309,7 +309,7 @@ export const externalizeAction = (
   if (action.type === QuoridorActionType.MOVE) {
     const { x, y } = action
     if (x !== undefined && y !== undefined) {
-      const a = 'ABCDEFGHI'[x]
+      const a = 'abcdefhi'[x]
       const b = 9 - y
         return {
           action: action.type,
@@ -327,7 +327,7 @@ export const externalizeAction = (
   } else if (action.type === QuoridorActionType.PUT_WALL) {
     const { x, y, o } = action
     if (x !== undefined && y !== undefined && o !== undefined) {
-      const a = 'ABCDEFGHI'[x]
+      const a = 'abcdefhi'[x]
       const b = 8 - y
       const c = {
         [Orientation.VERTICAL]: 'v',

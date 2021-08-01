@@ -124,7 +124,7 @@ Walls can be placed directly between two spaces, in any groove not already occup
 We use the [standard quoridor notation](https://quoridorstrats.wordpress.com/notation/) for the arena quoridor game.
 
 You maybe `first` or `second` player, 
-first player will start at `E1`, and second start at `E9`.
+first player will start at `e1`, and second start at `e9`.
 First will win if it reaches row `9` and second win if it reaches row `1`.
 
 For walls, each player will have 10
@@ -155,7 +155,7 @@ Move your pawn:
 ```json
 {
   "action": "move",
-  "position": "E8"
+  "position": "e8"
 }
 ```
 
@@ -165,7 +165,7 @@ Place wall:
 ```json
 {
    "action": "putWall",
-   "position": "A8h"
+   "position": "a8h"
 }
 ```
 
@@ -193,10 +193,10 @@ data: {"youAre":"first","id":"15f6301f-cbdd-4084-a810-df2e9c83238f"}
 
 Move event tells you who made what move
 ```
-data: {"player":"second","position":"E8","action": "move"}
+data: {"player":"second","position":"e8","action": "move"}
 ```
 ```
-data: {"player":"first","position":"E6v","action": "putWall"}
+data: {"player":"first","position":"e6v","action": "putWall"}
 ```
 
 Game end event tells you the game end result
