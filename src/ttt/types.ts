@@ -25,8 +25,6 @@ export type Board = Array<Array<TicTacToeTurn | null>>
 export interface TicTacToeState extends State {
   turn: TicTacToeTurn
   board: Board
-  expectFlip: boolean
-  createdAt: number
 }
 
 export enum TicTacToeActionType {

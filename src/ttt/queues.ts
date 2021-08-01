@@ -6,15 +6,15 @@ import { processMove } from './processMove'
 import { ConcludeRequest } from '../common/types'
 
 // Create a new connection in every instance
-export const moveQueue = new Queue<TicTacToeMove>('moveQueue', { connection: redis })
+export const moveQueue = new Queue<TicTacToeMove>('tttMoveQueue', { connection: redis })
 
-export const moveWorker = new Worker<TicTacToeMove>('moveQueue', async (job) => {
+export const moveWorker = new Worker<TicTacToeMove>('tttMoveQueue', async (job) => {
   const move = job.data
   return await processMove(move)
 }, { connection: redis })
 
-export const concludeQueue = new Queue<ConcludeRequest>('concludeQueue', { connection: redis })
-export const concludeWorker = new Worker<ConcludeRequest>('concludeQueue', async (job) => {
+export const concludeQueue = new Queue<ConcludeRequest>('tttConcludeQueue', { connection: redis })
+export const concludeWorker = new Worker<ConcludeRequest>('tttConcludeQueue', async (job) => {
   const concludeRequest = job.data
   return await processConclude(concludeRequest)
 }, { connection: redis })
