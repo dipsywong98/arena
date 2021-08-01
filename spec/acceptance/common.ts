@@ -1,4 +1,4 @@
-import { TicTacToeAction, TicTacToeBattle } from '../../src/ttt/types'
+import { ExternalAction, TicTacToeAction, TicTacToeBattle } from '../../src/ttt/types'
 import axios from 'axios'
 import arenaApp from '../../src/Server'
 import * as http from 'http'
@@ -9,6 +9,7 @@ import { v4 } from 'uuid'
 import { CallbackPayload, EvaluatePayload } from '../../src/common/types'
 import { quoridorConcludeWorker, quoridorMoveWorker } from '../../src/quoridor/queues'
 import { QuoridorAction } from '../../src/quoridor/types'
+import { coordToCompass } from '../../src/ttt/common'
 
 type Event = Record<string, unknown>
 type OnEvent = (event: Event, ctx: PlayContext) => void
@@ -117,9 +118,9 @@ export const expectGameStart = (youAre: string) =>
     expect(event).toEqual({ id: battleId, youAre })
   })
 
-export const expectPutSymbol = (x: number, y: number, player: string) =>
+export const expectPutSymbol = (position: string, player: string) =>
   receiveEvent((event) => {
-    expect(event).toEqual({ action: 'putSymbol', x, y, player })
+    expect(event).toEqual({ action: 'putSymbol', position, player })
   })
 
 export const expectPawnMove = (x: number, y: number, player: string) =>
@@ -156,8 +157,10 @@ export const play = (payload: Record<string, unknown>): Step => async (ctx: Play
 }
 
 export const putSymbol = (
-  x: number, y: number
-): Step => play({ action: 'putSymbol', x, y })
+  position: string
+): Step => {
+  return play({ action: 'putSymbol', position })
+}
 
 export const flipTable = (): Step => play({ action: 'flipTable' })
 
@@ -216,8 +219,12 @@ export const startRun = async (game: string, stepsForCases: Step[][]): Promise<v
 }
 
 export const autoPlay = <S, A extends TicTacToeAction | QuoridorAction> (
-  { init, apply, agent }: {
-    init: () => S, apply: (s: S, a: A) => S, agent: (s: S) => A
+  { init, apply, agent, externalizeAction, internalizeAction }: {
+    init: () => S,
+    apply: (s: S, a: A) => S,
+    agent: (s: S) => A,
+    externalizeAction: (a: A) => ExternalAction | QuoridorAction,
+    internalizeAction: (a: any) => any,
   }): Step =>
   async (ctx: PlayContext) => {
     let state = init()
@@ -229,14 +236,14 @@ export const autoPlay = <S, A extends TicTacToeAction | QuoridorAction> (
           me = value.youAre
           if (me === 'O' || me === 'black') {
             const react = agent(state)
-            play({ ...react, action: react.type })(ctx)
+            play({ ...externalizeAction(react), action: react.type })(ctx)
           }
         }
         if (value.action !== undefined) {
-          state = apply(state, { ...value, type: value.action } as A)
+          state = apply(state, internalizeAction(value))
           if (value.player !== me) {
             const react = agent(state)
-            play({ ...react, action: react.type })(ctx)
+            play({ ...externalizeAction(react), action: react.type })(ctx)
           }
         }
         if (value.action === 'flipTable' || value.winner !== undefined) {

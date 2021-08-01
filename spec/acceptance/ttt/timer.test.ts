@@ -25,16 +25,16 @@ describe('ttt-timer', () => {
       TicTacToeCaseType.BASE_AI_O, setNow(100000),
       listenEvent(),
       expectGameStart('X'),
-      expectPutSymbol(0, 0, 'O'),
+      expectPutSymbol('NW', 'O'),
       setNow(101000),
-      putSymbol(1, 0),
-      expectPutSymbol(1, 0, 'X'),
-      expectPutSymbol(2, 0, 'O'),
+      putSymbol('N'),
+      expectPutSymbol('N', 'X'),
+      expectPutSymbol('NE', 'O'),
       viewBattle(battle => {
         expect(battle.clock).toEqual(INITIAL_CLOCK_MS - 1000 + TURN_ADD_MS)
       }),
       setNow(105000),
-      putSymbol(1, 0),
+      putSymbol('N'),
       viewBattle(battle => {
         expect(battle.clock).toEqual(INITIAL_CLOCK_MS - 5000 + TURN_ADD_MS * 2)
       }))
@@ -44,10 +44,10 @@ describe('ttt-timer', () => {
       TicTacToeCaseType.BASE_AI_O, setNow(100000),
       listenEvent(),
       expectGameStart('X'),
-      expectPutSymbol(0, 0, 'O'),
+      expectPutSymbol('NW', 'O'),
       setNow(200000),
-      putSymbol(1, 0),
-      expectPutSymbol(1, 0, 'X'),
+      putSymbol('N'),
+      expectPutSymbol('N', 'X'),
       expectFlipTable('O'))
   })
 })

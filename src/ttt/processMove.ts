@@ -9,7 +9,7 @@ import {
   TicTacToeResult,
   TicTacToeTurn
 } from './types'
-import { applyAction, getResult, opposite } from './common'
+import { applyAction, externalizeAction, getResult, internalizeAction, opposite } from './common'
 import { getBattle, publishMessage, setBattle } from './store'
 import { Redis } from 'ioredis'
 import { concludeQueue } from './queues'
@@ -32,7 +32,8 @@ interface ProcessMoveContext {
   redis: Redis
   battle: TicTacToeBattle
   input: {
-    move: TicTacToeMove
+    action: TicTacToeAction
+    by: TicTacToeTurn
   }
   output: {
     errors: string[]
@@ -41,7 +42,7 @@ interface ProcessMoveContext {
 }
 
 export const validate = (ctx: ProcessMoveContext): ProcessMoveContext => produce(ctx, (draft) => {
-  const move = draft.input.move
+  const action = draft.input.action
   if (ctx.battle.clock < 0) {
     draft.output.errors.push('You ran out of time')
   }
@@ -49,56 +50,60 @@ export const validate = (ctx: ProcessMoveContext): ProcessMoveContext => produce
   if (state === undefined) {
     draft.output.errors.push('Battle has no history')
   } else {
-    if (move.action.type === TicTacToeActionType.PUT_SYMBOL) {
+    if (action.type === TicTacToeActionType.INVALID_ACTION) {
+      if (draft.output.errors.length === 0) {
+        draft.output.errors.push('invalid action')
+      }
+    } else if (action.type === TicTacToeActionType.PUT_SYMBOL) {
       // check in handlePutSymbol
-    } else if (move.action.type === TicTacToeActionType.FLIP_TABLE) {
+    } else if (action.type === TicTacToeActionType.FLIP_TABLE) {
       if (!state.expectFlip) {
         draft.output.errors.push(`You are not supposed to flip the table now`)
       }
-    } else if (move.action.type === TicTacToeActionType.START_GAME) {
+    } else if (action.type === TicTacToeActionType.START_GAME) {
       if (draft.battle.history.length !== 1) {
         draft.output.errors.push('game already started')
       }
     } else {
       draft.output.errors.push('unknown action type')
     }
-    if (state.expectFlip && move.action.type !== TicTacToeActionType.FLIP_TABLE) {
+    if (state.expectFlip && action.type !== TicTacToeActionType.FLIP_TABLE) {
       draft.output.errors.push('You should have flipped the table now')
     }
   }
   return draft
 })
 export const handlePutSymbol = (ctx: ProcessMoveContext): ProcessMoveContext => {
-  if (ctx.input.move.action.type !== TicTacToeActionType.PUT_SYMBOL) return ctx
+  if (ctx.input.action.type !== TicTacToeActionType.PUT_SYMBOL) return ctx
   if (ctx.output.errors.length > 0) return ctx
   return produce(ctx, draft => {
-    const move = draft.input.move
+    const action = draft.input.action
     const state = last(draft.battle.history)
     if (state === undefined) {
       draft.output.errors.push('no history')
       return draft
-    } else if (typeof (move.action.x) !== 'number' || typeof (move.action.y) !== 'number') {
+    } else if (typeof (action.x) !== 'number' || typeof (action.y) !== 'number') {
       draft.output.errors.push('Expect x and y shall be number for put symbol action')
     } else {
-      if (![0, 1, 2].includes(move.action.x) || ![0, 1, 2].includes(move.action.y)) {
-        draft.output.errors.push(`location ${move.action.x},${move.action.y} is out of range`)
-      } else if (state.board[move.action.y][move.action.x] !== null) {
-        draft.output.errors.push(`location ${move.action.x},${move.action.y} is not empty`)
+      if (![0, 1, 2].includes(action.x) || ![0, 1, 2].includes(action.y)) {
+        draft.output.errors.push(`location ${action.x},${action.y} is out of range`)
+      } else if (state.board[action.y][action.x] !== null) {
+        draft.output.errors.push(`location ${action.x},${action.y} is not empty`)
       }
     }
-    if (state.turn !== move.by) {
+    if (state.turn !== ctx.input.by) {
       draft.output.errors.push('Not your turn')
     }
     if (draft.output.errors.length > 0) {
       return draft
     }
-    const current = applyAction(state, move.action)
+    const current = applyAction(state, action)
     draft.battle.history.push(current)
     return draft
   })
 }
 export const checkEndGame = (ctx: ProcessMoveContext): ProcessMoveContext => produce(ctx, draft => {
-  if (ctx.input.move.action.type === TicTacToeActionType.FLIP_TABLE) {
+  if (ctx.input.action.type === TicTacToeActionType.FLIP_TABLE) {
     draft.battle.result = TicTacToeResult.FLIPPED
     return draft
   } else {
@@ -147,26 +152,23 @@ export const publishOutput = async (ctx: ProcessMoveContext): Promise<ProcessMov
   produce(ctx, async draft => {
     if (draft.output.errors.length > 0) {
       await setBattle(draft.redis, draft.battle)
-      await publishMessage(draft.redis, draft.battle.id, {
-        action: 'flipTable',
-        player: opposite(draft.battle.externalPlayer)
-      })
+      await publishMessage(draft.redis, draft.battle.id,
+        externalizeAction(
+          { type: TicTacToeActionType.FLIP_TABLE },
+          opposite(draft.battle.externalPlayer)))
       return draft
     } else {
       await setBattle(draft.redis, draft.battle)
       if (draft.output.action) {
-        await publishMessage(draft.redis, draft.battle.id, {
-          player: opposite(draft.battle.externalPlayer),
-          action: draft.output.action.type,
-          x: draft.output.action.x,
-          y: draft.output.action.y,
-          action2: draft.output.action.action2 !== undefined ? {
-            player: opposite(draft.battle.externalPlayer),
-            action: draft.output.action.action2.type,
-            x: draft.output.action.action2.x,
-            y: draft.output.action.action2.y,
-          } : undefined
-        })
+        await publishMessage(draft.redis, draft.battle.id,
+          externalizeAction(draft.output.action, opposite(draft.battle.externalPlayer), {
+            action2: draft.output.action.action2 !== undefined
+              ? externalizeAction(
+                draft.output.action.action2,
+                opposite(draft.battle.externalPlayer))
+              : undefined
+          })
+        )
       }
       if (draft.battle.result !== undefined && draft.battle.result !== TicTacToeResult.FLIPPED) {
         const message: Record<string, unknown> = {}
@@ -203,13 +205,22 @@ export const processMove = async (move: TicTacToeMove): Promise<unknown> => {
   const battle = await getBattle(redis, move.battleId)
   if (battle !== null) {
     if (battle.result === undefined) {
+      let action = {type: TicTacToeActionType.INVALID_ACTION}, error
+      try {
+        action = internalizeAction(move.action)
+      }catch (e) {
+        error = e.message
+      }
       const ctx: ProcessMoveContext = {
         redis,
         battle,
-        input: { move },
+        input: { action, by: move.by },
         output: {
           errors: []
         }
+      }
+      if (error !== undefined) {
+        ctx.output.errors.push(error)
       }
       try {
         const { battle: battleNew, input, output } = await pipe(

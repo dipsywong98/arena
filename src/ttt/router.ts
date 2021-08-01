@@ -68,7 +68,7 @@ ticTacToeRouter.get('/start/:battleId', async (req, res) => {
     }
   })
   await moveQueue.add(moveId, {
-    action: { type: TicTacToeActionType.START_GAME },
+    action: { action: TicTacToeActionType.START_GAME },
     battleId,
     by: battle.externalPlayer,
     id: moveId,
@@ -95,12 +95,12 @@ ticTacToeRouter.post('/play/:battleId', async (req, res) => {
     battle.clock += TURN_ADD_MS
   }
   await setBattle(redis, battle)
-  const { x, y, action } = req.body
+  const action = req.body
   const moveId = v4()
   const move: TicTacToeMove = {
     id: moveId,
     battleId,
-    action: { type: action, x, y },
+    action,
     by: battle.externalPlayer,
     elapsed
   }
@@ -110,9 +110,7 @@ ticTacToeRouter.post('/play/:battleId', async (req, res) => {
     battleId,
     {
       player: battle.externalPlayer,
-      action,
-      x,
-      y
+      ...action,
     })
 
   res.json({ message: 'received your command', moveId, clock: battle.clock })

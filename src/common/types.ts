@@ -65,13 +65,13 @@ export interface TestCase<S extends State,
 }
 
 export interface Action {
-  type: string,
+  // type: string,
   x?: number
   y?: number
   action2?: Action
 }
 
-export interface Move<A extends Action, Turn> {
+export interface Move<A, Turn> {
   id: string
   battleId: string
   by: Turn

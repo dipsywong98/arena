@@ -17,19 +17,19 @@ import {
   viewBattle
 } from '../common'
 import { initState } from '../../../src/ttt/config'
-import { applyAction } from '../../../src/ttt/common'
+import { applyAction, externalizeAction, internalizeAction } from '../../../src/ttt/common'
 
 const winSequence = [
   expectGameStart('X'),
-  expectPutSymbol(0, 0, 'O'),
-  putSymbol(2, 0),
-  expectPutSymbol(2, 0, 'X'),
-  expectPutSymbol(1, 0, 'O'),
-  putSymbol(2, 1),
-  expectPutSymbol(2, 1, 'X'),
-  expectPutSymbol(0, 1, 'O'),
-  putSymbol(2, 2),
-  expectPutSymbol(2, 2, 'X'),
+  expectPutSymbol('NW', 'O'),
+  putSymbol('NE'),
+  expectPutSymbol('NE', 'X'),
+  expectPutSymbol('N', 'O'),
+  putSymbol('E'),
+  expectPutSymbol('E', 'X'),
+  expectPutSymbol('W', 'O'),
+  putSymbol('SE'),
+  expectPutSymbol('SE', 'X'),
   expectWinner('X'),
   expectTotalScore(3)
 ]
@@ -51,7 +51,7 @@ describe('ttt-simple', () => {
       TicTacToeCaseType.BASE_AI_O,
       listenEvent(),
       expectGameStart('X'),
-      expectPutSymbol(0, 0, 'O'))
+      expectPutSymbol('NW', 'O'))
   })
 
   it('can react to player movement', () => {
@@ -59,10 +59,10 @@ describe('ttt-simple', () => {
       TicTacToeCaseType.BASE_AI_O,
       listenEvent(),
       expectGameStart('X'),
-      expectPutSymbol(0, 0, 'O'),
-      putSymbol(0, 1),
-      expectPutSymbol(0, 1, 'X'),
-      expectPutSymbol(1, 0, 'O'))
+      expectPutSymbol('NW', 'O'),
+      putSymbol('W'),
+      expectPutSymbol('W', 'X'),
+      expectPutSymbol('N', 'O'))
   })
 
   it('example: player win', () => {
@@ -85,13 +85,13 @@ describe('ttt-simple', () => {
       TicTacToeCaseType.BASE_AI_O,
       listenEvent(),
       expectGameStart('X'),
-      expectPutSymbol(0, 0, 'O'),
-      putSymbol(2, 2),
-      expectPutSymbol(2, 2, 'X'),
-      expectPutSymbol(1, 0, 'O'),
-      putSymbol(2, 1),
-      expectPutSymbol(2, 1, 'X'),
-      expectPutSymbol(2, 0, 'O'),
+      expectPutSymbol('NW', 'O'),
+      putSymbol('SE'),
+      expectPutSymbol('SE', 'X'),
+      expectPutSymbol('N', 'O'),
+      putSymbol('E'),
+      expectPutSymbol('E', 'X'),
+      expectPutSymbol('NE', 'O'),
       expectWinner('O'),
       expectTotalScore(0))
   })
@@ -103,27 +103,27 @@ describe('ttt-simple', () => {
     return startBattle('tic-tac-toe', TicTacToeCaseType.BASE_AI_X,
       listenEvent(),
       expectGameStart('O'),
-      putSymbol(2, 0),
-      expectPutSymbol(2, 0, 'O'),
-      expectPutSymbol(0, 0, 'X'),
-      putSymbol(0, 1),
-      expectPutSymbol(0, 1, 'O'),
-      expectPutSymbol(1, 0, 'X'),
-      putSymbol(1, 1),
-      expectPutSymbol(1, 1, 'O'),
-      expectPutSymbol(2, 1, 'X'),
-      putSymbol(1, 2),
-      expectPutSymbol(1, 2, 'O'),
-      expectPutSymbol(0, 2, 'X'),
-      putSymbol(2, 2),
-      expectPutSymbol(2, 2, 'O'),
+      putSymbol('NE'),
+      expectPutSymbol('NE', 'O'),
+      expectPutSymbol('NW', 'X'),
+      putSymbol('W'),
+      expectPutSymbol('W', 'O'),
+      expectPutSymbol('N', 'X'),
+      putSymbol('C'),
+      expectPutSymbol('C', 'O'),
+      expectPutSymbol('E', 'X'),
+      putSymbol('S'),
+      expectPutSymbol('S', 'O'),
+      expectPutSymbol('SW', 'X'),
+      putSymbol('SE'),
+      expectPutSymbol('SE', 'O'),
       expectWinner('DRAW'),
       expectTotalScore(0))
   })
 
   it('flips when player X play before AI O', () => {
     return startBattle('tic-tac-toe',
-      TicTacToeCaseType.BASE_AI_O, putSymbol(1, 2),
+      TicTacToeCaseType.BASE_AI_O, putSymbol('S'),
       listenEvent(),
       expectGameStart('X'),
       viewBattle(battle => {
@@ -154,9 +154,9 @@ describe('ttt-simple', () => {
       TicTacToeCaseType.BASE_AI_O,
       listenEvent(),
       expectGameStart('X'),
-      expectPutSymbol(0, 0, 'O'),
-      putSymbol(0, 0),
-      expectPutSymbol(0, 0, 'X'),
+      expectPutSymbol('NW', 'O'),
+      putSymbol('NW'),
+      expectPutSymbol('NW', 'X'),
       expectFlipTable('O'),
       viewBattle(battle => {
         expect(battle.flippedBy).toEqual('O')
@@ -170,13 +170,13 @@ describe('ttt-simple', () => {
       TicTacToeCaseType.BASE_AI_O,
       listenEvent(),
       expectGameStart('X'),
-      expectPutSymbol(0, 0, 'O'),
-      putSymbol(4, 4),
-      expectPutSymbol(4, 4, 'X'),
+      expectPutSymbol('NW', 'O'),
+      putSymbol('A'),
+      expectPutSymbol('A', 'X'),
       expectFlipTable('O'),
       viewBattle(battle => {
         expect(battle.flippedBy).toEqual('O')
-        expect(battle.flippedReason).toEqual('location 4,4 is out of range')
+        expect(battle.flippedReason).toEqual('A is not a valid position')
       }),
       expectTotalScore(0))
   })
@@ -213,7 +213,9 @@ describe('ttt-simple', () => {
     return startBattle('tic-tac-toe',
       TicTacToeCaseType.BASE_AI_O,
       listenEvent(),
-      autoPlay({init: initState, apply: applyAction, agent: abAgent}),
+      autoPlay({
+        init: initState, apply: applyAction, agent: abAgent, externalizeAction, internalizeAction
+      }),
       viewBattle(battle => {
         expect(battle.result).toEqual('X_WIN')
       }),

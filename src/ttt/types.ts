@@ -31,7 +31,8 @@ export enum TicTacToeActionType {
   START_GAME = 'startGame', // internal
   PUT_SYMBOL = 'putSymbol',
   FLIP_TABLE = 'flipTable',
-  END_GAME = 'endGame'// internal
+  END_GAME = 'endGame', // internal
+  INVALID_ACTION = 'invalidAction' // internal
 }
 
 export interface TicTacToeAction extends Action {
@@ -45,7 +46,7 @@ export type TicTacToeTestCase = TestCase<TicTacToeState, TicTacToeAction, TicTac
 export type TicTacToeBattle = (
   Battle<TicTacToeCaseType, TicTacToeResult, TicTacToeState, TicTacToeTurn>
 )
-export type TicTacToeMove = Move<TicTacToeAction, TicTacToeTurn>
+export type TicTacToeMove = Move<ExternalAction, TicTacToeTurn>
 
 export enum TicTacToeResult {
   O_WIN = 'O_WIN',
@@ -54,3 +55,9 @@ export enum TicTacToeResult {
   FLIPPED = 'FLIPPED',
 }
 
+export interface ExternalAction {
+  action: TicTacToeActionType
+  position?: string
+  player?: string // for outgoing only
+  [other: string]: unknown
+}

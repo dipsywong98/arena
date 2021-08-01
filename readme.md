@@ -27,6 +27,18 @@ win the baseline AI, at least draw with the advanced AI and flip the table when 
 The good old tic-tac-toe rule, two players `O` and `X`, `O` go first, and then take turn to put their symbol to an empty
 box in the 3x3 grid, the first to get three in a row/column/diagonal wins, otherwise when the grid is full it's a draw.
 
+### Specification
+
+We use a compass notation for positions
+
+```
+|NW|N |NE|
++--+--+--+
+|W |C |E |
++--+--+--+
+|SW|S |SE|
+```
+
 ### How to play
 
 1. Request for grading tic-tac-toe at the coordinator
@@ -49,12 +61,11 @@ box in the 3x3 grid, the first to get three in a row/column/diagonal wins, other
 ```json
 {
   "action": "putSymbol",
-  "x": 2,
-  "y": 2
+  "position": "SE"
 }
 ```
 
-where x and y are `0`, `1`, or `2`
+where positions is the compass notation for the grid
 
 5. Invalid moves are considered as surrendering, and the opponent should flip the table. To flip table, `POST`
    to `{arenaEndpoint}/tic-tac-toe/play/{battleId}` with payload
@@ -74,7 +85,7 @@ data: {"youAre":"O","id":"15f6301f-cbdd-4084-a810-df2e9c83238f"}
 
 Move event tells you who made what move
 ```
-data: {"player":"O","action":"putSymbol",x":0,"y":0}
+data: {"player":"O","action":"putSymbol","position":"NW"}
 ```
 
 Game end event tells you the game end result
