@@ -8,6 +8,7 @@ import {
   flipTable,
   listenEvent,
   movePawn,
+  play,
   putWall,
   receiveEvent,
   requestForGrade,
@@ -102,6 +103,42 @@ describe('quoridor-simple', () => {
       viewBattle(battle => {
         expect(battle.flippedBy).toEqual('second')
         expect(battle.flippedReason).toEqual('You are not supposed to flip the table now')
+      }),
+      expectTotalScore(0))
+  })
+
+
+
+  it('flips when player play unknown action', () => {
+    return startBattle('quoridor',
+      QuoridorCaseType.BASE_AI_SECOND,
+      listenEvent(),
+      expectGameStart('first'),
+      play({ something: 'idk' }),
+      receiveEvent(value => {
+        expect(value).toEqual({ player: 'first', something: 'idk' })
+      }),
+      expectFlipTable('second'),
+      viewBattle(battle => {
+        expect(battle.flippedBy).toEqual('second')
+        expect(battle.flippedReason).toEqual('unknown action type')
+      }),
+      expectTotalScore(0))
+  })
+
+  it('flips when player play invalid json', () => {
+    return startBattle('quoridor',
+      QuoridorCaseType.BASE_AI_SECOND,
+      listenEvent(),
+      expectGameStart('first'),
+      play('some invalid json content'),
+      receiveEvent(value => {
+        expect(value).toEqual({ player: 'first', 'some invalid json content': '' })
+      }),
+      expectFlipTable('second'),
+      viewBattle(battle => {
+        expect(battle.flippedBy).toEqual('second')
+        expect(battle.flippedReason).toEqual('unknown action type')
       }),
       expectTotalScore(0))
   })

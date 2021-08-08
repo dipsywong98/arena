@@ -9,6 +9,7 @@ import {
   expectWinner,
   flipTable,
   listenEvent,
+  play,
   putSymbol,
   receiveEvent,
   requestForGrade,
@@ -177,6 +178,42 @@ describe('ttt-simple', () => {
       viewBattle(battle => {
         expect(battle.flippedBy).toEqual('O')
         expect(battle.flippedReason).toEqual('A is not a valid position')
+      }),
+      expectTotalScore(0))
+  })
+
+  it('flips when player play unknown action', () => {
+    return startBattle('tic-tac-toe',
+      TicTacToeCaseType.BASE_AI_O,
+      listenEvent(),
+      expectGameStart('X'),
+      expectPutSymbol('NW', 'O'),
+      play({ something: 'idk' }),
+      receiveEvent(value => {
+        expect(value).toEqual({ player: 'X', something: 'idk' })
+      }),
+      expectFlipTable('O'),
+      viewBattle(battle => {
+        expect(battle.flippedBy).toEqual('O')
+        expect(battle.flippedReason).toEqual('unknown action type')
+      }),
+      expectTotalScore(0))
+  })
+
+  it('flips when player play invalid json', () => {
+    return startBattle('tic-tac-toe',
+      TicTacToeCaseType.BASE_AI_O,
+      listenEvent(),
+      expectGameStart('X'),
+      expectPutSymbol('NW', 'O'),
+      play('some invalid json content'),
+      receiveEvent(value => {
+        expect(value).toEqual({ player: 'X', 'some invalid json content': '' })
+      }),
+      expectFlipTable('O'),
+      viewBattle(battle => {
+        expect(battle.flippedBy).toEqual('O')
+        expect(battle.flippedReason).toEqual('unknown action type')
       }),
       expectTotalScore(0))
   })

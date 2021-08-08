@@ -151,11 +151,8 @@ export const config: Record<TicTacToeCaseType, TicTacToeTestCase> = Object.freez
   }
 })
 
-// TODO retune the score to 100%
-// TODO invalid json payload
 // TODO ensure handle move only if started (actually no need)
 // TODO overall TLE
-// TODO upper limit of 
 // TODO more support endpoint and auth
 // TODO seperate quoridor agent to another host, perhaps a even more chanllenging one
 // TODO upper limit of turns
