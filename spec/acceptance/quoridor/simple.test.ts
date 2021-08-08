@@ -75,7 +75,7 @@ describe('quoridor-simple', () => {
       viewBattle(battle => {
         expect(battle.result).toEqual('FIRST_WIN')
       }),
-      expectTotalScore(3)
+      expectTotalScore(10)
     )
   })
 
@@ -193,7 +193,7 @@ describe('quoridor-simple', () => {
       [listenEvent(),
         autoPlay1,
       viewBattle(battle => {
-        expect(battle.score).toEqual(3)
+        expect(battle.score).toEqual(10)
       })],
       [flipTable()],
       [flipTable()],
@@ -205,7 +205,7 @@ describe('quoridor-simple', () => {
       [flipTable()],
       [flipTable()],
       [flipTable(),
-      expectTotalScore(3)]
+      expectTotalScore(10)]
     ])
   })
 })

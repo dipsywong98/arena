@@ -23,34 +23,50 @@ const makeInitialStateGenerator = (aiTurn: QuoridorTurn) =>
 
 export const TURN_ADD_MS = 2 * 1000
 
+const abAiScore = (battle: QuoridorBattle) => {
+  if (playerWin(battle)) {
+    return 25
+  }
+  const turns = Math.floor(battle.history.length / 2)
+  if (turns < 5) {
+    return 0
+  } else if (turns < 10) {
+    return 1
+  } else if (turns < 15) {
+    return 3
+  } else if (turns < 20) {
+    return 6
+  } else if (turns >= 35) {
+    return 25
+  } else {
+    return 10 + turns - 20
+  }
+}
+
 export const config: Record<QuoridorCaseType, QuoridorTestCase> = Object.freeze({
   [QuoridorCaseType.BASE_AI_FIRST]: {
     initialStateGenerator: makeInitialStateGenerator(QuoridorTurn.FIRST),
     agent: baseAgent,
     score: (battle) => {
-      return playerWin(battle) ? 3 : 0
+      return playerWin(battle) ? 10 : 0
     }
   },
   [QuoridorCaseType.BASE_AI_SECOND]: {
     initialStateGenerator: makeInitialStateGenerator(QuoridorTurn.SECOND),
     agent: baseAgent,
     score: (battle) => {
-      return playerWin(battle) ? 3 : 0
+      return playerWin(battle) ? 10 : 0
     }
   },
   [QuoridorCaseType.AB_AI_FIRST]: {
     initialStateGenerator: makeInitialStateGenerator(QuoridorTurn.FIRST),
     agent: abAgent,
-    score: (battle) => {
-      return playerWin(battle) ? 3 : 0
-    }
+    score: abAiScore
   },
   [QuoridorCaseType.AB_AI_SECOND]: {
     initialStateGenerator: makeInitialStateGenerator(QuoridorTurn.SECOND),
     agent: abAgent,
-    score: (battle) => {
-      return playerWin(battle) ? 3 : 0
-    }
+    score: abAiScore
   },
   [QuoridorCaseType.C_AI_TELEPORT]: {
     initialStateGenerator: makeInitialStateGenerator(QuoridorTurn.SECOND),
@@ -64,7 +80,7 @@ export const config: Record<QuoridorCaseType, QuoridorTestCase> = Object.freeze(
       }
     },
     score: () => {
-      return 1
+      return 2
     }
   },
   [QuoridorCaseType.C_AI_SECOND_FIRST]: {
@@ -79,7 +95,7 @@ export const config: Record<QuoridorCaseType, QuoridorTestCase> = Object.freeze(
       }
     },
     score: () => {
-      return 1
+      return 2
     }
   },
   [QuoridorCaseType.C_AI_TWICE_A_ROW]: {
@@ -99,7 +115,7 @@ export const config: Record<QuoridorCaseType, QuoridorTestCase> = Object.freeze(
       }
     },
     score: () => {
-      return 1
+      return 2
     }
   },
   [QuoridorCaseType.C_AI_WALL_OUTSIDE]: {
@@ -115,7 +131,7 @@ export const config: Record<QuoridorCaseType, QuoridorTestCase> = Object.freeze(
       }
     },
     score: () => {
-      return 1
+      return 2
     }
   },
   [QuoridorCaseType.C_AI_PAWN_OUTSIDE]: {
@@ -130,7 +146,7 @@ export const config: Record<QuoridorCaseType, QuoridorTestCase> = Object.freeze(
       }
     },
     score: () => {
-      return 1
+      return 2
     }
   },
   [QuoridorCaseType.C_AI_WALL_CROSS]: {
@@ -155,19 +171,14 @@ export const config: Record<QuoridorCaseType, QuoridorTestCase> = Object.freeze(
       }
     },
     score: () => {
-      return 1
+      return 4
     }
   },
   [QuoridorCaseType.C_AI_WALL_BLOCKING]: {
     initialStateGenerator: makeInitialStateGenerator(QuoridorTurn.SECOND),
     agent: blockingWallAgent,
     score: () => {
-      return 1
+      return 6
     }
   },
 })
-
-// TODO ensure handle move only if started
-// TODO shuffle the generated battle ids
-// TODO compass coordinate system
-// TODO more support endpoint and auth

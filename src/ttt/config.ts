@@ -37,33 +37,33 @@ export const config: Record<TicTacToeCaseType, TicTacToeTestCase> = Object.freez
     initialStateGenerator: makeInitialStateGenerator(TicTacToeTurn.O),
     agent: baseAgent,
     score: (battle) => {
-      return playerWin(battle) ? 3 : 0
+      return playerWin(battle) ? 20 : 0
     }
   },
   [TicTacToeCaseType.BASE_AI_X]: {
     initialStateGenerator: makeInitialStateGenerator(TicTacToeTurn.X),
     agent: baseAgent,
     score: (battle) => {
-      return playerWin(battle) ? 3 : 0
+      return playerWin(battle) ? 20 : 0
     }
   },
   [TicTacToeCaseType.AB_AI_O]: {
     initialStateGenerator: makeInitialStateGenerator(TicTacToeTurn.O),
     agent: abAgent,
     score: (battle) => {
-      return (playerWin(battle) || battle.result === TicTacToeResult.DRAW) ? 3 : 0
+      return (playerWin(battle) || battle.result === TicTacToeResult.DRAW) ? 20 : 0
     }
   },
   [TicTacToeCaseType.AB_AI_X]: {
     initialStateGenerator: makeInitialStateGenerator(TicTacToeTurn.X),
     agent: abAgent,
     score: (battle) => {
-      return (playerWin(battle) || battle.result === TicTacToeResult.DRAW) ? 3 : 0
+      return (playerWin(battle) || battle.result === TicTacToeResult.DRAW) ? 20 : 0
     }
   },
   [TicTacToeCaseType.C_AI_OUT_OF_BOUND]: {
     initialStateGenerator: makeInitialStateGenerator(TicTacToeTurn.X),
-    agent () {
+    agent() {
       return {
         cheat: {
           type: TicTacToeActionType.PUT_SYMBOL, x: 3, y: 3
@@ -71,12 +71,12 @@ export const config: Record<TicTacToeCaseType, TicTacToeTestCase> = Object.freez
       }
     },
     score: () => {
-      return 1
+      return 5
     }
   },
   [TicTacToeCaseType.C_AI_DUP]: {
     initialStateGenerator: makeInitialStateGenerator(TicTacToeTurn.X),
-    agent (state) {
+    agent(state) {
       for (let y = 0; y < 3; y++) {
         for (let x = 0; x < 3; x++) {
           if (state.board[y][x] !== null) {
@@ -91,7 +91,7 @@ export const config: Record<TicTacToeCaseType, TicTacToeTestCase> = Object.freez
       return baseAgent(state)
     },
     score: () => {
-      return 1
+      return 5
     }
   },
   [TicTacToeCaseType.C_AI_X_FIRST]: {
@@ -104,12 +104,12 @@ export const config: Record<TicTacToeCaseType, TicTacToeTestCase> = Object.freez
       }
     },
     score: () => {
-      return 1
+      return 5
     }
   },
   [TicTacToeCaseType.C_AI_TWICE_A_ROW]: {
     initialStateGenerator: makeInitialStateGenerator(TicTacToeTurn.O),
-    agent (state) {
+    agent(state) {
       if (state.board[0][0] !== null) {
         const points = [
           [1, 0],
@@ -146,12 +146,16 @@ export const config: Record<TicTacToeCaseType, TicTacToeTestCase> = Object.freez
       }
     },
     score: () => {
-      return 1
+      return 5
     }
   }
 })
 
-// TODO ensure handle move only if started
-// TODO shuffle the generated battle ids
-// TODO compass coordinate system
+// TODO retune the score to 100%
+// TODO invalid json payload
+// TODO ensure handle move only if started (actually no need)
+// TODO overall TLE
+// TODO upper limit of 
 // TODO more support endpoint and auth
+// TODO seperate quoridor agent to another host, perhaps a even more chanllenging one
+// TODO upper limit of turns

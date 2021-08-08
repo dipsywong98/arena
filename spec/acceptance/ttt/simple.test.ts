@@ -31,7 +31,7 @@ const winSequence = [
   putSymbol('SE'),
   expectPutSymbol('SE', 'X'),
   expectWinner('X'),
-  expectTotalScore(3)
+  expectTotalScore(20)
 ]
 
 describe('ttt-simple', () => {
@@ -191,14 +191,14 @@ describe('ttt-simple', () => {
       [flipTable()],
       [flipTable()],
       [flipTable(),
-        expectTotalScore(0)]
+      expectTotalScore(0)]
     ])
   })
 
-  it('whole all 1 win', () => {
+  it('1 win rest flip', () => {
     return startRun('tic-tac-toe', [
       [listenEvent(),
-        ...winSequence, expectTotalScore(3)],
+      ...winSequence, expectTotalScore(20)],
       [flipTable()],
       [flipTable()],
       [flipTable()],
@@ -219,7 +219,7 @@ describe('ttt-simple', () => {
       viewBattle(battle => {
         expect(battle.result).toEqual('X_WIN')
       }),
-      expectTotalScore(3)
+      expectTotalScore(20)
     )
   })
 })

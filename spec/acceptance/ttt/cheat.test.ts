@@ -35,7 +35,7 @@ describe('ttt-cheat', () => {
         expectPutSymbol('', 'X'),
         flipTable(),
         expectFlipTable('O'),
-        expectTotalScore(1))
+        expectTotalScore(5))
     })
   })
   describe('C_AI_DUP', () => {
@@ -62,7 +62,7 @@ describe('ttt-cheat', () => {
         expectPutSymbol('W', 'X'),
         flipTable(),
         expectFlipTable('O'),
-        expectTotalScore(1))
+        expectTotalScore(5))
     })
   })
   describe('C_AI_X_FIRST', () => {
@@ -85,7 +85,7 @@ describe('ttt-cheat', () => {
         expectPutSymbol('NW', 'X'),
         flipTable(),
         expectFlipTable('O'),
-        expectTotalScore(1))
+        expectTotalScore(5))
     })
   })
   describe('C_AI_TWICE_A_ROW', () => {
@@ -116,7 +116,7 @@ describe('ttt-cheat', () => {
         expectPutSymbol('N', 'O'),
         flipTable(),
         expectFlipTable('X'),
-        expectTotalScore(1))
+        expectTotalScore(5))
     })
   })
 })

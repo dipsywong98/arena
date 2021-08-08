@@ -215,7 +215,7 @@ describe('quoridor-cheat', () => {
         QuoridorCaseType.C_AI_WALL_BLOCKING,
         listenEvent(),
         autoPlayWithFlip,
-        expectTotalScore(1))
+        expectTotalScoreSomething())
     }, 10000)
   })
 })

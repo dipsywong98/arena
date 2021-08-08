@@ -1,54 +1,56 @@
 # Arena technical and judging details (?)
 
-## Tic Tac Toe (20 marks)
+Need to be two different questions since they are graded seperately
 
-tic-tac-toe cheater (4 marks): player scores if they flip table right after this
+## Tic Tac Toe (100%)
 
-1 scores for ai being X but went first
+tic-tac-toe cheater (20%): player scores if they flip table right after this
 
-1 scores for ai putting his symbol to non-empty box
+5% for ai being X but went first `C_AI_X_FIRST`
 
-1 scores for ai trying to expand the grid (aka x=3)
+5% for ai putting his symbol to non-empty box `C_AI_DUP`
 
-1 scores for ai move twice a row
+5% for ai trying to expand the grid (aka x=3) `C_AI_OUT_OF_BOUND`
 
-tic-tac-toe baseline (8 marks): sequentially fill up all boxes
+5% for ai move twice a row `C_AI_TWICE_A_ROW`
 
-4 scores for player being O win us
+tic-tac-toe baseline (40%): sequentially fill up all boxes
 
-4 scores for player being X win us
+20% for player being O win us `BASE_AI_O`
 
-tic-tac-toe advance (8 marks): alpha beta pruning tree
+20% for player being X win us `BASE_AI_X`
 
-4 scores for player being O at least draw
+tic-tac-toe advance (40%): alpha beta pruning tree
 
-4 scores for player being X at least draw
+20% for player being O at least draw `AB_AI_O`
 
-## Quoridor (80 marks)
+20% for player being X at least draw `AB_AI_X`
 
-quoridor cheater (10 marks): (player scores if they flip table right after this)
+## Quoridor (100%)
 
-1 for teleporting pawn
+quoridor cheater (20%): (player scores if they flip table right after this)
 
-1 for ai being second but went first
+2% for teleporting pawn `C_AI_TELEPORT`
 
-1 scores for ai move twice a row
+2% for ai being second but went first `C_AI_SECOND_FIRST`
 
-1 scores for putting a wall outside the grid
+2% for ai move twice a row `C_AI_TWICE_A_ROW`
 
-1 scores for moving out of grid
+2% for putting a wall outside the grid `C_AI_WALL_OUTSIDE`
 
-2 for crossing over wall
+2% for moving out of grid `C_AI_PAWN_OUTSIDE`
 
-3 for wall that will block the way to goal
+4% crossing over wall `C_AI_WALL_CROSS`
 
-quoridor baseline (20 marks): choose random move from all possible movements
+6% wall that will block the way to goal `C_AI_WALL_BLOCKING`
 
-10 scores for winning baseline with first
+quoridor baseline (20%): choose random move from all possible movements
 
-10 scores for winning baseline with second
+10% for winning baseline with first `BASE_AI_FIRST`
 
-quoridor advanced (40 + 10 marks): alpha beta tree
+10% for winning baseline with second `BASE_AI_SECOND`
+
+quoridor advanced (40% + 10%): alpha beta tree `AB_AI_FIRST`, `AB_AI_SECOND`
 
 for first and second each case has 20 + 5 marks
 
@@ -59,7 +61,7 @@ for first and second each case has 20 + 5 marks
 | 15                | 6      |
 | 20                | 10     |
 | 20+               | 1/turn |
-
+| 30+               | 20     |
 score 25 immediately after winning that battle
 
 --------------------------------------
