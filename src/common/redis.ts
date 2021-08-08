@@ -3,11 +3,16 @@ import IORedis, { Redis } from 'ioredis'
 export const allRedis: Redis[] = []
 
 export const makeRedis = (): Redis => {
-  const redis = new IORedis(process.env.REDIS_TLS_URL ?? process.env.REDIS_URL, {
-    tls: {
-      rejectUnauthorized: false
-    }
-  })
+  if(process.env.REDIS_TLS_URL !== undefined) {
+    const redis = new IORedis(process.env.REDIS_TLS_URL, {
+      tls: {
+        rejectUnauthorized: false
+      }
+    })
+    allRedis.push(redis)
+    return redis
+  }
+  const redis = new IORedis(process.env.REDIS_URL)
   allRedis.push(redis)
   return redis
 }

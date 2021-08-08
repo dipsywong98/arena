@@ -7,8 +7,8 @@
     "lint:fix": "eslint . --ext .ts --fix",
     "start": "node -r module-alias/register ./dist --env=production",
     "start:dev": "nodemon",
-    "test:unit": "jest spec/unit",
-    "test:acceptance": "jest spec/acceptance --detectOpenHandles"
+    "test:unit": "jest spec/unit --collectCoverage",
+    "test:acceptance": "jest spec/acceptance --detectOpenHandles --collectCoverage"
   },
   "nodemonConfig": {
     "watch": [

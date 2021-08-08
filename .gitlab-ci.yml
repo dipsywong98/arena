@@ -33,6 +33,7 @@ unit:
     policy: pull
   script:
     - yarn test:unit
+  artifacts: reports
 
 acceptance:
   stage: test
@@ -43,6 +44,7 @@ acceptance:
     policy: pull
   script:
     - yarn test:acceptance
+  artifacts: reports
 
 build:
   stage: test
