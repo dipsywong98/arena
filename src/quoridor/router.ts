@@ -51,7 +51,7 @@ quoridorRouter.get('/start/:battleId', async (req, res) => {
   res.write(`data: ${JSON.stringify({ youAre: battle.externalPlayer, id: battleId })}\n\n`)
 
   await subscribeMessage(subRedis, battleId, (message) => {
-    try{
+    try {
       const { action2, ...rest } = JSON.parse(message)
       res.write(`data: ${JSON.stringify(rest)}\n\n`)
       if (action2 !== undefined) {

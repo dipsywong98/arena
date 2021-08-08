@@ -205,10 +205,10 @@ export const processMove = async (move: TicTacToeMove): Promise<unknown> => {
   const battle = await getBattle(redis, move.battleId)
   if (battle !== null) {
     if (battle.result === undefined) {
-      let action = {type: TicTacToeActionType.INVALID_ACTION}, error
+      let action = { type: TicTacToeActionType.INVALID_ACTION }, error
       try {
         action = internalizeAction(move.action)
-      }catch (e) {
+      } catch (e) {
         error = e.message
       }
       const ctx: ProcessMoveContext = {

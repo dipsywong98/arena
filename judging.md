@@ -30,7 +30,7 @@ quoridor cheater (10 marks): (player scores if they flip table right after this)
 
 1 for teleporting pawn
 
-1 for ai being first but went first
+1 for ai being second but went first
 
 1 scores for ai move twice a row
 
@@ -52,13 +52,13 @@ quoridor advanced (40 + 10 marks): alpha beta tree
 
 for first and second each case has 20 + 5 marks
 
-|surviving # turns | score |
-|------------------|-------|
-|5                 |1      |
-|10                |3      |
-|15                |6      |
-|20                |10     |
-|20+               |1/turn |
+| surviving # turns | score  |
+| ----------------- | ------ |
+| 5                 | 1      |
+| 10                | 3      |
+| 15                | 6      |
+| 20                | 10     |
+| 20+               | 1/turn |
 
 score 25 immediately after winning that battle
 

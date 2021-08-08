@@ -5,10 +5,16 @@ export enum QuoridorCaseType {
   BASE_AI_SECOND = 'BASE_AI_SECOND',
   AB_AI_FIRST = 'AB_AI_FIRST',
   AB_AI_SECOND = 'AB_AI_SECOND',
-  C_AI_SECOND_FIRST = 'C_AI_SECOND_FIRST'
+  C_AI_TELEPORT = 'C_AI_TELEPORT',
+  C_AI_SECOND_FIRST = 'C_AI_SECOND_FIRST',
+  C_AI_TWICE_A_ROW = 'C_AI_TWICE_A_ROW',
+  C_AI_WALL_OUTSIDE = 'C_AI_WALL_OUTSIDE',
+  C_AI_PAWN_OUTSIDE = 'C_AI_PAWN_OUTSIDE',
+  C_AI_WALL_CROSS = 'C_AI_WALL_CROSS',
+  C_AI_WALL_BLOCKING = 'C_AI_WALL_BLOCKING',
 }
 
-export function isCaseType (p: string | undefined): p is QuoridorCaseType {
+export function isCaseType(p: string | undefined): p is QuoridorCaseType {
   return p !== undefined && p in QuoridorCaseType
 }
 

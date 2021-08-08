@@ -9,6 +9,8 @@ import { v4 } from 'uuid'
 import { CallbackPayload, EvaluatePayload } from '../../src/common/types'
 import { quoridorConcludeWorker, quoridorMoveWorker } from '../../src/quoridor/queues'
 import { QuoridorAction, QuoridorActionType } from '../../src/quoridor/types'
+import logger from '../../src/common/logger'
+import { ConsoleTransportOptions } from 'winston/lib/winston/transports'
 
 type Event = Record<string, unknown>
 type OnEvent = (event: Event, ctx: PlayContext) => void
@@ -77,6 +79,7 @@ export const requestForGrade = async (
   }
   const { data: { battleIds } } = await axios.post(`/${game}/evaluate`, payload)
   expect(battleIds).toEqual(expect.arrayContaining(sentBattleIds))
+  logger.info(`battleIds ${battleIds.join(',')}`)
   return battleIds as string[]
 }
 
@@ -145,19 +148,24 @@ export const expectWinner = (winner: string) =>
     expect(event).toEqual({ winner })
   })
 
-export const expectTotalScore = (expectedScore: number) => async (context: PlayContext) => {
+export const expectTotalScore = (expectedScore: number | ((score: number) => void)) => async (context: PlayContext) => {
+  const check = typeof expectedScore === 'number' ? (actualScore: number) => {
+    expect(actualScore).toEqual(expectedScore)
+  } : expectedScore
   if (context.runId in callbackEndpointResults) {
     const actualScore = callbackEndpointResults[context.runId]?.score
-    expect(actualScore).toEqual(expectedScore)
+    check(actualScore)
   } else {
     await new Promise((resolve => {
       onCallbackCalled[context.runId] = (payload) => {
-        expect(payload.score).toEqual(expectedScore)
+        check(payload.score)
         resolve(0)
       }
     }))
   }
 }
+
+export const expectTotalScoreSomething = () => expectTotalScore(score => expect(score).toBeGreaterThan(0))
 
 export const expectFlipTable = (player: string) =>
   receiveEvent((event) => {
@@ -238,7 +246,7 @@ export const startRun = async (game: string, stepsForCases: Step[][]): Promise<v
   await Promise.all(promises)
 }
 
-export const autoPlay = <S, A extends TicTacToeAction | QuoridorAction> (
+export const autoPlay = <S, A extends TicTacToeAction | QuoridorAction>(
   { init, apply, agent, externalizeAction, internalizeAction }: {
     init: () => S,
     apply: (s: S, a: A) => S,
@@ -252,22 +260,21 @@ export const autoPlay = <S, A extends TicTacToeAction | QuoridorAction> (
     let flag = false
     while (!flag) {
       await receiveEvent((value) => {
-        if (value.youAre !== undefined) {
+        expect(value).toBeTruthy()
+        if (value.action === 'flipTable' || value.winner !== undefined) {
+          flag = true
+        } else if (value.youAre !== undefined) {
           me = value.youAre
           if (me === 'O' || me === 'first') {
             const react = agent(state)
             play({ ...externalizeAction(react), action: react.type })(ctx)
           }
-        }
-        if (value.action !== undefined) {
+        } else if (value.action !== undefined) {
           state = apply(state, internalizeAction(value))
           if (value.player !== me) {
             const react = agent(state)
             play({ ...externalizeAction(react), action: react.type })(ctx)
           }
-        }
-        if (value.action === 'flipTable' || value.winner !== undefined) {
-          flag = true
         }
       })(ctx)
     }

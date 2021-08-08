@@ -1,6 +1,7 @@
 import { initState, opposite } from './common'
-import { abAgent, baseAgent } from './agent'
+import { abAgent, baseAgent, blockingWallAgent } from './agent'
 import {
+  Orientation,
   QuoridorActionType,
   QuoridorBattle,
   QuoridorCaseType,
@@ -51,6 +52,21 @@ export const config: Record<QuoridorCaseType, QuoridorTestCase> = Object.freeze(
       return playerWin(battle) ? 3 : 0
     }
   },
+  [QuoridorCaseType.C_AI_TELEPORT]: {
+    initialStateGenerator: makeInitialStateGenerator(QuoridorTurn.SECOND),
+    agent: () => {
+      return {
+        cheat: {
+          type: QuoridorActionType.MOVE,
+          x: 4,
+          y: 4
+        }
+      }
+    },
+    score: () => {
+      return 1
+    }
+  },
   [QuoridorCaseType.C_AI_SECOND_FIRST]: {
     initialStateGenerator: makeInitialStateGenerator(QuoridorTurn.SECOND),
     agent: () => {
@@ -62,6 +78,89 @@ export const config: Record<QuoridorCaseType, QuoridorTestCase> = Object.freeze(
         }
       }
     },
+    score: () => {
+      return 1
+    }
+  },
+  [QuoridorCaseType.C_AI_TWICE_A_ROW]: {
+    initialStateGenerator: makeInitialStateGenerator(QuoridorTurn.SECOND),
+    agent: () => {
+      return {
+        cheat: {
+          type: QuoridorActionType.MOVE,
+          x: 4,
+          y: 1,
+          action2: {
+            type: QuoridorActionType.MOVE,
+            x: 4,
+            y: 2
+          }
+        }
+      }
+    },
+    score: () => {
+      return 1
+    }
+  },
+  [QuoridorCaseType.C_AI_WALL_OUTSIDE]: {
+    initialStateGenerator: makeInitialStateGenerator(QuoridorTurn.FIRST),
+    agent: () => {
+      return {
+        cheat: {
+          type: QuoridorActionType.PUT_WALL,
+          x: 8,
+          y: 4,
+          o: Orientation.HORIZONTAL
+        }
+      }
+    },
+    score: () => {
+      return 1
+    }
+  },
+  [QuoridorCaseType.C_AI_PAWN_OUTSIDE]: {
+    initialStateGenerator: makeInitialStateGenerator(QuoridorTurn.SECOND),
+    agent: () => {
+      return {
+        cheat: {
+          type: QuoridorActionType.MOVE,
+          x: 4,
+          y: -1
+        }
+      }
+    },
+    score: () => {
+      return 1
+    }
+  },
+  [QuoridorCaseType.C_AI_WALL_CROSS]: {
+    initialStateGenerator: makeInitialStateGenerator(QuoridorTurn.FIRST),
+    agent: (state) => {
+      if (state.players[QuoridorTurn.FIRST].walls === 10) {
+        return {
+          type: QuoridorActionType.PUT_WALL,
+          x: 4,
+          y: 4,
+          o: Orientation.HORIZONTAL
+        }
+      } else {
+        return {
+          cheat: {
+            type: QuoridorActionType.PUT_WALL,
+            x: 4,
+            y: 4,
+            o: Orientation.VERTICAL
+          }
+        }
+      }
+    },
+    score: () => {
+      return 1
+    }
+  },
+  [QuoridorCaseType.C_AI_WALL_BLOCKING]: {
+    initialStateGenerator: makeInitialStateGenerator(QuoridorTurn.SECOND),
+    agent: blockingWallAgent,
     score: () => {
       return 1
     }

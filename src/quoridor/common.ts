@@ -23,7 +23,7 @@ export const initPlayer = (y: number): Player => ({
   y
 })
 
-export const make2dArray = <T> (size: number, value: T): T[][] => {
+export const make2dArray = <T>(size: number, value: T): T[][] => {
   return Array(size)
     .fill('')
     .map(() => Array(size).fill(value) as T[])
@@ -222,7 +222,11 @@ export const isWalkable = (
   if (state.players.second.x === x1 && state.players.second.y === y1) {
     return false
   }
-  return !state.walls[y0 + y1][x0 + x1]
+  try {
+    return !state.walls[y0 + y1][x0 + x1]
+  } catch (e) {
+    return false
+  }
 }
 
 export const pushIfWalkable = (
@@ -235,14 +239,14 @@ export const pushIfWalkable = (
   return false
 }
 
-export const allPossibleWalls = (state: QuoridorState): QActionInternal[] => {
+export const allPossibleWalls = (state: QuoridorState, checker = canPutWall): QActionInternal[] => {
   const a = []
   for (let y = 0; y < SIZE - 1; y++) {
     for (let x = 0; x < SIZE - 1; x++) {
-      if (canPutWall(state, x, y, Orientation.HORIZONTAL)) {
+      if (checker(state, x, y, Orientation.HORIZONTAL)) {
         a.push({ x, y, o: Orientation.HORIZONTAL, type: QuoridorActionType.PUT_WALL })
       }
-      if (canPutWall(state, x, y, Orientation.VERTICAL)) {
+      if (checker(state, x, y, Orientation.VERTICAL)) {
         a.push({ x, y, o: Orientation.VERTICAL, type: QuoridorActionType.PUT_WALL })
       }
     }
@@ -311,11 +315,11 @@ export const externalizeAction = (
     if (x !== undefined && y !== undefined) {
       const a = 'abcdefghi'[x]
       const b = 9 - y
-        return {
-          action: action.type,
-          position: `${a}${b}`,
-          player,
-          ...rest
+      return {
+        action: action.type,
+        position: `${a}${b}`,
+        player,
+        ...rest
       }
     }
     return {
@@ -353,4 +357,11 @@ export const externalizeAction = (
       ...rest
     }
   }
+}
+
+export const blocked = (state: QuoridorState) => {
+  return (
+    pathLength(state, QuoridorTurn.FIRST) < 0
+    || pathLength(state, QuoridorTurn.SECOND) < 0
+  )
 }

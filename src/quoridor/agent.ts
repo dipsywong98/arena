@@ -2,8 +2,10 @@ import { QActionInternal, QuoridorActionType, QuoridorState, QuoridorTurn } from
 import {
   allPossibleWalls,
   applyAction,
+  blocked,
   getWalkableNeighborCoords,
   isEndGame,
+  isWallNotOverlap,
   opposite,
   pathLength,
   SIZE
@@ -29,19 +31,27 @@ const scorer = (me: QuoridorTurn) => (state: QuoridorState): number => {
   // path length
   const plp = pathLength(state, me)
   if (plp === -1) {
-    throw new Error('why this happened')
-    }
+    throw new Error(`why this happened, no path for ${me}`)
+  }
   const plq = pathLength(state, opposite(me))
   if (plq === -1) {
-    throw new Error('why this happened')
+    throw new Error(`why this happened, no path for ${opposite(me)}`)
   } // dont select this
   const plmax = SIZE * SIZE
   return (plmax - plp) / plmax - (plmax - plq) / plmax
 }
 
+const preferBlockingScorer = (me: QuoridorTurn) => (state: QuoridorState): number => {
+  try {
+    return scorer(me)(state)
+  } catch (e) {
+    return 1000
+  }
+}
+
 const generator = (state: QuoridorState): QActionInternal[] => {
   const neighbors = getWalkableNeighborCoords(state, state.turn)
-    .map(({x, y}) => ({x,y,type: QuoridorActionType.MOVE}))
+    .map(({ x, y }) => ({ x, y, type: QuoridorActionType.MOVE }))
   const walls = state.players[state.turn].walls > 0 ? shuffle(allPossibleWalls(state)) : []
   return neighbors.concat(walls)
 }
@@ -49,6 +59,13 @@ const generator = (state: QuoridorState): QActionInternal[] => {
 const moveOnlyGenerator = (state: QuoridorState): QActionInternal[] => {
   return getWalkableNeighborCoords(state, state.turn)
     .map(({ x, y }) => ({ x, y, type: QuoridorActionType.MOVE }))
+}
+
+const blockingWallGenerator = (state: QuoridorState): QActionInternal[] => {
+  const neighbors = getWalkableNeighborCoords(state, state.turn)
+    .map(({ x, y }) => ({ x, y, type: QuoridorActionType.MOVE }))
+  const walls = state.players[state.turn].walls > 0 ? shuffle(allPossibleWalls(state, isWallNotOverlap)) : []
+  return walls.concat(neighbors)
 }
 
 export const baseAgent = (state: QuoridorState): QActionInternal => {
@@ -71,7 +88,7 @@ export const abAgent = (state: QuoridorState): QActionInternal => {
     })
     return alphaBetaTreeResult.action ?? baseAgent(state)
   } catch (e) {
-    logger.err(e)
+    logger.err('error occured in abtree and fall back to baseAgent', e)
     return moveOnlyAgent(state)
   }
 }
@@ -90,6 +107,38 @@ export const moveOnlyAgent = (state: QuoridorState): QActionInternal => {
       apply: applyAction
     })
     return alphaBetaTreeResult.action ?? baseAgent(state)
+  } catch (e) {
+    logger.err('error occured in abtree and fall back to baseAgent', e)
+    return baseAgent(state)
+  }
+}
+
+
+export const blockingWallAgent = (state: QuoridorState): QActionInternal | { cheat: QActionInternal } => {
+  try {
+    const alphaBetaTreeResult = alphaBetaTree({
+      state,
+      generator: blockingWallGenerator,
+      isEndGame,
+      scorer: preferBlockingScorer(state.turn),
+      depth: 2,
+      maximize: true,
+      alpha: -Infinity,
+      beta: Infinity,
+      apply: applyAction
+    })
+    const action = alphaBetaTreeResult.action
+    if (action === undefined) {
+      return baseAgent(state)
+    } else {
+      const nextState = applyAction(state, action)
+      if (blocked(nextState)) {
+        return {
+          cheat: action
+        }
+      }
+      return action
+    }
   } catch (e) {
     logger.err(e)
     return baseAgent(state)
