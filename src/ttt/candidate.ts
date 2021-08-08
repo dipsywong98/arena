@@ -32,7 +32,7 @@ export const candidate = (battleId: string) => {
           play({ ...externalizeAction(react), action: react.type })
         }
       } else if (value.action !== undefined) {
-        if (valid(state, value, value.player, battleId)) {
+        if (valid(state, value, value.player)) {
           state = apply(state, internalizeAction(value))
           if (value.player !== me) {
             const react = agent(state)
@@ -53,7 +53,7 @@ export const candidate = (battleId: string) => {
   })
 }
 
-function valid(state: TicTacToeState, value: any, by: any, _battleId: string) {
+function valid(state: TicTacToeState, value: any, by: any) {
   if (state.turn !== by) {
     return false
   }

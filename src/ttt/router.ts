@@ -127,8 +127,8 @@ ticTacToeRouter.get('/admin/view/:id', (req, res) => {
 ticTacToeRouter.post('/', (req, res) => {
   if (process.env.CANDIDATE_ENABLED) {
     res.send('OK')
-  } else {
     candidate(req.body.battleId)
+  } else {
     res.send('OK')
   }
 })

@@ -4,7 +4,6 @@ import redis from '../common/redis'
 import { difference, mergeAll } from 'ramda'
 import { reportScore } from '../common/reportScore'
 import { ConcludeRequest } from '../common/types'
-import logger from '../common/logger'
 
 export const processConclude = async (concludeRequest: ConcludeRequest) => {
   const { runId } = concludeRequest
