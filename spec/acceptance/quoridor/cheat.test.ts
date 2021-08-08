@@ -181,41 +181,41 @@ describe('quoridor-cheat', () => {
     })
   })
   describe('C_AI_WALL_BLOCKING', () => {
-    const autoPlay1 = autoPlay({
-      init: initState,
-      apply: applyAction,
-      agent: state => {
-        if (blocked(state)) {
-          return {
-            type: QuoridorActionType.FLIP_TABLE,
-            x: 0, y: 0
-          }
-        }
-        return moveOnlyAgent(state)
-      },
-      externalizeAction: externalizeAction,
-      internalizeAction: internalizeAction
-    })
-    const autoPlay2 = autoPlay({
-      init: initState,
-      apply: applyAction,
-      agent: moveOnlyAgent,
-      externalizeAction: externalizeAction,
-      internalizeAction: internalizeAction
-    })
     it('dont flip', () => {
+      const autoPlayNoFlip = autoPlay({
+        init: initState,
+        apply: applyAction,
+        agent: moveOnlyAgent,
+        externalizeAction: externalizeAction,
+        internalizeAction: internalizeAction
+      })
       return startBattle('quoridor',
         QuoridorCaseType.C_AI_WALL_BLOCKING,
         listenEvent(),
-        autoPlay2,
+        autoPlayNoFlip,
         expectTotalScore(0))
     }, 10000)
     it('flip', () => {
+      const autoPlayWithFlip = autoPlay({
+        init: initState,
+        apply: applyAction,
+        agent: state => {
+          if (blocked(state)) {
+            return {
+              type: QuoridorActionType.FLIP_TABLE,
+              x: 0, y: 0
+            }
+          }
+          return moveOnlyAgent(state)
+        },
+        externalizeAction: externalizeAction,
+        internalizeAction: internalizeAction
+      })
       return startBattle('quoridor',
         QuoridorCaseType.C_AI_WALL_BLOCKING,
         listenEvent(),
-        autoPlay1,
+        autoPlayWithFlip,
         expectTotalScore(1))
-    })
+    }, 10000)
   })
 })
