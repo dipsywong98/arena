@@ -52,7 +52,8 @@ const preferBlockingScorer = (me: QuoridorTurn) => (state: QuoridorState): numbe
 const generator = (state: QuoridorState): QActionInternal[] => {
   const neighbors = getWalkableNeighborCoords(state, state.turn)
     .map(({ x, y }) => ({ x, y, type: QuoridorActionType.MOVE }))
-  const walls = state.players[state.turn].walls > 0 ? shuffle(allPossibleWalls(state)) : []
+  const hasWallLeft = state.players[state.turn].walls > 0
+  const walls = hasWallLeft ? shuffle(allPossibleWalls(state)) : []
   return neighbors.concat(walls)
 }
 
@@ -64,7 +65,8 @@ const moveOnlyGenerator = (state: QuoridorState): QActionInternal[] => {
 const blockingWallGenerator = (state: QuoridorState): QActionInternal[] => {
   const neighbors = getWalkableNeighborCoords(state, state.turn)
     .map(({ x, y }) => ({ x, y, type: QuoridorActionType.MOVE }))
-  const walls = state.players[state.turn].walls > 0 ? shuffle(allPossibleWalls(state, isWallNotOverlap)) : []
+  const haveWallLeft = state.players[state.turn].walls > 0
+  const walls = haveWallLeft ? shuffle(allPossibleWalls(state, isWallNotOverlap)) : []
   return walls.concat(neighbors)
 }
 
@@ -113,8 +115,8 @@ export const moveOnlyAgent = (state: QuoridorState): QActionInternal => {
   }
 }
 
-
-export const blockingWallAgent = (state: QuoridorState): QActionInternal | { cheat: QActionInternal } => {
+type QActionInternalOrCheat = QActionInternal | { cheat: QActionInternal }
+export const blockingWallAgent = (state: QuoridorState): QActionInternalOrCheat => {
   try {
     const alphaBetaTreeResult = alphaBetaTree({
       state,

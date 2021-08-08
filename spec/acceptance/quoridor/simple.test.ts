@@ -35,7 +35,7 @@ const autoPlay1 = autoPlay({
 describe('quoridor-simple', () => {
   it('generate the test cases', async () => {
     const battleIds = await requestForGrade('quoridor')
-    expect(battleIds).toHaveLength(5)
+    expect(battleIds).toHaveLength(11)
   })
 
   it('gives me my position when start game', async () => {
@@ -122,7 +122,7 @@ describe('quoridor-simple', () => {
   })
 
   describe('flips when player place walls exceed boundary', () => {
-    it ('|', () => {
+    it('|', () => {
       return startBattle('quoridor',
         QuoridorCaseType.BASE_AI_SECOND,
         listenEvent(),
@@ -177,8 +177,14 @@ describe('quoridor-simple', () => {
       [flipTable()],
       [flipTable()],
       [flipTable()],
+      [flipTable()],
+      [flipTable()],
+      [flipTable()],
+      [flipTable()],
+      [flipTable()],
+      [flipTable()],
       [flipTable(),
-        expectTotalScore(0)]
+      expectTotalScore(0)]
     ])
   })
 
@@ -186,14 +192,20 @@ describe('quoridor-simple', () => {
     return startRun('quoridor', [
       [listenEvent(),
         autoPlay1,
-        viewBattle(battle => {
-          expect(battle.score).toEqual(3)
-        })],
+      viewBattle(battle => {
+        expect(battle.score).toEqual(3)
+      })],
+      [flipTable()],
+      [flipTable()],
+      [flipTable()],
+      [flipTable()],
+      [flipTable()],
+      [flipTable()],
       [flipTable()],
       [flipTable()],
       [flipTable()],
       [flipTable(),
-        expectTotalScore(3)]
+      expectTotalScore(3)]
     ])
   })
 })

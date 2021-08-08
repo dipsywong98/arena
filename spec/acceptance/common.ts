@@ -10,7 +10,6 @@ import { CallbackPayload, EvaluatePayload } from '../../src/common/types'
 import { quoridorConcludeWorker, quoridorMoveWorker } from '../../src/quoridor/queues'
 import { QuoridorAction, QuoridorActionType } from '../../src/quoridor/types'
 import logger from '../../src/common/logger'
-import { ConsoleTransportOptions } from 'winston/lib/winston/transports'
 
 type Event = Record<string, unknown>
 type OnEvent = (event: Event, ctx: PlayContext) => void
@@ -79,7 +78,7 @@ export const requestForGrade = async (
   }
   const { data: { battleIds } } = await axios.post(`/${game}/evaluate`, payload)
   expect(battleIds).toEqual(expect.arrayContaining(sentBattleIds))
-  logger.info(`battleIds ${battleIds.join(',')}`)
+  logger.info(`battleIds ${(battleIds as string[]).join(',')}`)
   return battleIds as string[]
 }
 
@@ -148,24 +147,27 @@ export const expectWinner = (winner: string) =>
     expect(event).toEqual({ winner })
   })
 
-export const expectTotalScore = (expectedScore: number | ((score: number) => void)) => async (context: PlayContext) => {
-  const check = typeof expectedScore === 'number' ? (actualScore: number) => {
-    expect(actualScore).toEqual(expectedScore)
-  } : expectedScore
-  if (context.runId in callbackEndpointResults) {
-    const actualScore = callbackEndpointResults[context.runId]?.score
-    check(actualScore)
-  } else {
-    await new Promise((resolve => {
-      onCallbackCalled[context.runId] = (payload) => {
-        check(payload.score)
-        resolve(0)
-      }
-    }))
-  }
-}
+export const expectTotalScore = (expectedScore: number | ((score: number) => void)) => (
+  async (context: PlayContext) => {
+    const check = typeof expectedScore === 'number' ? (actualScore: number) => {
+      expect(actualScore).toEqual(expectedScore)
+    } : expectedScore
+    if (context.runId in callbackEndpointResults) {
+      const actualScore = callbackEndpointResults[context.runId]?.score
+      check(actualScore)
+    } else {
+      await new Promise((resolve => {
+        onCallbackCalled[context.runId] = (payload) => {
+          check(payload.score)
+          resolve(0)
+        }
+      }))
+    }
+  })
 
-export const expectTotalScoreSomething = () => expectTotalScore(score => expect(score).toBeGreaterThan(0))
+export const expectTotalScoreSomething = () => {
+  return expectTotalScore(score => expect(score).toBeGreaterThan(0))
+}
 
 export const expectFlipTable = (player: string) =>
   receiveEvent((event) => {

@@ -11,9 +11,15 @@ import {
   movePawn,
   startBattle
 } from '../common'
-import { QuoridorActionType, QuoridorCaseType, QuoridorTurn } from '../../../src/quoridor/types'
-import { applyAction, externalizeAction, initState, internalizeAction, pathLength } from '../../../src/quoridor/common'
-import { baseAgent, moveOnlyAgent } from '../../../src/quoridor/agent'
+import { QuoridorActionType, QuoridorCaseType } from '../../../src/quoridor/types'
+import {
+  applyAction,
+  blocked,
+  externalizeAction,
+  initState,
+  internalizeAction,
+} from '../../../src/quoridor/common'
+import { moveOnlyAgent } from '../../../src/quoridor/agent'
 
 describe('quoridor-cheat', () => {
   describe('C_AI_TELEPORT', () => {
@@ -179,7 +185,7 @@ describe('quoridor-cheat', () => {
       init: initState,
       apply: applyAction,
       agent: state => {
-        if (pathLength(state, QuoridorTurn.FIRST) < 0 || pathLength(state, QuoridorTurn.SECOND) < 0) {
+        if (blocked(state)) {
           return {
             type: QuoridorActionType.FLIP_TABLE,
             x: 0, y: 0
