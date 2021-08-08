@@ -44,11 +44,11 @@ quoridor cheater (20%): (player scores if they flip table right after this)
 
 6% wall that will block the way to goal `C_AI_WALL_BLOCKING`
 
-quoridor baseline (20%): choose random move from all possible movements
+quoridor baseline (30%): choose random move from all possible movements
 
-10% for winning baseline with first `BASE_AI_FIRST`
+15% for winning baseline with first `BASE_AI_FIRST`
 
-10% for winning baseline with second `BASE_AI_SECOND`
+15% for winning baseline with second `BASE_AI_SECOND`
 
 quoridor advanced (40% + 10%): alpha beta tree `AB_AI_FIRST`, `AB_AI_SECOND`
 

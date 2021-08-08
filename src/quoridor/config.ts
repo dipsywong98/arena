@@ -10,7 +10,12 @@ import {
 } from './types'
 import { playerWin } from './processMove'
 
-export const INITIAL_CLOCK_MS = 60 * 1000
+export const INITIAL_CLOCK_MS = parseInt(process.env.QUORIDOR_INITIAL_CLOCK_MS ?? '60000')
+
+export const TURN_ADD_MS = parseInt(process.env.QUORIDOR_TURN_ADD_MS ?? '2000')
+
+// would directly call the score function for score
+export const TERMINATE_TURNS = parseInt(process.env.QUORIDOR_TERMINATE_TURNS ?? '40')
 
 const makeInitialStateGenerator = (aiTurn: QuoridorTurn) =>
   (battleId: string, runId: string): Omit<QuoridorBattle, 'type'> => ({
@@ -21,8 +26,6 @@ const makeInitialStateGenerator = (aiTurn: QuoridorTurn) =>
     clock: INITIAL_CLOCK_MS,
     createdAt: Date.now()
   })
-
-export const TURN_ADD_MS = 2 * 1000
 
 const abAiScore = (battle: QuoridorBattle) => {
   if (playerWin(battle)) {
@@ -49,14 +52,14 @@ export const config: Record<QuoridorCaseType, QuoridorTestCase> = Object.freeze(
     initialStateGenerator: makeInitialStateGenerator(QuoridorTurn.FIRST),
     agent: baseAgent,
     score: (battle) => {
-      return playerWin(battle) ? 10 : 0
+      return playerWin(battle) ? 15 : 0
     }
   },
   [QuoridorCaseType.BASE_AI_SECOND]: {
     initialStateGenerator: makeInitialStateGenerator(QuoridorTurn.SECOND),
     agent: baseAgent,
     score: (battle) => {
-      return playerWin(battle) ? 10 : 0
+      return playerWin(battle) ? 15 : 0
     }
   },
   [QuoridorCaseType.AB_AI_FIRST]: {

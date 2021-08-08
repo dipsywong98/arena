@@ -15,6 +15,7 @@ import { quoridorMoveQueue } from './queues'
 import { processEvaluate } from './processEvaluate'
 import { TURN_ADD_MS } from './config'
 import { isEvaluatePayload } from '../common/types'
+import { candidate } from './candidate'
 
 const quoridorRouter = Router()
 quoridorRouter.get('/hi', (request, response) => {
@@ -121,6 +122,15 @@ quoridorRouter.get('/admin/view/:id', (req, res) => {
   getBattle(pubRedis, id).then(game => {
     res.json(game)
   })
+})
+
+quoridorRouter.post('/', (req, res) => {
+  if (process.env.CANDIDATE_ENABLED) {
+    res.send('OK')
+    candidate(req.body.battleId)
+  } else {
+    res.send('OK')
+  }
 })
 
 quoridorRouter.post('/', (req, res) => {

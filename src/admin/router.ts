@@ -11,7 +11,7 @@ const getRun = async (game: string, runId: string): Promise<unknown> => {
     const run: Run = JSON.parse(j)
     return {
       ...run,
-      battleUrls: run.battleIds.map(id => `${arenaUrl}/tic-tac-toe/admin/view/${id}`)
+      battleUrls: run.battleIds.map(id => `${arenaUrl}/${game}/admin/view/${id}`)
     }
   }
   return j

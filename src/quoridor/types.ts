@@ -74,6 +74,7 @@ export enum QuoridorResult {
   FIRST_WIN = 'FIRST_WIN',
   SECOND_WIN = 'SECOND_WIN',
   FLIPPED = 'FLIPPED',
+  DRAW = 'DRAW',
 }
 
 export enum QuoridorActionType {

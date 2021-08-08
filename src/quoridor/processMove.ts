@@ -25,7 +25,7 @@ import { quoridorConcludeQueue } from './queues'
 import { v4 } from 'uuid'
 import redis from '../common/redis'
 import logger from '../common/logger'
-import { config } from './config'
+import { config, TERMINATE_TURNS } from './config'
 
 export const playerWin = (battle: QuoridorBattle) => {
   if (battle.result === QuoridorResult.FIRST_WIN) {
@@ -89,6 +89,9 @@ export const checkEndGame = (ctx: ProcessMoveContext): ProcessMoveContext => pro
       if (winner) {
         draft.battle.result = winner
       }
+    }
+    if (Math.floor(draft.battle.history.length / 2) >= TERMINATE_TURNS) {
+      draft.battle.result = QuoridorResult.DRAW
     }
     return draft
   }

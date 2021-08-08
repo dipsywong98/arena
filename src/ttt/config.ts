@@ -153,6 +153,9 @@ export const config: Record<TicTacToeCaseType, TicTacToeTestCase> = Object.freez
   }
 })
 
+// TODO lock the battle when is still processing
+// TODO compress the quoridor board
+// TODO expose endpoint to clear redis
 // TODO ensure handle move only if started (actually no need)
 // TODO overall TLE
 // TODO more support endpoint
