@@ -198,7 +198,7 @@ export const putWall = (position: string): Step => play({
 
 export const viewBattle = (cb: (battle: TicTacToeBattle) => unknown): Step => (
   async (ctx: PlayContext) => {
-    const battle = await axios.get(`/${ctx.game}/view/${ctx.battleId}`)
+    const battle = await axios.get(`/${ctx.game}/admin/view/${ctx.battleId}`)
     cb(battle.data)
   })
 

@@ -116,7 +116,7 @@ ticTacToeRouter.post('/play/:battleId', async (req, res) => {
   res.json({ message: 'received your command', moveId, clock: battle.clock })
 })
 
-ticTacToeRouter.get('/view/:id', (req, res) => {
+ticTacToeRouter.get('/admin/view/:id', (req, res) => {
   const id = req.params.id
   getBattle(pubRedis, id).then(game => {
     res.json(game)

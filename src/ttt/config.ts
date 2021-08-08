@@ -153,6 +153,6 @@ export const config: Record<TicTacToeCaseType, TicTacToeTestCase> = Object.freez
 
 // TODO ensure handle move only if started (actually no need)
 // TODO overall TLE
-// TODO more support endpoint and auth
+// TODO more support endpoint
 // TODO seperate quoridor agent to another host, perhaps a even more chanllenging one
 // TODO upper limit of turns

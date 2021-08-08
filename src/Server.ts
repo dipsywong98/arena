@@ -15,6 +15,7 @@ import { BullMQAdapter } from '@bull-board/api/bullMQAdapter'
 import { concludeQueue, moveQueue } from './ttt/queues'
 import { quoridorConcludeQueue, quoridorMoveQueue } from './quoridor/queues'
 import marked = require('marked')
+import basicAuth from 'express-basic-auth'
 
 const app = express()
 
@@ -25,6 +26,16 @@ const app = express()
 app.use(express.json())
 app.use(express.urlencoded({ extended: true }))
 app.use(cookieParser())
+
+if (process.env.NODE_ENV !== 'test') {
+  app.use(/.*admin.*/, basicAuth({
+    challenge: true,
+    authorizer: (_username: string, password: string) => {
+      return password === (process.env.AUTH_TOKEN ?? 'token')
+    },
+    unauthorizedResponse: 'Unauthorized'
+  }))
+}
 
 // Show routes called in console during development
 if (process.env.NODE_ENV === 'development') {
@@ -50,6 +61,9 @@ createBullBoard({
 
 serverAdapter.setBasePath('/admin/queues')
 
+app.use('/403', (_req, res) => {
+  res.status(403).send('Forbidden')
+})
 app.use('/admin/queues', serverAdapter.getRouter())
 app.use('/tic-tac-toe', ticTacToeRouter)
 app.use('/quoridor', quoridorRouter)

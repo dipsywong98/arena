@@ -116,7 +116,7 @@ quoridorRouter.post('/play/:battleId', async (req, res) => {
   res.json({ message: 'received your command', moveId, clock: battle.clock })
 })
 
-quoridorRouter.get('/view/:id', (req, res) => {
+quoridorRouter.get('/admin/view/:id', (req, res) => {
   const id = req.params.id
   getBattle(pubRedis, id).then(game => {
     res.json(game)
