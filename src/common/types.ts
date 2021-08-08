@@ -30,7 +30,8 @@ export interface Run {
   battleIds: string[]
   callbackUrl: string
   score?: number
-  message?: string
+  message?: unknown
+  createdAt: number
 }
 
 export interface ConcludeRequest {
@@ -54,6 +55,7 @@ export interface Battle<CaseType, Result, S extends State, Turn> {
   history: S[]
   score?: number
   clock: number
+  createdAt: number
 }
 
 export interface TestCase<S extends State,

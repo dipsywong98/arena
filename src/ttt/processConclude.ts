@@ -1,9 +1,10 @@
 import { getBattle, getRun, setRun } from './store'
 import { TicTacToeBattle } from './types'
 import redis from '../common/redis'
-import { difference } from 'ramda'
+import { difference, mergeAll } from 'ramda'
 import { reportScore } from '../common/reportScore'
 import { ConcludeRequest } from '../common/types'
+import logger from '../common/logger'
 
 export const processConclude = async (concludeRequest: ConcludeRequest) => {
   const { runId } = concludeRequest
@@ -26,10 +27,14 @@ export const processConclude = async (concludeRequest: ConcludeRequest) => {
     }
   }
   const totalScore = battles.map(battle => battle.score).reduce((a, b) => a + b, 0)
-  const totalMessage = battles.map(battle => {
-    return `${battle.id}: ${battle.flippedReason ?? `scored ${battle.score}`}`
-  }).join('\n---------------\n')
-  await reportScore(run.callbackUrl, run.id, totalScore, totalMessage)
+  const totalMessage = mergeAll(battles.map(battle => {
+    return { [battle.id]: `${battle.flippedReason ?? `scored ${battle.score}`}` }
+  }))
+  await reportScore(
+    run.callbackUrl,
+    run.id,
+    totalScore,
+    Object.entries(totalMessage).map(([k, v]) => `${k}: ${v}`).join('\n'))
   const concludedRun = { ...run, score: totalScore, message: totalMessage }
   await setRun(redis, concludedRun)
   return concludedRun

@@ -6,13 +6,14 @@ import {
   TicTacToeCaseType,
   TicTacToeResult,
   TicTacToeTestCase,
+  TicTacToeState,
   TicTacToeTurn
 } from './types'
 import { playerWin } from './processMove'
 
 export const INITIAL_CLOCK_MS = 18 * 1000
 
-export const initState = () => {
+export const initState = (): TicTacToeState => {
   return {
     expectFlip: false,
     turn: TicTacToeTurn.O,
@@ -27,7 +28,8 @@ const makeInitialStateGenerator = (aiTurn: TicTacToeTurn) =>
     runId,
     externalPlayer: opposite(aiTurn),
     history: [initState()],
-    clock: INITIAL_CLOCK_MS
+    clock: INITIAL_CLOCK_MS,
+    createdAt: Date.now()
   })
 
 export const TURN_ADD_MS = 2 * 1000

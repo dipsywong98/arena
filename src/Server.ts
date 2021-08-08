@@ -16,6 +16,7 @@ import { concludeQueue, moveQueue } from './ttt/queues'
 import { quoridorConcludeQueue, quoridorMoveQueue } from './quoridor/queues'
 import marked = require('marked')
 import basicAuth from 'express-basic-auth'
+import adminRouter from './admin/router'
 
 const app = express()
 
@@ -65,10 +66,14 @@ app.use('/403', (_req, res) => {
   res.status(403).send('Forbidden')
 })
 app.use('/admin/queues', serverAdapter.getRouter())
+app.use('/admin', adminRouter)
 app.use('/tic-tac-toe', ticTacToeRouter)
 app.use('/quoridor', quoridorRouter)
 const viewsDir = path.join(__dirname, '..', 'static')
 app.use('/static', express.static(viewsDir))
+app.post('/', (req,res) => {
+  res.json(req.body)
+})
 
 const homeHtml = marked(readFileSync(path.join(__dirname, '..', 'readme.md'), { encoding: 'utf8' }))
 

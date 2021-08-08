@@ -15,6 +15,7 @@ import { moveQueue } from './queues'
 import { processEvaluate } from './processEvaluate'
 import { TURN_ADD_MS } from './config'
 import { isEvaluatePayload } from '../common/types'
+import { candidate } from './candidate'
 
 const ticTacToeRouter = Router()
 ticTacToeRouter.get('/hi', (request, response) => {
@@ -124,7 +125,12 @@ ticTacToeRouter.get('/admin/view/:id', (req, res) => {
 })
 
 ticTacToeRouter.post('/', (req, res) => {
-  res.send('OK')
+  if (process.env.CANDIDATE_ENABLED) {
+    res.send('OK')
+  } else {
+    candidate(req.body.battleId)
+    res.send('OK')
+  }
 })
 
 ticTacToeRouter.get('/', (req, res) => {

@@ -27,7 +27,7 @@ export async function processEvaluate<ReqBody> (payload: ReqBody & EvaluatePaylo
   const { teamUrl, runId, caseType, callbackUrl } = payload
   const type = isCaseType(caseType) ? caseType : undefined
   const battleIds = await generateBattlesForGrading(runId, type)
-  const run: Run = { battleIds, callbackUrl, id: runId }
+  const run: Run = { battleIds, callbackUrl, id: runId, createdAt: Date.now() }
   await setRun(pubRedis, run)
   const errors = []
   for (const battleId of shuffle(battleIds)) {

@@ -18,7 +18,8 @@ const makeInitialStateGenerator = (aiTurn: QuoridorTurn) =>
     runId,
     externalPlayer: opposite(aiTurn),
     history: [initState()],
-    clock: INITIAL_CLOCK_MS
+    clock: INITIAL_CLOCK_MS,
+    createdAt: Date.now()
   })
 
 export const TURN_ADD_MS = 2 * 1000
