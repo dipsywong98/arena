@@ -79,6 +79,7 @@ export interface Move<A, Turn> {
   by: Turn
   action: A
   elapsed: number
+  error?: string
 }
 
 type ProcessEvaluate = <ReqBody> (payload: ReqBody & EvaluatePayload) => (

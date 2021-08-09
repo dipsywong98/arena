@@ -1,6 +1,7 @@
 import { Router } from 'express'
 import {
   getBattle,
+  checkAndLockBattle,
   publishMessage,
   setBattle,
   subscribeMessage,
@@ -98,14 +99,24 @@ ticTacToeRouter.post('/play/:battleId', async (req, res) => {
   await setBattle(redis, battle)
   const action = req.body
   const moveId = v4()
+  const error = (
+    await checkAndLockBattle(redis, battle.id)
+      ? 'send move before arena replies'
+      : undefined)
+  await checkAndLockBattle(redis, battleId)
   const move: TicTacToeMove = {
     id: moveId,
     battleId,
     action,
     by: battle.externalPlayer,
-    elapsed
+    elapsed,
+    error
   }
-  await moveQueue.add(moveId, move)
+  if (error !== undefined) {
+    await moveQueue.add(moveId, move)
+  } else {
+    await moveQueue.add(moveId, move, { priority: 1 })
+  }
   await publishMessage(
     pubRedis,
     battleId,

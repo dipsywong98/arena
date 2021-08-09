@@ -174,8 +174,13 @@ export const expectFlipTable = (player: string) =>
     expect(event).toEqual({ player, action: 'flipTable' })
   })
 
-export const play = (payload: unknown): Step => async (ctx: PlayContext) => {
-  await axios.post(`/${ctx.game}/play/${ctx.battleId}`, payload)
+export const play = (payload: unknown, payload2?: unknown): Step => async (ctx: PlayContext) => {
+  const p = axios.post(`/${ctx.game}/play/${ctx.battleId}`, payload)
+  if(payload2) {
+    const p2 = axios.post(`/${ctx.game}/play/${ctx.battleId}`, payload2)
+    await p2
+  }
+  await p
 }
 
 export const putSymbol = (

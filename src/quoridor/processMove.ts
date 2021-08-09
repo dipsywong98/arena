@@ -19,7 +19,7 @@ import {
   internalizeAction,
   opposite
 } from './common'
-import { getBattle, publishMessage, setBattle } from './store'
+import { getBattle, publishMessage, setBattle, unlockBattle } from './store'
 import { Redis } from 'ioredis'
 import { quoridorConcludeQueue } from './queues'
 import { v4 } from 'uuid'
@@ -129,6 +129,7 @@ const calculateScore = (ctx: ProcessMoveContext): ProcessMoveContext => produce(
 })
 export const publishOutput = async (ctx: ProcessMoveContext): Promise<ProcessMoveContext> =>
   produce(ctx, async draft => {
+    await unlockBattle(redis, draft.battle.id)
     if (draft.output.errors.length > 0) {
       await setBattle(draft.redis, draft.battle)
       await publishMessage(draft.redis, draft.battle.id, {
@@ -256,7 +257,7 @@ export const processMove = async (move: QuoridorMove): Promise<unknown> => {
   const battle = await getBattle(redis, move.battleId)
   if (battle !== null) {
     if (battle.result === undefined) {
-      let action = { type: QuoridorActionType.INVALID_ACTION }, error
+      let action = { type: QuoridorActionType.INVALID_ACTION }, error = move.error
       try {
         action = internalizeAction(move.action)
       } catch (e) {

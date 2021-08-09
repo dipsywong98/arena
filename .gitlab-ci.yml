@@ -42,7 +42,18 @@ acceptance:
       - node_modules/
     policy: pull
   script:
-    - yarn test:acceptance
+    - yarn test:acceptance --ci --reporters=default --reporters=jest-junit
+  artifacts:
+    when: always
+    paths:
+      - coverage/
+    reports:
+      junit:
+        - junit.xml
+      cobertura: coverage/cobertura-coverage.xml
+  cache:
+    paths:
+      - coverage/
 
 build:
   stage: test
@@ -81,3 +92,17 @@ deploy:
     - dpl --provider=heroku --app=cis2021-arena-dev --api-key=$HEROKU_API_KEY_DEV
   only:
     - master
+
+pages:
+  stage: deploy
+  dependencies:
+    - test
+  script:
+    - mkdir .public
+    - cp -r coverage/* .public
+    - mv .public public
+  artifacts:
+    paths:
+      - public
+  only:
+   - master

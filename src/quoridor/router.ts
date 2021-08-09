@@ -5,7 +5,8 @@ import {
   setBattle,
   subscribeMessage,
   timerRead,
-  timerReset
+  timerReset,
+  checkAndLockBattle
 } from './store'
 import { v4 } from 'uuid'
 import { QuoridorActionType, QuoridorMove } from './types'
@@ -98,14 +99,23 @@ quoridorRouter.post('/play/:battleId', async (req, res) => {
   await setBattle(redis, battle)
   const action = req.body
   const moveId = v4()
+  const error = (
+    await checkAndLockBattle(redis, battle.id)
+      ? 'send move before arena replies'
+      : undefined)
   const move: QuoridorMove = {
     id: moveId,
     battleId,
     action,
     by: battle.externalPlayer,
-    elapsed
+    elapsed,
+    error
   }
-  await quoridorMoveQueue.add(moveId, move)
+  if (error !== undefined) {
+    await quoridorMoveQueue.add(moveId, move)
+  } else {
+    await quoridorMoveQueue.add(moveId, move, { priority: 1 })
+  }
   await publishMessage(
     pubRedis,
     battleId,

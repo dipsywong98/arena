@@ -3,6 +3,7 @@ import http from "http"
 import https from "https"
 import { TicTacToeActionType } from "../ttt/types"
 import { arenaUrl } from "./constants"
+import logger from "./logger"
 import { Action, State } from "./types"
 
 
@@ -60,7 +61,7 @@ export const candidateMaker = <S extends State, A extends Action>({
             }
           }
         } catch (err) {
-          console.error(err)
+          logger.err(err)
         }
       })
     })

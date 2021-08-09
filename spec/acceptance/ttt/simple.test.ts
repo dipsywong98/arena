@@ -218,6 +218,23 @@ describe('ttt-simple', () => {
       expectTotalScore(0))
   })
 
+  it('flips when player play twice a row', () => {
+    return startBattle('tic-tac-toe',
+      TicTacToeCaseType.AB_AI_O,
+      listenEvent(),
+      expectGameStart('X'),
+      expectPutSymbol('NW', 'O'),
+      play({ action: 'putSymbol', position: 'N' }, { action: 'putSymbol', position: 'NE' }),
+      expectPutSymbol('N', 'X'),
+      expectPutSymbol('NE', 'X'),
+      expectFlipTable('O'),
+      viewBattle(battle => {
+        expect(battle.flippedBy).toEqual('O')
+        expect(battle.flippedReason).toEqual('send move before arena replies')
+      }),
+      expectTotalScore(0))
+  })
+
   it('whole all 9 flip', () => {
     return startRun('tic-tac-toe', [
       [flipTable()],

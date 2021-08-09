@@ -16,7 +16,7 @@ import {
   startRun,
   viewBattle
 } from '../common'
-import { QuoridorCaseType } from '../../../src/quoridor/types'
+import { QuoridorActionType, QuoridorCaseType } from '../../../src/quoridor/types'
 import {
   applyAction,
   externalizeAction,
@@ -204,6 +204,25 @@ describe('quoridor-simple', () => {
       viewBattle(battle => {
         expect(battle.flippedBy).toEqual('second')
         expect(battle.flippedReason).toEqual('Cannot put | wall at a5')
+      }),
+      expectTotalScore(0))
+  })
+  
+  it('flips when player play twice a row', () => {
+    return startBattle('quoridor',
+      QuoridorCaseType.BASE_AI_SECOND,
+      listenEvent(),
+      expectGameStart('first'),
+      play(
+        { action: QuoridorActionType.MOVE, position: 'e2' },
+         { action: QuoridorActionType.MOVE, position: 'e3' }
+         ),
+      expectPawnMove('e2', 'first'),
+      expectPawnMove('e3', 'first'),
+      expectFlipTable('second'),
+      viewBattle(battle => {
+        expect(battle.flippedBy).toEqual('second')
+        expect(battle.flippedReason).toEqual('send move before arena replies')
       }),
       expectTotalScore(0))
   })

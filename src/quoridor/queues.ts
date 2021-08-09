@@ -17,7 +17,7 @@ export const quoridorConcludeQueue = new Queue<ConcludeRequest>(
   'quoridorConcludeQueue', { connection: redis })
 export const quoridorConcludeWorker = new Worker<ConcludeRequest>(
   'quoridorConcludeQueue', async (job) => {
-  const concludeRequest = job.data
-  return await processConclude(concludeRequest)
-}, { connection: redis })
+    const concludeRequest = job.data
+    return await processConclude(concludeRequest)
+  }, { connection: redis })
 

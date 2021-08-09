@@ -18,6 +18,10 @@ const makeRedisTimerKey = (battleId: string) => {
   return `arena:ttt:timer:${battleId}`
 }
 
+const makeRedisLockId = (battleId: string) => {
+  return `arena:ttt:lock:${battleId}`
+}
+
 export const getBattle = async (
   redis: Redis, battleId: string
 ): Promise<TicTacToeBattle | null> => {
@@ -38,7 +42,7 @@ export const setBattle = async (redis: Redis, battle: TicTacToeBattle): Promise<
 }
 
 export const getRun = async (redis: Redis,
-                             runId: string): Promise<Run | null> => {
+  runId: string): Promise<Run | null> => {
   const text = await redis.get(makeRedisRunId(runId))
   if (text === null) {
     return null
@@ -83,4 +87,12 @@ export const timerRead = async (redis: Redis, battleId: string) => {
   } else {
     return now - Number(string)
   }
+}
+
+export const checkAndLockBattle = async (redis: Redis, battleId: string) => {
+  return await redis.getset(makeRedisLockId(battleId), 'true')
+}
+
+export const unlockBattle = async (redis: Redis, battleId: string) => {
+  await redis.del(makeRedisLockId(battleId))
 }
