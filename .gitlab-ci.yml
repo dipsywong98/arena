@@ -37,10 +37,12 @@ unit:
 acceptance:
   stage: test
   cache:
-    key: $CI_COMMIT_REF_SLUG-$CI_PROJECT_DIR
-    paths:
-      - node_modules/
-    policy: pull
+    - key: $CI_COMMIT_REF_SLUG-$CI_PROJECT_DIR
+      paths:
+        - node_modules/
+      policy: pull
+    - paths:
+        - coverage/
   script:
     - yarn test:acceptance --ci --reporters=default --reporters=jest-junit
   artifacts:
@@ -51,9 +53,7 @@ acceptance:
       junit:
         - junit.xml
       cobertura: coverage/cobertura-coverage.xml
-  cache:
-    paths:
-      - coverage/
+      
 
 build:
   stage: test
@@ -96,7 +96,7 @@ deploy:
 pages:
   stage: deploy
   dependencies:
-    - test
+    - acceptance
   script:
     - mkdir .public
     - cp -r coverage/* .public
