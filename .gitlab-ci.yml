@@ -44,7 +44,7 @@ acceptance:
     - paths:
         - coverage/
   script:
-    - yarn test:acceptance --ci --reporters=default --reporters=jest-junit
+    - yarn test:acceptance --reporters=default --reporters=jest-junit
   artifacts:
     when: always
     paths:

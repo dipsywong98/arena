@@ -19,6 +19,8 @@ import {
 } from '../common'
 import { initState } from '../../../src/ttt/config'
 import { applyAction, externalizeAction, internalizeAction } from '../../../src/ttt/common'
+import { checkAndLockBattle } from '../../../src/ttt/store'
+import redis from '../../../src/common/redis'
 
 const winSequence = [
   expectGameStart('X'),
@@ -220,10 +222,11 @@ describe('ttt-simple', () => {
 
   it('flips when player play twice a row', () => {
     return startBattle('tic-tac-toe',
-      TicTacToeCaseType.AB_AI_O,
+      TicTacToeCaseType.BASE_AI_O,
       listenEvent(),
       expectGameStart('X'),
       expectPutSymbol('NW', 'O'),
+      (async (ctx) => { await checkAndLockBattle(redis, ctx.battleId) }),
       play({ action: 'putSymbol', position: 'N' }, { action: 'putSymbol', position: 'NE' }),
       expectPutSymbol('N', 'X'),
       expectPutSymbol('NE', 'X'),

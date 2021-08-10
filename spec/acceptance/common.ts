@@ -176,7 +176,7 @@ export const expectFlipTable = (player: string) =>
 
 export const play = (payload: unknown, payload2?: unknown): Step => async (ctx: PlayContext) => {
   const p = axios.post(`/${ctx.game}/play/${ctx.battleId}`, payload)
-  if(payload2) {
+  if (payload2) {
     const p2 = axios.post(`/${ctx.game}/play/${ctx.battleId}`, payload2)
     await p2
   }

@@ -24,6 +24,8 @@ import {
   internalizeAction
 } from '../../../src/quoridor/common'
 import { moveOnlyAgent } from '../../../src/quoridor/agent'
+import { checkAndLockBattle } from '../../../src/quoridor/store'
+import redis from '../../../src/common/redis'
 
 const autoPlay1 = autoPlay({
   init: initState,
@@ -207,21 +209,23 @@ describe('quoridor-simple', () => {
       }),
       expectTotalScore(0))
   })
-  
+
   it('flips when player play twice a row', () => {
     return startBattle('quoridor',
-      QuoridorCaseType.BASE_AI_SECOND,
+      QuoridorCaseType.BASE_AI_FIRST,
       listenEvent(),
-      expectGameStart('first'),
+      expectGameStart('second'),
+      receiveEvent(),
+      (async (ctx) => { await checkAndLockBattle(redis, ctx.battleId) }),
       play(
         { action: QuoridorActionType.MOVE, position: 'e2' },
-         { action: QuoridorActionType.MOVE, position: 'e3' }
-         ),
-      expectPawnMove('e2', 'first'),
-      expectPawnMove('e3', 'first'),
-      expectFlipTable('second'),
+        { action: QuoridorActionType.MOVE, position: 'e3' }
+      ),
+      expectPawnMove('e2', 'second'),
+      expectPawnMove('e3', 'second'),
+      expectFlipTable('first'),
       viewBattle(battle => {
-        expect(battle.flippedBy).toEqual('second')
+        expect(battle.flippedBy).toEqual('first')
         expect(battle.flippedReason).toEqual('send move before arena replies')
       }),
       expectTotalScore(0))

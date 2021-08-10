@@ -17,6 +17,7 @@ import { processEvaluate } from './processEvaluate'
 import { TURN_ADD_MS } from './config'
 import { isEvaluatePayload } from '../common/types'
 import { candidate } from './candidate'
+import { processMove } from './processMove'
 
 const quoridorRouter = Router()
 quoridorRouter.get('/hi', (request, response) => {
@@ -98,6 +99,13 @@ quoridorRouter.post('/play/:battleId', async (req, res) => {
   }
   await setBattle(redis, battle)
   const action = req.body
+  await publishMessage(
+    pubRedis,
+    battleId,
+    {
+      player: battle.externalPlayer,
+      ...action
+    })
   const moveId = v4()
   const error = (
     await checkAndLockBattle(redis, battle.id)
@@ -114,15 +122,8 @@ quoridorRouter.post('/play/:battleId', async (req, res) => {
   if (error !== undefined) {
     await quoridorMoveQueue.add(moveId, move)
   } else {
-    await quoridorMoveQueue.add(moveId, move, { priority: 1 })
+    processMove(move)
   }
-  await publishMessage(
-    pubRedis,
-    battleId,
-    {
-      player: battle.externalPlayer,
-      ...action
-    })
 
   res.json({ message: 'received your command', moveId, clock: battle.clock })
 })
