@@ -120,7 +120,7 @@ ticTacToeRouter.post('/play/:battleId', async (req, res) => {
     elapsed,
     error
   }
-  if (error !== undefined) {
+  if (error === undefined) {
     moveQueue.add(moveId, move);
   } else {
     processMove(move)

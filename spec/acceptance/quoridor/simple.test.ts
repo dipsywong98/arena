@@ -24,8 +24,6 @@ import {
   internalizeAction
 } from '../../../src/quoridor/common'
 import { moveOnlyAgent } from '../../../src/quoridor/agent'
-import { checkAndLockBattle } from '../../../src/quoridor/store'
-import redis from '../../../src/common/redis'
 
 const autoPlay1 = autoPlay({
   init: initState,
@@ -216,7 +214,6 @@ describe('quoridor-simple', () => {
       listenEvent(),
       expectGameStart('second'),
       receiveEvent(),
-      (async (ctx) => { await checkAndLockBattle(redis, ctx.battleId) }),
       play(
         { action: QuoridorActionType.MOVE, position: 'e2' },
         { action: QuoridorActionType.MOVE, position: 'e3' }

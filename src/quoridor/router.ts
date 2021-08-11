@@ -119,7 +119,7 @@ quoridorRouter.post('/play/:battleId', async (req, res) => {
     elapsed,
     error
   }
-  if (error !== undefined) {
+  if (error === undefined) {
     await quoridorMoveQueue.add(moveId, move)
   } else {
     processMove(move)
