@@ -34,7 +34,7 @@ export const processConclude = async (concludeRequest: ConcludeRequest) => {
     run.id,
     totalScore,
     Object.entries(totalMessage).map(([k, v]) => `${k}: ${v}`).join('\n'))
-  const concludedRun = { ...run, score: totalScore, message: totalMessage }
+  const concludedRun = { ...run, score: totalScore, message: totalMessage, completedAt: Date.now() }
   await setRun(redis, concludedRun)
   return concludedRun
 }

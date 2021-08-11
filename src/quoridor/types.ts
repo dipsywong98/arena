@@ -43,6 +43,13 @@ export interface QuoridorState extends State {
   expectFlip: boolean
 }
 
+export interface QuoridorStateCompressed extends State {
+  walls: string
+  players: Record<QuoridorTurn, Player>
+  turn: QuoridorTurn
+  expectFlip: boolean
+}
+
 export interface Coord {
   x: number,
   y: number

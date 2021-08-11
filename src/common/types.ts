@@ -32,6 +32,7 @@ export interface Run {
   score?: number
   message?: unknown
   createdAt: number
+  completedAt?: number
 }
 
 export interface ConcludeRequest {

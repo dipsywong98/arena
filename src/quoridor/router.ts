@@ -45,7 +45,7 @@ quoridorRouter.get('/start/:battleId', async (req, res) => {
     res.status(404).send({ error: 'battle not found' })
     return
   }
-  res.setHeader('Cache-Control', 'no-cache')
+  // res.setHeader('Cache-Control', 'no-cache')
   res.setHeader('Content-Type', 'text/event-stream')
   res.setHeader('Access-Control-Allow-Origin', '*')
   res.setHeader('Connection', 'keep-alive')

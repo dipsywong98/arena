@@ -30,7 +30,7 @@ export const processConclude = async (concludeRequest: ConcludeRequest) => {
     return `${battle.id}: ${battle.flippedReason ?? `scored ${battle.score}`}`
   }).join('\n---------------\n')
   await reportScore(run.callbackUrl, run.id, totalScore, totalMessage)
-  const concludedRun = { ...run, score: totalScore, message: totalMessage }
+  const concludedRun = { ...run, score: totalScore, message: totalMessage, completedAt: Date.now() }
   await setRun(redis, concludedRun)
   return concludedRun
 }
