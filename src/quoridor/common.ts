@@ -1,4 +1,5 @@
 import produce from 'immer'
+import Pako from 'pako'
 import PriorityQueue from 'priorityqueuejs'
 import {
   Coord,
@@ -11,6 +12,7 @@ import {
   QuoridorActionType,
   QuoridorResult,
   QuoridorState,
+  QuoridorStateCompressed,
   QuoridorTurn
 } from './types'
 
@@ -364,4 +366,21 @@ export const blocked = (state: QuoridorState) => {
     pathLength(state, QuoridorTurn.FIRST) < 0
     || pathLength(state, QuoridorTurn.SECOND) < 0
   )
+}
+
+export const compressState = (state: QuoridorState): QuoridorStateCompressed => {
+  const { walls, ...rest } = state
+  // Pako.deflate(, { to: 'string' })
+  return { walls: walls.map(r => (r.map(f => f ? '1' : '0').join(''))).join('\n'), ...rest }
+}
+
+export const depressState = (
+  state: QuoridorStateCompressed | undefined
+): QuoridorState | undefined => {
+  if (state === undefined) return undefined
+  const { walls, ...rest } = state
+  return {
+    walls: walls.split('\n').map(r => r.split('').map(f => f === '1' ? true : false)),
+    ...rest
+  }
 }

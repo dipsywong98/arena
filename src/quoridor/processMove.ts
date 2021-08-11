@@ -13,6 +13,8 @@ import {
 import {
   applyAction,
   canPutWall,
+  compressState,
+  depressState,
   externalizeAction,
   getResult,
   getWalkableNeighborCoords,
@@ -83,7 +85,7 @@ export const checkEndGame = (ctx: ProcessMoveContext): ProcessMoveContext => pro
     draft.battle.result = QuoridorResult.FLIPPED
     return draft
   } else {
-    const state = last(draft.battle.history)
+    const state = depressState(last(draft.battle.history))
     if (state !== undefined) {
       const winner = getResult(state)
       if (winner) {
@@ -97,7 +99,7 @@ export const checkEndGame = (ctx: ProcessMoveContext): ProcessMoveContext => pro
   }
 })
 export const agentMove = (ctx: ProcessMoveContext): ProcessMoveContext => produce(ctx, draft => {
-  const state = last(draft.battle.history)
+  const state = depressState(last(draft.battle.history))
   if (state !== undefined
     && (
       state.turn === opposite(draft.battle.externalPlayer)
@@ -110,7 +112,7 @@ export const agentMove = (ctx: ProcessMoveContext): ProcessMoveContext => produc
       action = action.cheat
       expectFlip = true
     }
-    draft.battle.history.push({ ...applyAction(state, action), expectFlip })
+    draft.battle.history.push(compressState({ ...applyAction(state, action), expectFlip }))
     draft.output.action = action
     return draft
   }
@@ -158,6 +160,12 @@ export const publishOutput = async (ctx: ProcessMoveContext): Promise<ProcessMov
           case QuoridorResult.FIRST_WIN:
             message.winner = 'FIRST'
             break
+          case QuoridorResult.DRAW:
+            message.winner = 'DRAW'
+            break
+          default:
+            message.winner = 'UNKNOWN'
+            break
         }
         await publishMessage(draft.redis, draft.battle.id, message)
       }
@@ -182,7 +190,7 @@ export const handleMovePawn = (ctx: ProcessMoveContext): ProcessMoveContext => {
   if (ctx.output.errors.length > 0) return ctx
   return produce(ctx, draft => {
     const action = draft.input.action
-    const state = last(draft.battle.history)
+    const state = depressState(last(draft.battle.history))
     const x1 = action.x
     const y1 = action.y
     if (state === undefined) {
@@ -208,7 +216,7 @@ export const handleMovePawn = (ctx: ProcessMoveContext): ProcessMoveContext => {
       return draft
     }
     const current = applyAction(state, { type: action.type, x: x1, y: y1 })
-    draft.battle.history.push(current)
+    draft.battle.history.push(compressState(current))
     return draft
   })
 }
@@ -218,7 +226,7 @@ export const handlePutWall = (ctx: ProcessMoveContext): ProcessMoveContext => {
   if (ctx.output.errors.length > 0) return ctx
   return produce(ctx, draft => {
     const action = draft.input.action
-    const state = last(draft.battle.history)
+    const state = depressState(last(draft.battle.history))
     const x1 = action.x
     const y1 = action.y
     const o = action.o
@@ -248,7 +256,7 @@ export const handlePutWall = (ctx: ProcessMoveContext): ProcessMoveContext => {
       return draft
     }
     const current = applyAction(state, { type: action.type, x: x1, y: y1, o })
-    draft.battle.history.push(current)
+    draft.battle.history.push(compressState(current))
     return draft
   })
 }

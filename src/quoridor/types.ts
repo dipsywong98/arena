@@ -74,7 +74,7 @@ export interface QuoridorAction extends Action {
 }
 
 export type QuoridorBattle = Battle<
-  QuoridorCaseType, QuoridorResult, QuoridorState, QuoridorTurn>
+  QuoridorCaseType, QuoridorResult, QuoridorStateCompressed, QuoridorTurn>
 export type QuoridorMove = Move<ExternalAction, QuoridorTurn>
 
 export enum QuoridorResult {

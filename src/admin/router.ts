@@ -21,9 +21,23 @@ const getRun = async (game: string, runId: string): Promise<unknown> => {
   const j = await redis.get(`arena:${game}:run:${runId}`)
   if (j) {
     const run: Run = JSON.parse(j)
+    const battles = await Promise.all(run.battleIds.map(async battleId => {
+      const b = await redis.get(`arena:${game}:battle:${battleId}`)
+      if (b) {
+        const battle = JSON.parse(b)
+        return {
+          id: battleId,
+          type: battle.type,
+          score: battle.score,
+          result: battle.result,
+          flippedReason: battle.flippedReason,
+          link: `${arenaUrl}/admin/${game}/view/${battleId}`
+        }
+      }
+    }))
     return {
       ...run,
-      battleUrls: run.battleIds.map(id => `${arenaUrl}/admin/${game}/view/${id}`)
+      battles,
     }
   }
   return j

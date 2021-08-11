@@ -1,4 +1,4 @@
-import { initState, opposite } from './common'
+import { compressState, initState, opposite } from './common'
 import { abAgent, baseAgent, blockingWallAgent } from './agent'
 import {
   Orientation,
@@ -22,7 +22,7 @@ const makeInitialStateGenerator = (aiTurn: QuoridorTurn) =>
     id: battleId,
     runId,
     externalPlayer: opposite(aiTurn),
-    history: [initState()],
+    history: [compressState(initState())],
     clock: INITIAL_CLOCK_MS,
     createdAt: Date.now()
   })
