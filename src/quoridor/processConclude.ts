@@ -17,18 +17,19 @@ export const processConclude = async (concludeRequest: ConcludeRequest) => {
   const battles = (await Promise.all(
     run.battleIds.map(battleId => getBattle(redis, battleId))
   )).filter(battle => battle?.score !== undefined) as Array<QuoridorBattle & { score: number }>
-  if (battles.length !== run.battleIds.length) {
-    const done = battles.map(b => b.id)
-    return {
-      message: `run ${run.id} has not finished its evaluation`,
-      done,
-      missing: difference(run.battleIds, done)
-    }
-  }
+  const done = battles.map(b => b.id)
+  const missing = difference(run.battleIds, done)
+  // if (battles.length !== run.battleIds.length) {
+  //   return {
+  //     message: `run ${run.id} has not finished its evaluation`,
+  //     done,
+  //     missing: missing
+  //   }
+  // }
   const totalScore = battles.map(battle => battle.score).reduce((a, b) => a + b, 0)
   const totalMessage = battles.map(battle => {
     return `${battle.id}: ${battle.flippedReason ?? `scored ${battle.score}`}`
-  }).join('\n---------------\n')
+  }).join('\n---------------\n') + missing.map(battleId => `${battleId}: processing`)
   await reportScore(run.callbackUrl, run.id, totalScore, totalMessage)
   const concludedRun = { ...run, score: totalScore, message: totalMessage, completedAt: Date.now() }
   await setRun(redis, concludedRun)
