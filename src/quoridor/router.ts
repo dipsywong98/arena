@@ -70,7 +70,7 @@ quoridorRouter.get('/start/:battleId', async (req, res) => {
       logger.err(e)
     }
   })
-  await quoridorMoveQueue.add(moveId, {
+  processMove({
     action: { action: QuoridorActionType.START_GAME },
     battleId,
     by: battle.externalPlayer,

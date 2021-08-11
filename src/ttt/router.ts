@@ -70,7 +70,7 @@ ticTacToeRouter.get('/start/:battleId', async (req, res) => {
       logger.err(e)
     }
   })
-  await moveQueue.add(moveId, {
+  processMove({
     action: { action: TicTacToeActionType.START_GAME },
     battleId,
     by: battle.externalPlayer,

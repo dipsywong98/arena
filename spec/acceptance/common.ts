@@ -61,7 +61,7 @@ afterAll(() => {
   })
   moveWorker.close().catch(noop)
   concludeWorker.close().catch(noop)
-  quoridorMoveWorker.close().catch(noop)
+  quoridorMoveWorker?.close().catch(noop)
   quoridorConcludeWorker.close().catch(noop)
   server?.stop()
 })

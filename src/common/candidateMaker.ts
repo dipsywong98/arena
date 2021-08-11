@@ -41,6 +41,7 @@ export const candidateMaker = <S extends State, A extends Action>({
         let me: unknown | undefined
         res.on('data', data => {
           const text = new TextDecoder('utf-8').decode(data)
+          console.log(battleId, text)
           try {
             const value = JSON.parse(text.replace('data: ', ''))
             if (value.action === 'flipTable' || value.winner !== undefined) {

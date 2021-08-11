@@ -2,16 +2,15 @@ import { Queue, Worker } from 'bullmq'
 import redis from '../common/redis'
 import { QuoridorMove } from './types'
 import { processConclude } from './processConclude'
-import { processMove } from './processMove'
 import { ConcludeRequest } from '../common/types'
+import path from 'path'
 
 // Create a new connection in every instance
 export const quoridorMoveQueue = new Queue<QuoridorMove>('quoridorMoveQueue', { connection: redis })
 
-export const quoridorMoveWorker = new Worker<QuoridorMove>('quoridorMoveQueue', async (job) => {
-  const move = job.data
-  return await processMove(move)
-}, { connection: redis })
+const p = path.join(__dirname, 'sandboxedProcessor.ts')
+export const quoridorMoveWorker = new Worker<QuoridorMove>(
+  'quoridorMoveQueue', p, { connection: redis })
 
 export const quoridorConcludeQueue = new Queue<ConcludeRequest>(
   'quoridorConcludeQueue', { connection: redis })

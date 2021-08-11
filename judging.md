@@ -2,6 +2,18 @@
 
 Need to be two different questions since they are graded seperately
 
+## Admin
+
+username: `<blank>`
+
+password: the auth token of coordinator
+
+queue: https://cis2021-arena-dev.herokuapp.com/admin/queues/
+
+quoridor: https://cis2021-arena-dev.herokuapp.com/admin/quoridor/runs/
+
+ttt: https://cis2021-arena-dev.herokuapp.com/admin/ttt/runs/
+
 ## Tic Tac Toe (100%)
 
 tic-tac-toe cheater (20%): player scores if they flip table right after this
