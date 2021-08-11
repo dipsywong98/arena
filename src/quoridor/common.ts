@@ -1,5 +1,4 @@
 import produce from 'immer'
-import Pako from 'pako'
 import PriorityQueue from 'priorityqueuejs'
 import {
   Coord,

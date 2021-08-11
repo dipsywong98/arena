@@ -1,7 +1,6 @@
 import axios from "axios"
 import http from "http"
 import https from "https"
-import { play } from "spec/acceptance/common"
 import { TicTacToeActionType } from "../ttt/types"
 import { arenaUrl } from "./constants"
 import logger from "./logger"
