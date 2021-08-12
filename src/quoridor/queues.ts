@@ -15,7 +15,8 @@ if (process.env.NODE_ENV === 'test') {
     return await processMove(job.data)
   }, { connection: redis })
 } else {
-  const p = path.join(__dirname, 'sandboxedProcessor.ts')
+  const ext = process.env.NODE_ENV === 'development' ? 'ts' : 'js'
+  const p = path.join(__dirname, `sandboxedProcessor.${ext}`)
   worker = new Worker<QuoridorMove>('quoridorMoveQueue', p, { connection: redis })
 }
 export const quoridorMoveWorker = worker
