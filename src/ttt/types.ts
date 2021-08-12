@@ -1,3 +1,5 @@
+import { assert } from 'console'
+import { FLIP_TABLE } from '../common/constants'
 import { Action, Battle, Move, State, TestCase } from '../common/types'
 
 export enum TicTacToeCaseType {
@@ -30,10 +32,12 @@ export interface TicTacToeState extends State {
 export enum TicTacToeActionType {
   START_GAME = 'startGame', // internal
   PUT_SYMBOL = 'putSymbol',
-  FLIP_TABLE = 'flipTable',
+  FLIP_TABLE = '(╯°□°)╯︵ ┻━┻',
   END_GAME = 'endGame', // internal
   INVALID_ACTION = 'invalidAction' // internal
 }
+
+assert(TicTacToeActionType.FLIP_TABLE === FLIP_TABLE)
 
 export interface TicTacToeAction extends Action {
   type: TicTacToeActionType,

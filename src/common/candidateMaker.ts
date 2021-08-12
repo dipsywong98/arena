@@ -1,8 +1,9 @@
 import axios from "axios"
 import http from "http"
 import https from "https"
+import { QuoridorActionType } from "src/quoridor/types"
 import { TicTacToeActionType } from "../ttt/types"
-import { arenaUrl } from "./constants"
+import { ARENA_URL, FLIP_TABLE } from "./constants"
 import logger from "./logger"
 import { Action, State } from "./types"
 
@@ -26,7 +27,7 @@ export const candidateMaker = <S extends State, A extends Action>({
     let timeout: NodeJS.Timeout | undefined
     const play = (payload: unknown) => {
       timeout = setTimeout(() => {
-        axios.post(`${arenaUrl}/${game}/play/${battleId}`, payload)
+        axios.post(`${ARENA_URL}/${game}/play/${battleId}`, payload)
       }, 500)
     }
     const dequeue = () => {
@@ -35,15 +36,16 @@ export const candidateMaker = <S extends State, A extends Action>({
         start(queue[0])
       }
     }
-    const req = (arenaUrl.startsWith('https://') ? https : http)
-      .get(`${arenaUrl}/${game}/start/${battleId}`, res => {
+    const req = (ARENA_URL.startsWith('https://') ? https : http)
+      .get(`${ARENA_URL}/${game}/start/${battleId}`, res => {
         let state = initState()
         let me: unknown | undefined
         res.on('data', data => {
           const text = new TextDecoder('utf-8').decode(data)
           try {
             const value = JSON.parse(text.replace('data: ', ''))
-            if (value.action === 'flipTable' || value.winner !== undefined) {
+            if (value.action === FLIP_TABLE
+              || value.winner !== undefined) {
               req.end()
               dequeue()
             } else if (value.youAre !== undefined) {

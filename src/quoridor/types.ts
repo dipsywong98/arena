@@ -1,3 +1,5 @@
+import { assert } from 'console'
+import { FLIP_TABLE } from '../common/constants'
 import { Action, Battle, Move, State, TestCase } from '../common/types'
 
 export enum QuoridorCaseType {
@@ -88,9 +90,11 @@ export enum QuoridorActionType {
   START_GAME = 'startGame', // internal
   MOVE = 'move',
   PUT_WALL = 'putWall',
-  FLIP_TABLE = 'flipTable',
+  FLIP_TABLE = '(╯°□°)╯︵ ┻━┻',
   INVALID_ACTION = 'invalidAction'// internal
 }
+
+assert(QuoridorActionType.FLIP_TABLE === FLIP_TABLE)
 
 export interface ExternalAction {
   action: QuoridorActionType

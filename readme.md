@@ -72,7 +72,7 @@ where positions is the compass notation for the grid
 
 ```json
 {
-   "action": "flipTable"
+   "action": "(╯°□°)╯︵ ┻━┻"
 }
 ```
 
@@ -96,7 +96,7 @@ data: {"winner":"O"}
 
 Flip table tells you someone flipped table and who flipped it
 ```
-data: {"player":"O","action":"flipTable"}
+data: {"player":"O","action":"(╯°□°)╯︵ ┻━┻"}
 ```
 
 ## Quoridor
@@ -176,7 +176,7 @@ Where `position` is a 3 character standard quoridor notation indicating the wall
 
 ```json
 {
-   "action": "flipTable"
+   "action": "(╯°□°)╯︵ ┻━┻"
 }
 ```
 
@@ -207,6 +207,5 @@ data: {"winner":"second"}
 
 Flip table tells you someone flipped table and who flipped it
 ```
-data: {"player":"first","action":"flipTable"}
+data: {"player":"first","action":"(╯°□°)╯︵ ┻━┻"}
 ```
-

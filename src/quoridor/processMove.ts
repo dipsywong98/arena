@@ -135,7 +135,7 @@ export const publishOutput = async (ctx: ProcessMoveContext): Promise<ProcessMov
     if (draft.output.errors.length > 0) {
       await setBattle(draft.redis, draft.battle)
       await publishMessage(draft.redis, draft.battle.id, {
-        action: 'flipTable',
+        action: QuoridorActionType.FLIP_TABLE,
         player: opposite(draft.battle.externalPlayer)
       })
       return draft

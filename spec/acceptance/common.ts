@@ -10,6 +10,7 @@ import { CallbackPayload, EvaluatePayload } from '../../src/common/types'
 import { quoridorConcludeWorker, quoridorMoveWorker } from '../../src/quoridor/queues'
 import { QuoridorAction, QuoridorActionType } from '../../src/quoridor/types'
 import logger from '../../src/common/logger'
+import { FLIP_TABLE } from '../../src/common/constants'
 
 type Event = Record<string, unknown>
 type OnEvent = (event: Event, ctx: PlayContext) => void
@@ -171,7 +172,7 @@ export const expectTotalScoreSomething = () => {
 
 export const expectFlipTable = (player: string) =>
   receiveEvent((event) => {
-    expect(event).toEqual({ player, action: 'flipTable' })
+    expect(event).toEqual({ player, action: FLIP_TABLE })
   })
 
 export const play = (payload: unknown, payload2?: unknown): Step => async (ctx: PlayContext) => {
@@ -189,7 +190,7 @@ export const putSymbol = (
   return play({ action: 'putSymbol', position })
 }
 
-export const flipTable = (): Step => play({ action: 'flipTable' })
+export const flipTable = (): Step => play({ action: FLIP_TABLE })
 
 export const movePawn = (position: string): Step => play({
   action: QuoridorActionType.MOVE,
@@ -268,7 +269,7 @@ export const autoPlay = <S, A extends TicTacToeAction | QuoridorAction>(
     while (!flag) {
       await receiveEvent((value) => {
         expect(value).toBeTruthy()
-        if (value.action === 'flipTable' || value.winner !== undefined) {
+        if (value.action === FLIP_TABLE || value.winner !== undefined) {
           flag = true
         } else if (value.youAre !== undefined) {
           me = value.youAre

@@ -1,7 +1,7 @@
 import { Router } from 'express'
 import { Run } from '../common/types'
 import redis from '../common/redis'
-import { arenaUrl } from '../common/constants'
+import { ARENA_URL } from '../common/constants'
 import { getBattle as getTTTBattle } from '../ttt/store'
 import { getBattle as getQBattle } from '../quoridor/store'
 import { Redis } from 'ioredis'
@@ -31,7 +31,7 @@ const getRun = async (game: string, runId: string): Promise<unknown> => {
           score: battle.score,
           result: battle.result,
           flippedReason: battle.flippedReason,
-          link: `${arenaUrl}/admin/${game}/view/${battleId}`
+          link: `${ARENA_URL}/admin/${game}/view/${battleId}`
         }
       }
     }))
@@ -53,7 +53,7 @@ const getRuns = async (game: string) => {
       score: f.score,
       createdAt: f.createdAt,
       callbackUrl: f.callbackUrl,
-      link: `${arenaUrl}/admin/${game}/runs/${f.id}`
+      link: `${ARENA_URL}/admin/${game}/runs/${f.id}`
     }))
 }
 
