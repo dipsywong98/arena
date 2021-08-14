@@ -20,7 +20,8 @@ the quoridor is where the real battle happens.
 
 ### Goal
 
-win the baseline AI, at least draw with the advanced AI and flip the table when necessary to win 20% of the score
+Win the baseline AI, at least draw with the advanced AI and flip the table when necessary within the time limit.
+For each tic-tac-toe game you have a total of 18s to think, everytime you respond you will gain additional 2s to think.
 
 ### Rule
 
@@ -55,7 +56,7 @@ Use this compass notation when requesting and handling response with arena tic-t
    an [`event/stream`](https://developer.mozilla.org/en-US/docs/Web/API/Server-sent_events/Using_server-sent_events)
    that it can keep pushing latest update (aka events) of the battle to you. The possible events are in the next section
 
-4. When it is your turn, you need to submit your move in 2 seconds. To submit move, `POST`
+4. When it is your turn, you need to submit your move within your thinking time. To submit move, `POST`
    to `{arenaEndpoint}/tic-tac-toe/play/{battleId}` with payload
 
 ```json
@@ -103,8 +104,8 @@ data: {"player":"O","action":"(╯°□°)╯︵ ┻━┻"}
 
 ### Goal
 
-Win the baseline AI, survive long enough when battling with advanced AI and flip table when necessary to win the 70% of the scores,
-10% for winning the advanced AI!
+Win the baseline AI, survive long enough when battling with advanced AI and flip table when necessary within the timelimit.
+For each quoridor game you have a total of 60s to think, everytime you respond you will gain additional 2s to think.
 
 ### Rule
 
@@ -148,7 +149,7 @@ For walls, each player will have 10
    an [`event/stream`](https://developer.mozilla.org/en-US/docs/Web/API/Server-sent_events/Using_server-sent_events)
    that it can keep pushing latest update (aka events) of the battle to you. The possible events are in the next section
 
-4. When it is your turn, you need to submit your move in 5 seconds. To submit move, `POST`
+4. When it is your turn, you need to submit your move within time limit. To submit move, `POST`
    to `{arenaEndpoint}/quoridor/play/{battleId}`.
 
 Move your pawn:

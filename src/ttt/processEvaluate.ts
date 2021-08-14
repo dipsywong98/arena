@@ -6,6 +6,8 @@ import { config } from './config'
 import { v4 } from 'uuid'
 import { shuffle } from '../common/shuffle'
 import { EvaluatePayload, Run } from '../common/types'
+import { reportScore } from 'src/common/reportScore'
+import { uniq } from 'ramda'
 
 export const generateBattlesForGrading = async (
   runId: string,
@@ -23,7 +25,7 @@ export const generateBattlesForGrading = async (
       }))
 }
 
-export async function processEvaluate<ReqBody> (payload: ReqBody & EvaluatePayload) {
+export async function processEvaluate<ReqBody>(payload: ReqBody & EvaluatePayload) {
   const { teamUrl, runId, caseType, callbackUrl } = payload
   const type = isCaseType(caseType) ? caseType : undefined
   const battleIds = await generateBattlesForGrading(runId, type)
@@ -37,6 +39,9 @@ export async function processEvaluate<ReqBody> (payload: ReqBody & EvaluatePaylo
       errors[battleId] = e.message
     }
   }
-  await setRun(pubRedis, { ...run, errors })
+  if (Object.keys(errors).length > 0) {
+    await setRun(pubRedis, { ...run, errors })
+    await reportScore(callbackUrl, runId, 0, uniq(Object.values(errors)).join(', '))
+  }
   return { battleIds, errors }
 }
