@@ -23,19 +23,20 @@ export const generateBattlesForGrading = async (
       }))
 }
 
-export async function processEvaluate<ReqBody> (payload: ReqBody & EvaluatePayload) {
+export async function processEvaluate<ReqBody>(payload: ReqBody & EvaluatePayload) {
   const { teamUrl, runId, caseType, callbackUrl } = payload
   const type = isCaseType(caseType) ? caseType : undefined
   const battleIds = await generateBattlesForGrading(runId, type)
   const run: Run = { battleIds, callbackUrl, id: runId, createdAt: Date.now() }
   await setRun(pubRedis, run)
-  const errors = []
+  const errors: Record<string, string> = {}
   for (const battleId of shuffle(battleIds)) {
     try {
       await axios.post(`${teamUrl.replace(/\/$/, '')}/quoridor`, { battleId })
     } catch (e) {
-      errors.push(e.message)
+      errors[battleId] = e.message
     }
   }
+  await setRun(pubRedis, { ...run, errors })
   return { battleIds, errors }
 }

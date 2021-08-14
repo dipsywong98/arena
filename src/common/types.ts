@@ -33,6 +33,7 @@ export interface Run {
   message?: unknown
   createdAt: number
   completedAt?: number
+  errors?: Record<string, string>
 }
 
 export interface ConcludeRequest {
