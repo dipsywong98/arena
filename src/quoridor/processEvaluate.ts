@@ -8,6 +8,7 @@ import { shuffle } from '../common/shuffle'
 import { EvaluatePayload, Run } from '../common/types'
 import { reportScore } from '../common/reportScore'
 import { uniq } from 'ramda'
+import { houseKeepQueue, SHOULD_START_WITHIN } from '../common/houseKeeping'
 
 export const generateBattlesForGrading = async (
   runId: string,
@@ -35,6 +36,7 @@ export async function processEvaluate<ReqBody>(payload: ReqBody & EvaluatePayloa
   for (const battleId of shuffle(battleIds)) {
     try {
       await axios.post(`${teamUrl.replace(/\/$/, '')}/quoridor`, { battleId })
+      houseKeepQueue.add(battleId, { game: 'quoridor', battleId }, { delay: SHOULD_START_WITHIN })
     } catch (e) {
       errors[battleId] = e.message
       console.log(e.message, `${teamUrl.replace(/\/$/, '')}/quoridor`)
