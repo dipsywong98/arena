@@ -1,13 +1,18 @@
 import { Router } from 'express'
-import { Run } from '../common/types'
+import { Battle, Run } from '../common/types'
 import redis from '../common/redis'
 import { ARENA_URL } from '../common/constants'
 import { getBattle as getTTTBattle } from '../ttt/store'
 import { getBattle as getQBattle } from '../quoridor/store'
 import { Redis } from 'ioredis'
+import { DateTime } from 'luxon'
+
+const timestampToString = (t: number) => {
+  return DateTime.fromMillis(t).toString()
+}
 
 interface Helper {
-  getBattle: (redis: Redis, battleId: string) => Promise<unknown>
+  getBattle: (redis: Redis, battleId: string) => Promise<Battle<any, any, any, any> | null>
 }
 
 const helper: Record<string, Helper> = {
@@ -37,6 +42,7 @@ const getRun = async (game: string, runId: string): Promise<unknown> => {
     }))
     return {
       ...run,
+      createdAtStr: timestampToString(run.createdAt),
       battles,
     }
   }
@@ -52,6 +58,7 @@ const getRuns = async (game: string) => {
       id: f.id,
       score: f.score,
       createdAt: f.createdAt,
+      createdAtStr: timestampToString(f.createdAt),
       callbackUrl: f.callbackUrl,
       link: `${ARENA_URL}/admin/${game}/runs/${f.id}`
     })).sort((a, b) => b.createdAt - a.createdAt)
@@ -70,8 +77,8 @@ adminRouter.get('/:game/runs/:runId', (req, res) => {
 adminRouter.get('/:game/battles/:id', (req, res) => {
   const { id, game } = req.params
   if (game in helper) {
-    helper[game].getBattle(redis, id).then(game => {
-      res.json(game)
+    helper[game].getBattle(redis, id).then((game: Battle<any, any, any, any> | null) => {
+      res.json({ ...game, createdAtStr: DateTime.fromMillis(game?.createdAt ?? 0).toString() })
     })
   } else {
     res.json([game, 'not in', Object.keys(helper)])
