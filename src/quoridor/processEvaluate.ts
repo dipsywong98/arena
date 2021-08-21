@@ -6,7 +6,7 @@ import { config } from './config'
 import { v4 } from 'uuid'
 import { shuffle } from '../common/shuffle'
 import { EvaluatePayload, Run } from '../common/types'
-import { reportScore } from 'src/common/reportScore'
+import { reportScore } from '../common/reportScore'
 import { uniq } from 'ramda'
 
 export const generateBattlesForGrading = async (
@@ -37,6 +37,7 @@ export async function processEvaluate<ReqBody>(payload: ReqBody & EvaluatePayloa
       await axios.post(`${teamUrl.replace(/\/$/, '')}/quoridor`, { battleId })
     } catch (e) {
       errors[battleId] = e.message
+      console.log(e.message, `${teamUrl.replace(/\/$/, '')}/quoridor`)
     }
   }
   if (Object.keys(errors).length > 0) {

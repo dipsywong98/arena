@@ -41,6 +41,10 @@ beforeAll(() => {
     sentBattleIds.push(req.body.battleId)
     res.send({})
   })
+  arenaApp.post('/test/quoridor', (req, res) => {
+    sentBattleIds.push(req.body.battleId)
+    res.send({})
+  })
   arenaApp.post('/test/callback', (req, res) => {
     const body = req.body as CallbackPayload
     callbackEndpointResults[body.runId] = body

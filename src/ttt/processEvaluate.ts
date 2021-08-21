@@ -6,7 +6,7 @@ import { config } from './config'
 import { v4 } from 'uuid'
 import { shuffle } from '../common/shuffle'
 import { EvaluatePayload, Run } from '../common/types'
-import { reportScore } from 'src/common/reportScore'
+import { reportScore } from '../common/reportScore'
 import { uniq } from 'ramda'
 
 export const generateBattlesForGrading = async (
