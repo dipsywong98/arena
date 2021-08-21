@@ -28,7 +28,7 @@ describe('quoridor-housekeep', () => {
         expect(battle.clock).toEqual(INITIAL_CLOCK_MS)
         expect(battle.flippedReason).not.toBeDefined()
       }),
-      setNow(now + SHOULD_START_WITHIN + 100),
+      setNow(now + SHOULD_START_WITHIN + 500),
       async (ctx) => { await housekeepForGameBattle('quoridor', ctx.battleId) },
       expectTotalScore(0),
       viewBattle(battle => {

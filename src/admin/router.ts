@@ -31,7 +31,7 @@ const getRun = async (game: string, runId: string): Promise<unknown> => {
           score: battle.score,
           result: battle.result,
           flippedReason: battle.flippedReason,
-          link: `${ARENA_URL}/admin/${game}/view/${battleId}`
+          link: `${ARENA_URL}/admin/${game}/battles/${battleId}`
         }
       }
     }))
@@ -54,7 +54,7 @@ const getRuns = async (game: string) => {
       createdAt: f.createdAt,
       callbackUrl: f.callbackUrl,
       link: `${ARENA_URL}/admin/${game}/runs/${f.id}`
-    }))
+    })).sort((a, b) => b.createdAt - a.createdAt)
 }
 
 adminRouter.get('/:game/runs', (req, res) => {
@@ -67,7 +67,7 @@ adminRouter.get('/:game/runs/:runId', (req, res) => {
   getRun(game === 'tic-tac-toe' ? 'ttt' : game, runId).then(j => res.json(j))
 })
 
-adminRouter.get('/:game/view/:id', (req, res) => {
+adminRouter.get('/:game/battles/:id', (req, res) => {
   const { id, game } = req.params
   if (game in helper) {
     helper[game].getBattle(redis, id).then(game => {

@@ -101,6 +101,6 @@ export const houseKeepQueueWorker = new Worker(HOUSE_KEEP_QUEUE,
 )
 
 if (process.env.NODE_ENV !== 'test') {
-  houseKeepQueue.add(HOUSE_KEEP_QUEUE, { game: 'ttt' }, { repeat: { every: 60000 } })
-  houseKeepQueue.add(HOUSE_KEEP_QUEUE, { game: 'quoridor' }, { repeat: { every: 60000 } })
+  houseKeepQueue.add('cron-ttt', { game: 'ttt' }, { repeat: { every: 60000 } })
+  houseKeepQueue.add('cron-quoridor', { game: 'quoridor' }, { repeat: { every: 60000 } })
 }
