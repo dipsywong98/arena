@@ -79,9 +79,10 @@ export const timerReset = async (redis: Redis, battleId: string) => {
   await redis.set(makeRedisTimerKey(battleId), Date.now())
 }
 
-export const timerRead = async (redis: Redis, battleId: string) => {
+export const timerReadAndClear = async (redis: Redis, battleId: string) => {
   const now = Date.now()
   const string = await redis.get(makeRedisTimerKey(battleId))
+  await redis.del(makeRedisTimerKey(battleId))
   if (string === null) {
     return 0
   } else {

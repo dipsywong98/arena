@@ -7,7 +7,7 @@ import path from 'path'
 import { processMove } from './processMove'
 
 // Create a new connection in every instance
-export const moveQueue = new Queue<TicTacToeMove>('tttMoveQueue', { connection: redis })
+export const tttMoveQueue = new Queue<TicTacToeMove>('tttMoveQueue', { connection: redis })
 
 let worker
 if (process.env.NODE_ENV === 'test') {
@@ -19,10 +19,14 @@ if (process.env.NODE_ENV === 'test') {
   const p = path.join(__dirname, `sandboxedProcessor.${ext}`)
   worker = new Worker<TicTacToeMove>('tttMoveQueue', p, { connection: redis })
 }
-export const moveWorker = worker
+export const ticTacToeMoveWorker = worker
 
-export const concludeQueue = new Queue<ConcludeRequest>('tttConcludeQueue', { connection: redis })
-export const concludeWorker = new Worker<ConcludeRequest>('tttConcludeQueue', async (job) => {
-  const concludeRequest = job.data
-  return await processConclude(concludeRequest)
-}, { connection: redis })
+export const ticTacToeConcludeQueue = new Queue<ConcludeRequest>(
+  'tttConcludeQueue', { connection: redis }
+)
+export const ticTacToeConcludeWorker = new Worker<ConcludeRequest>(
+  'tttConcludeQueue',
+  async (job) => {
+    const concludeRequest = job.data
+    return await processConclude(concludeRequest)
+  }, { connection: redis })

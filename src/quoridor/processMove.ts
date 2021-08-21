@@ -57,6 +57,9 @@ export const validate = (ctx: ProcessMoveContext): ProcessMoveContext => produce
   if (ctx.battle.clock < 0) {
     draft.output.errors.push('You ran out of time')
   }
+  if (draft.output.errors.length > 0) {
+    return draft
+  }
   const state = last(draft.battle.history)
   if (state === undefined) {
     draft.output.errors.push('Battle has no history')

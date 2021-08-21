@@ -1,6 +1,6 @@
 import { isCaseType, QuoridorCaseType } from './types'
 import { setBattle, setRun } from './store'
-import { pubRedis } from '../common/redis'
+import redis from '../common/redis'
 import axios from 'axios'
 import { config } from './config'
 import { v4 } from 'uuid'
@@ -17,7 +17,7 @@ export const generateBattlesForGrading = async (
     Object.entries(type !== undefined ? { [type]: config[type] } : config)
       .map(async ([type, { initialStateGenerator }]) => {
         const id = v4()
-        await setBattle(pubRedis, {
+        await setBattle(redis, {
           ...initialStateGenerator(id, runId),
           type: type as QuoridorCaseType
         })
@@ -30,7 +30,7 @@ export async function processEvaluate<ReqBody>(payload: ReqBody & EvaluatePayloa
   const type = isCaseType(caseType) ? caseType : undefined
   const battleIds = await generateBattlesForGrading(runId, type)
   const run: Run = { battleIds, callbackUrl, id: runId, createdAt: Date.now() }
-  await setRun(pubRedis, run)
+  await setRun(redis, run)
   const errors: Record<string, string> = {}
   for (const battleId of shuffle(battleIds)) {
     try {
@@ -41,7 +41,7 @@ export async function processEvaluate<ReqBody>(payload: ReqBody & EvaluatePayloa
     }
   }
   if (Object.keys(errors).length > 0) {
-    await setRun(pubRedis, { ...run, errors })
+    await setRun(redis, { ...run, errors })
     await reportScore(callbackUrl, runId, 0, uniq(Object.values(errors)).join(', '))
   }
   return { battleIds, errors }

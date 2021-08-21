@@ -33,6 +33,11 @@ unit:
     policy: pull
   script:
     - yarn test:unit
+  artifacts:
+    when: always
+    reports:
+      junit:
+        - junit.xml
 
 acceptance:
   stage: test

@@ -5,19 +5,20 @@ import {
   publishMessage,
   setBattle,
   subscribeMessage,
-  timerRead,
+  timerReadAndClear,
   timerReset
 } from './store'
 import { v4 } from 'uuid'
 import { TicTacToeActionType, TicTacToeMove } from './types'
 import logger from '../common/logger'
 import redis, { pubRedis, subRedis } from '../common/redis'
-import { moveQueue } from './queues'
+import { tttMoveQueue } from './queues'
 import { processEvaluate } from './processEvaluate'
 import { TURN_ADD_MS } from './config'
 import { isEvaluatePayload } from '../common/types'
 import { candidate } from './candidate'
 import { processMove } from './processMove'
+import { houseKeepQueue } from 'src/common/houseKeeping'
 
 const ticTacToeRouter = Router()
 ticTacToeRouter.get('/hi', (request, response) => {
@@ -55,17 +56,17 @@ ticTacToeRouter.get('/start/:battleId', async (req, res) => {
 
   await subscribeMessage(subRedis, battleId, (message) => {
     try {
-      const { action2, ...rest } = JSON.parse(message)
-      res.write(`data: ${JSON.stringify(rest)}\n\n`)
-      if (action2 !== undefined) {
-        res.write(`data: ${JSON.stringify(action2)}\n\n`)
-      }
       // this timerReset is ok because even
       //   if this message is published by player sending move to us
       // player should not send another move to us immediately
       // so next time the player send us move and we stop timer to get the elapsed time
       // arena should have already reset the timer
       timerReset(redis, battleId)
+      const { action2, ...rest } = JSON.parse(message)
+      res.write(`data: ${JSON.stringify(rest)}\n\n`)
+      if (action2 !== undefined) {
+        res.write(`data: ${JSON.stringify(action2)}\n\n`)
+      }
     } catch (e) {
       logger.err(e)
     }
@@ -85,7 +86,7 @@ ticTacToeRouter.get('/start/:battleId', async (req, res) => {
 // eslint-disable-next-line @typescript-eslint/no-misused-promises
 ticTacToeRouter.post('/play/:battleId', async (req, res) => {
   const { battleId } = req.params
-  const elapsed = await timerRead(redis, battleId)
+  const elapsed = await timerReadAndClear(redis, battleId)
   const battle = await getBattle(pubRedis, battleId)
   if (battle === null) {
     res.status(404).send({ error: 'Battle not found' })
@@ -121,7 +122,7 @@ ticTacToeRouter.post('/play/:battleId', async (req, res) => {
     error
   }
   if (error === undefined) {
-    moveQueue.add(moveId, move);
+    tttMoveQueue.add(moveId, move);
   } else {
     processMove(move)
   }

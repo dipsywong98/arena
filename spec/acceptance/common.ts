@@ -3,7 +3,7 @@ import axios from 'axios'
 import arenaApp from '../../src/Server'
 import * as http from 'http'
 import { allRedis } from '../../src/common/redis'
-import { concludeWorker, moveWorker } from '../../src/ttt/queues'
+import { ticTacToeConcludeWorker, ticTacToeMoveWorker } from '../../src/ttt/queues'
 import stoppable from 'stoppable'
 import { v4 } from 'uuid'
 import { CallbackPayload, EvaluatePayload } from '../../src/common/types'
@@ -11,6 +11,7 @@ import { quoridorConcludeWorker, quoridorMoveWorker } from '../../src/quoridor/q
 import { QuoridorAction, QuoridorActionType } from '../../src/quoridor/types'
 import logger from '../../src/common/logger'
 import { FLIP_TABLE } from '../../src/common/constants'
+import { houseKeepQueueScheduler, houseKeepQueueWorker } from '../../src/common/houseKeeping'
 
 type Event = Record<string, unknown>
 type OnEvent = (event: Event, ctx: PlayContext) => void
@@ -61,14 +62,16 @@ afterAll(() => {
   const noop = () => {
     // noop
   }
+  ticTacToeMoveWorker.close().catch(noop)
+  ticTacToeConcludeWorker.close().catch(noop)
+  quoridorMoveWorker?.close().catch(noop)
+  quoridorConcludeWorker.close().catch(noop)
+  houseKeepQueueWorker.close().catch(noop)
+  houseKeepQueueScheduler.close().catch(noop)
+  server?.stop()
   allRedis.map(r => {
     r.quit().catch(noop)
   })
-  moveWorker.close().catch(noop)
-  concludeWorker.close().catch(noop)
-  quoridorMoveWorker?.close().catch(noop)
-  quoridorConcludeWorker.close().catch(noop)
-  server?.stop()
 })
 
 export const requestForGrade = async (

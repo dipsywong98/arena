@@ -4,7 +4,7 @@ import {
   publishMessage,
   setBattle,
   subscribeMessage,
-  timerRead,
+  timerReadAndClear,
   timerReset,
   checkAndLockBattle
 } from './store'
@@ -55,17 +55,17 @@ quoridorRouter.get('/start/:battleId', async (req, res) => {
 
   await subscribeMessage(subRedis, battleId, (message) => {
     try {
-      const { action2, ...rest } = JSON.parse(message)
-      res.write(`data: ${JSON.stringify(rest)}\n\n`)
-      if (action2 !== undefined) {
-        res.write(`data: ${JSON.stringify(action2)}\n\n`)
-      }
       // this timerReset is ok because even
       //   if this message is published by player sending move to us
       // player should not send another move to us immediately
       // so next time the player send us move and we stop timer to get the elapsed time
       // arena should have already reset the timer
       timerReset(redis, battleId)
+      const { action2, ...rest } = JSON.parse(message)
+      res.write(`data: ${JSON.stringify(rest)}\n\n`)
+      if (action2 !== undefined) {
+        res.write(`data: ${JSON.stringify(action2)}\n\n`)
+      }
     } catch (e) {
       logger.err(e)
     }
@@ -85,7 +85,7 @@ quoridorRouter.get('/start/:battleId', async (req, res) => {
 // eslint-disable-next-line @typescript-eslint/no-misused-promises
 quoridorRouter.post('/play/:battleId', async (req, res) => {
   const { battleId } = req.params
-  const elapsed = await timerRead(redis, battleId)
+  const elapsed = await timerReadAndClear(redis, battleId)
   const battle = await getBattle(pubRedis, battleId)
   if (battle === null) {
     res.status(404).send({ error: 'Battle not found' })

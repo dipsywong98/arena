@@ -12,7 +12,7 @@ import {
 import { applyAction, externalizeAction, getResult, internalizeAction, opposite } from './common'
 import { getBattle, publishMessage, setBattle, unlockBattle } from './store'
 import { Redis } from 'ioredis'
-import { concludeQueue } from './queues'
+import { ticTacToeConcludeQueue } from './queues'
 import { v4 } from 'uuid'
 import redis from '../common/redis'
 import logger from '../common/logger'
@@ -45,6 +45,9 @@ export const validate = (ctx: ProcessMoveContext): ProcessMoveContext => produce
   const action = draft.input.action
   if (ctx.battle.clock < 0) {
     draft.output.errors.push('You ran out of time')
+  }
+  if (draft.output.errors.length > 0) {
+    return draft
   }
   const state = last(draft.battle.history)
   if (state === undefined) {
@@ -190,7 +193,7 @@ export const publishOutput = async (ctx: ProcessMoveContext): Promise<ProcessMov
   })
 const addToScoreQueue = async (ctx: ProcessMoveContext): Promise<ProcessMoveContext> => {
   if (ctx.battle.result !== undefined) {
-    await concludeQueue.add(v4(), { runId: ctx.battle.runId })
+    await ticTacToeConcludeQueue.add(v4(), { runId: ctx.battle.runId })
   }
   return ctx
 }

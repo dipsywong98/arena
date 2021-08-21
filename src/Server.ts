@@ -12,11 +12,12 @@ import path from 'path'
 import { ExpressAdapter } from '@bull-board/express'
 import { createBullBoard } from '@bull-board/api'
 import { BullMQAdapter } from '@bull-board/api/bullMQAdapter'
-import { concludeQueue, moveQueue } from './ttt/queues'
+import { ticTacToeConcludeQueue, tttMoveQueue } from './ttt/queues'
 import { quoridorConcludeQueue, quoridorMoveQueue } from './quoridor/queues'
 import marked = require('marked')
 import basicAuth from 'express-basic-auth'
 import adminRouter from './admin/router'
+import { houseKeepQueue } from './common/houseKeeping'
 
 const app = express()
 
@@ -52,10 +53,11 @@ export const serverAdapter = new ExpressAdapter()
 
 createBullBoard({
   queues: [
-    new BullMQAdapter(concludeQueue),
-    new BullMQAdapter(moveQueue),
+    new BullMQAdapter(ticTacToeConcludeQueue),
+    new BullMQAdapter(tttMoveQueue),
     new BullMQAdapter(quoridorConcludeQueue),
-    new BullMQAdapter(quoridorMoveQueue)
+    new BullMQAdapter(quoridorMoveQueue),
+    new BullMQAdapter(houseKeepQueue),
   ],
   serverAdapter
 })
