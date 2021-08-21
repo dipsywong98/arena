@@ -1,10 +1,8 @@
 import {
   expectGameStart,
-  expectPawnMove,
   expectPutWall,
   expectTotalScore,
   listenEvent,
-  movePawn,
   putWall,
   receiveEvent,
   setNow,

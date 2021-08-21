@@ -59,18 +59,18 @@ beforeEach(() => {
 })
 
 afterAll(() => {
-  const noop = () => {
-    // noop
+  const noop = (a: number) => (e: unknown) => {
+    // console.error(a, e)
   }
-  ticTacToeMoveWorker.close().catch(noop)
-  ticTacToeConcludeWorker.close().catch(noop)
-  quoridorMoveWorker?.close().catch(noop)
-  quoridorConcludeWorker.close().catch(noop)
-  houseKeepQueueWorker.close().catch(noop)
-  houseKeepQueueScheduler.close().catch(noop)
+  ticTacToeMoveWorker.close().catch(noop(1))
+  ticTacToeConcludeWorker.close().catch(noop(2))
+  quoridorMoveWorker?.close().catch(noop(3))
+  quoridorConcludeWorker.close().catch(noop(4))
+  houseKeepQueueWorker.close().catch(noop(5))
+  houseKeepQueueScheduler.close().catch(noop(6))
   server?.stop()
   allRedis.map(r => {
-    r.quit().catch(noop)
+    r.quit().catch(noop(7))
   })
 })
 

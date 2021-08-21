@@ -97,7 +97,7 @@ export const houseKeepQueueWorker = new Worker(HOUSE_KEEP_QUEUE,
     } else {
       return await houseKeepForGame(game)
     }
-  }
+  }, { connection: redis }
 )
 
 if (process.env.NODE_ENV !== 'test') {

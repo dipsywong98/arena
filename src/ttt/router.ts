@@ -18,7 +18,6 @@ import { TURN_ADD_MS } from './config'
 import { isEvaluatePayload } from '../common/types'
 import { candidate } from './candidate'
 import { processMove } from './processMove'
-import { houseKeepQueue } from 'src/common/houseKeeping'
 
 const ticTacToeRouter = Router()
 ticTacToeRouter.get('/hi', (request, response) => {
