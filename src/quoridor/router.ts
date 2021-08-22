@@ -11,7 +11,7 @@ import {
 import { v4 } from 'uuid'
 import { QuoridorActionType, QuoridorMove } from './types'
 import logger from '../common/logger'
-import redis, { pubRedis, subRedis } from '../common/redis'
+import redis, { getPubRedis, getSubRedis } from '../common/redis'
 import { quoridorMoveQueue } from './queues'
 import { processEvaluate } from './processEvaluate'
 import { TURN_ADD_MS } from './config'
@@ -40,7 +40,7 @@ quoridorRouter.post('/evaluate', async (req, res) => {
 // eslint-disable-next-line @typescript-eslint/no-misused-promises
 quoridorRouter.get('/start/:battleId', async (req, res) => {
   const { battleId } = req.params
-  const battle = await getBattle(pubRedis, battleId)
+  const battle = await getBattle(getPubRedis(), battleId)
   if (battle === null) {
     res.status(404).send({ error: 'battle not found' })
     return
@@ -53,7 +53,7 @@ quoridorRouter.get('/start/:battleId', async (req, res) => {
   const moveId = v4()
   res.write(`data: ${JSON.stringify({ youAre: battle.externalPlayer, id: battleId })}\n\n`)
 
-  await subscribeMessage(subRedis, battleId, (message) => {
+  await subscribeMessage(getSubRedis(), battleId, (message) => {
     try {
       // this timerReset is ok because even
       //   if this message is published by player sending move to us
@@ -86,7 +86,7 @@ quoridorRouter.get('/start/:battleId', async (req, res) => {
 quoridorRouter.post('/play/:battleId', async (req, res) => {
   const { battleId } = req.params
   const elapsed = await timerReadAndClear(redis, battleId)
-  const battle = await getBattle(pubRedis, battleId)
+  const battle = await getBattle(getPubRedis(), battleId)
   if (battle === null) {
     res.status(404).send({ error: 'Battle not found' })
     return
@@ -100,7 +100,7 @@ quoridorRouter.post('/play/:battleId', async (req, res) => {
   await setBattle(redis, battle)
   const action = req.body
   await publishMessage(
-    pubRedis,
+    getPubRedis(),
     battleId,
     {
       player: battle.externalPlayer,
@@ -130,7 +130,7 @@ quoridorRouter.post('/play/:battleId', async (req, res) => {
 
 quoridorRouter.get('/admin/view/:id', (req, res) => {
   const id = req.params.id
-  getBattle(pubRedis, id).then(game => {
+  getBattle(getPubRedis(), id).then(game => {
     res.json(game)
   })
 })

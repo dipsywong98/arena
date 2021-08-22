@@ -3,7 +3,7 @@ import IORedis, { Redis } from 'ioredis'
 export const allRedis: Redis[] = []
 
 export const makeRedis = (): Redis => {
-  if(process.env.REDIS_TLS_URL !== undefined) {
+  if (process.env.REDIS_TLS_URL !== undefined) {
     const redis = new IORedis(process.env.REDIS_TLS_URL, {
       tls: {
         rejectUnauthorized: false
@@ -19,7 +19,20 @@ export const makeRedis = (): Redis => {
 
 const redis = makeRedis()
 
-export const pubRedis = makeRedis()
-export const subRedis = makeRedis()
+let pubRedis: Redis | undefined, subRedis: Redis | undefined
+
+export const getPubRedis = () => {
+  if (pubRedis === undefined) {
+    pubRedis = makeRedis()
+  }
+  return pubRedis
+}
+
+export const getSubRedis = () => {
+  if(subRedis === undefined) {
+    subRedis = makeRedis()
+  }
+  return subRedis
+}
 
 export default redis
