@@ -89,7 +89,9 @@ export const housekeepForGameBattle = async (game: string, battleId: string) => 
 
 const HOUSE_KEEP_QUEUE = 'arena:housekeep'
 export const houseKeepQueue = new Queue(HOUSE_KEEP_QUEUE, { connection: redis })
-export const houseKeepQueueScheduler = new QueueScheduler(HOUSE_KEEP_QUEUE, { connection: redis });
+export const houseKeepQueueScheduler = process.env.NODE_ENV !== 'test'
+  ? new QueueScheduler(HOUSE_KEEP_QUEUE, { connection: redis })
+  : { close: async () => await Promise.resolve() };
 export const houseKeepQueueWorker = new Worker(HOUSE_KEEP_QUEUE,
   async ({ data: { game, battleId } }) => {
     if (battleId !== undefined) {
