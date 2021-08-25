@@ -23,20 +23,7 @@ export const makeRedis = (): Redis => {
 
 const redis = makeRedis()
 
-let pubRedis: Redis | undefined, subRedis: Redis | undefined
-
-export const getPubRedis = () => {
-  if (pubRedis === undefined) {
-    pubRedis = makeRedis()
-  }
-  return pubRedis
-}
-
-export const getSubRedis = () => {
-  if (subRedis === undefined) {
-    subRedis = makeRedis()
-  }
-  return subRedis
-}
+export const pubRedis = makeRedis()
+export const subRedis = makeRedis()
 
 export default redis
