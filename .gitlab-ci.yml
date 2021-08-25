@@ -32,7 +32,7 @@ unit:
       - node_modules/
     policy: pull
   script:
-    - yarn test:unit
+    - yarn test:unit --reporters=default --reporters=jest-junit
   artifacts:
     when: always
     reports:
