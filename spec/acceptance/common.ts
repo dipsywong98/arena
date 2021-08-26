@@ -9,8 +9,14 @@ import { CallbackPayload, EvaluatePayload } from '../../src/common/types'
 import { QuoridorAction, QuoridorActionType } from '../../src/quoridor/types'
 import logger from '../../src/common/logger'
 import { FLIP_TABLE } from '../../src/common/constants'
-import { houseKeepQueue, houseKeepQueueScheduler, houseKeepQueueWorker } from '../../src/common/houseKeeping'
-import { getConcludeQueue, getConcludeWorker, getMoveQueue, getMoveWorker } from '../../src/common/queues'
+import {
+  houseKeepQueue,
+  houseKeepQueueScheduler, houseKeepQueueWorker
+} from '../../src/common/houseKeeping'
+import {
+  getConcludeQueue,
+  getConcludeWorker, getMoveQueue, getMoveWorker
+} from '../../src/common/queues'
 
 type Event = Record<string, unknown>
 type OnEvent = (event: Event, ctx: PlayContext) => void
@@ -58,6 +64,7 @@ beforeEach(() => {
 })
 
 afterAll(() => {
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const noop = (a: number) => (e: unknown) => {
     // console.error(a, e)
   }

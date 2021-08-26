@@ -74,6 +74,7 @@ app.use('/quoridor', quoridorRouter)
 const viewsDir = path.join(__dirname, '..', 'static')
 app.use('/static', express.static(viewsDir))
 app.post('/', (req, res) => {
+  // eslint-disable-next-line no-console
   console.log(req.body)
   res.json(req.body)
 })

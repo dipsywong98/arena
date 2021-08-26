@@ -39,7 +39,6 @@ export async function processEvaluate<ReqBody>(payload: ReqBody & EvaluatePayloa
       houseKeepQueue.add(battleId, { game: 'quoridor', battleId }, { delay: SHOULD_START_WITHIN })
     } catch (e) {
       errors[battleId] = e.message
-      console.log(e.message, `${teamUrl.replace(/\/$/, '')}/quoridor`)
     }
   }
   if (Object.keys(errors).length > 0) {

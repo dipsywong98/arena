@@ -1,7 +1,6 @@
 import axios from "axios"
 import http from "http"
 import https from "https"
-import { QuoridorActionType } from "src/quoridor/types"
 import { TicTacToeActionType } from "../ttt/types"
 import { ARENA_URL, FLIP_TABLE } from "./constants"
 import logger from "./logger"
@@ -23,7 +22,7 @@ export const candidateMaker = <S extends State, A extends Action>({
 }: Candidate<S, A>) => {
   const queue: string[] = []
   const start = (battleId: string) => {
-    console.log(battleId)
+    logger.info('candidate start ' + battleId)
     let timeout: NodeJS.Timeout | undefined
     const play = (payload: unknown) => {
       timeout = setTimeout(() => {

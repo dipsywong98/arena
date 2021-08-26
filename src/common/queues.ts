@@ -1,6 +1,7 @@
 import { Queue, Worker } from 'bullmq'
 import path from 'path'
 import { opt } from '../common/redis'
+import logger from './logger'
 import { processConclude } from './processConclude'
 import { processMove } from './processMove'
 import { ConcludePayload, MovePayload } from './types'
@@ -27,6 +28,7 @@ let concludeWorker: Worker<ConcludePayload, unknown, string> | undefined
 
 export const getMoveWorker = () => {
   if (moveWorker === undefined) {
+    logger.info(`NODE_ENV: ${process.env.NODE_ENV ?? 'unknown'}`)
     if (process.env.NODE_ENV === 'test') {
       moveWorker = new Worker<MovePayload>('moveQueue', async (job) => {
         return await processMove(job.data)
