@@ -23,11 +23,12 @@ import {
 } from './common'
 import { getBattle, publishMessage, setBattle, unlockBattle } from './store'
 import { Redis } from 'ioredis'
-import { quoridorConcludeQueue } from './queues'
 import { v4 } from 'uuid'
 import redis from '../common/redis'
 import logger from '../common/logger'
 import { config, TERMINATE_TURNS } from './config'
+import { getConcludeQueue } from '../common/queues'
+import { Game } from '../common/types'
 
 export const playerWin = (battle: QuoridorBattle) => {
   if (battle.result === QuoridorResult.FIRST_WIN) {
@@ -176,7 +177,9 @@ export const publishOutput = async (ctx: ProcessMoveContext): Promise<ProcessMov
   })
 const addToScoreQueue = async (ctx: ProcessMoveContext): Promise<ProcessMoveContext> => {
   if (ctx.battle.result !== undefined) {
-    await quoridorConcludeQueue.add(v4(), { runId: ctx.battle.runId })
+    await getConcludeQueue().add(v4(), {
+      game: Game.QUORIDOR, conclude: { runId: ctx.battle.runId }
+    })
   }
   return ctx
 }

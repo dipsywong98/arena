@@ -4,6 +4,11 @@ import { Router } from 'express'
 
 export const START_GAME = 'startGame'
 
+export enum Game {
+  TTT = 'ttt',
+  QUORIDOR = 'quoridor',
+}
+
 export interface EvaluatePayload {
   teamUrl: string
   callbackUrl: string
@@ -133,4 +138,14 @@ export interface ChallengeContext<A extends Action,
   queues?: Queues<M, A, Turn>
   stores?: Stores<B, CaseType, Result, S, Turn>,
   router?: Router
+}
+
+export interface MovePayload {
+  game: Game
+  move: Move<any, any>
+}
+
+export interface ConcludePayload {
+  game: Game
+  conclude: ConcludeRequest
 }

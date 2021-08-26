@@ -3,15 +3,14 @@ import axios from 'axios'
 import arenaApp from '../../src/Server'
 import * as http from 'http'
 import { allRedis } from '../../src/common/redis'
-import { ticTacToeConcludeWorker, ticTacToeMoveWorker } from '../../src/ttt/queues'
 import stoppable from 'stoppable'
 import { v4 } from 'uuid'
 import { CallbackPayload, EvaluatePayload } from '../../src/common/types'
-import { quoridorConcludeWorker, quoridorMoveWorker } from '../../src/quoridor/queues'
 import { QuoridorAction, QuoridorActionType } from '../../src/quoridor/types'
 import logger from '../../src/common/logger'
 import { FLIP_TABLE } from '../../src/common/constants'
-import { houseKeepQueueScheduler, houseKeepQueueWorker } from '../../src/common/houseKeeping'
+import { houseKeepQueue, houseKeepQueueScheduler, houseKeepQueueWorker } from '../../src/common/houseKeeping'
+import { getConcludeQueue, getConcludeWorker, getMoveQueue, getMoveWorker } from '../../src/common/queues'
 
 type Event = Record<string, unknown>
 type OnEvent = (event: Event, ctx: PlayContext) => void
@@ -62,12 +61,13 @@ afterAll(() => {
   const noop = (a: number) => (e: unknown) => {
     // console.error(a, e)
   }
-  ticTacToeMoveWorker.close().catch(noop(1))
-  ticTacToeConcludeWorker.close().catch(noop(2))
-  quoridorMoveWorker?.close().catch(noop(3))
-  quoridorConcludeWorker.close().catch(noop(4))
+  getMoveWorker().close().catch(noop(1))
+  getConcludeWorker().close().catch(noop(2))
+  getMoveQueue().close().catch(noop(3))
+  getConcludeQueue().close().catch(noop(4))
   houseKeepQueueWorker.close().catch(noop(5))
   houseKeepQueueScheduler.close().catch(noop(6))
+  houseKeepQueue.close().catch(noop(7))
   server?.stop()
   allRedis.map(r => {
     r.quit().catch(noop(7))

@@ -12,12 +12,12 @@ import { v4 } from 'uuid'
 import { QuoridorActionType, QuoridorMove } from './types'
 import logger from '../common/logger'
 import redis, { getPubRedis, getSubRedis } from '../common/redis'
-import { quoridorMoveQueue } from './queues'
 import { processEvaluate } from './processEvaluate'
 import { TURN_ADD_MS } from './config'
-import { isEvaluatePayload } from '../common/types'
+import { Game, isEvaluatePayload } from '../common/types'
 import { candidate } from './candidate'
 import { processMove } from './processMove'
+import { getMoveQueue } from '../common/queues'
 
 const quoridorRouter = Router()
 quoridorRouter.get('/hi', (request, response) => {
@@ -120,7 +120,7 @@ quoridorRouter.post('/play/:battleId', async (req, res) => {
     error
   }
   if (error === undefined) {
-    await quoridorMoveQueue.add(moveId, move)
+    await getMoveQueue().add(moveId, {game: Game.QUORIDOR, move})
   } else {
     processMove(move)
   }

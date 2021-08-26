@@ -1,21 +1,15 @@
 import { Queue, QueueScheduler, Worker } from "bullmq"
 import { merge } from "ramda"
-import { quoridorMoveQueue } from "../quoridor/queues"
 import { QuoridorTurn } from "../quoridor/types"
-import { tttMoveQueue } from "../ttt/queues"
 import { TicTacToeTurn } from "../ttt/types"
 import { v4 } from "uuid"
 import { FLIP_TABLE } from "./constants"
-import redis from "./redis"
-import { Battle, Move, START_GAME } from "./types"
+import redis, { opt } from "./redis"
+import { Battle, Game, Move, START_GAME } from "./types"
+import { getMoveQueue } from "./queues"
 
 // default 5 minutes
-export const SHOULD_START_WITHIN = parseInt(process.env.SHOULD_START_WITHIN ?? '30000')
-
-const moveQueues: Record<string, Queue<Move<any, any>>> = {
-  ttt: tttMoveQueue,
-  quoridor: quoridorMoveQueue
-}
+export const SHOULD_START_WITHIN = parseInt(process.env.SHOULD_START_WITHIN ?? '300000')
 
 const opposite = (s: string) => {
   switch (s) {
@@ -27,7 +21,7 @@ const opposite = (s: string) => {
   }
 }
 
-export const houseKeepForGame = async (game: string) => {
+export const houseKeepForGame = async (game: Game) => {
   const battleKeys = await redis.keys(`arena:${game}:battle:*`)
   const battles: Array<Battle<any, any, any, any>> = (
     (await Promise.all(battleKeys.map(async battleKey => await redis.get(battleKey))))
@@ -40,7 +34,7 @@ export const houseKeepForGame = async (game: string) => {
   return merge(results.filter(r => r !== null))
 }
 
-export const housekeepForGameBattle = async (game: string, battleId: string) => {
+export const housekeepForGameBattle = async (game: Game, battleId: string) => {
   const battleStr = await redis.get(`arena:${game}:battle:${battleId}`)
   const now = Date.now()
   if (battleStr !== null) {
@@ -61,7 +55,7 @@ export const housekeepForGameBattle = async (game: string, battleId: string) => 
           elapsed: 0,
           error
         }
-        await moveQueues[game].add(moveId, move)
+        await getMoveQueue().add(moveId, { game, move })
         return { [battle.id]: error }
       }
     }
@@ -81,16 +75,16 @@ export const housekeepForGameBattle = async (game: string, battleId: string) => 
         elapsed: 0,
         error
       }
-      await moveQueues[game].add(moveId, move)
+      await getMoveQueue().add(moveId, { game, move })
       return { [battle.id]: error }
     }
   }
 }
 
 const HOUSE_KEEP_QUEUE = 'arena:housekeep'
-export const houseKeepQueue = new Queue(HOUSE_KEEP_QUEUE, { connection: redis })
+export const houseKeepQueue = new Queue(HOUSE_KEEP_QUEUE, opt)
 export const houseKeepQueueScheduler = process.env.NODE_ENV !== 'test'
-  ? new QueueScheduler(HOUSE_KEEP_QUEUE, { connection: redis })
+  ? new QueueScheduler(HOUSE_KEEP_QUEUE, opt)
   : { close: async () => await Promise.resolve() };
 export const houseKeepQueueWorker = new Worker(HOUSE_KEEP_QUEUE,
   async ({ data: { game, battleId } }) => {
@@ -99,7 +93,7 @@ export const houseKeepQueueWorker = new Worker(HOUSE_KEEP_QUEUE,
     } else {
       return await houseKeepForGame(game)
     }
-  }, { connection: redis }
+  }, opt
 )
 
 if (process.env.NODE_ENV !== 'test') {

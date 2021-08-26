@@ -12,12 +12,11 @@ import path from 'path'
 import { ExpressAdapter } from '@bull-board/express'
 import { createBullBoard } from '@bull-board/api'
 import { BullMQAdapter } from '@bull-board/api/bullMQAdapter'
-import { ticTacToeConcludeQueue, tttMoveQueue } from './ttt/queues'
-import { quoridorConcludeQueue, quoridorMoveQueue } from './quoridor/queues'
 import marked = require('marked')
 import basicAuth from 'express-basic-auth'
 import adminRouter from './admin/router'
 import { houseKeepQueue } from './common/houseKeeping'
+import { getConcludeQueue, getConcludeWorker, getMoveQueue, getMoveWorker } from './common/queues'
 
 const app = express()
 
@@ -53,14 +52,15 @@ export const serverAdapter = new ExpressAdapter()
 
 createBullBoard({
   queues: [
-    new BullMQAdapter(ticTacToeConcludeQueue),
-    new BullMQAdapter(tttMoveQueue),
-    new BullMQAdapter(quoridorConcludeQueue),
-    new BullMQAdapter(quoridorMoveQueue),
+    new BullMQAdapter(getConcludeQueue()),
+    new BullMQAdapter(getMoveQueue()),
     new BullMQAdapter(houseKeepQueue),
   ],
   serverAdapter
 })
+
+getMoveWorker()
+getConcludeWorker()
 
 serverAdapter.setBasePath('/admin/queues')
 
@@ -73,7 +73,8 @@ app.use('/tic-tac-toe', ticTacToeRouter)
 app.use('/quoridor', quoridorRouter)
 const viewsDir = path.join(__dirname, '..', 'static')
 app.use('/static', express.static(viewsDir))
-app.post('/', (req,res) => {
+app.post('/', (req, res) => {
+  console.log(req.body)
   res.json(req.body)
 })
 

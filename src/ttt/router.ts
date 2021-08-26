@@ -12,12 +12,12 @@ import { v4 } from 'uuid'
 import { TicTacToeActionType, TicTacToeMove } from './types'
 import logger from '../common/logger'
 import redis, { getPubRedis, getSubRedis } from '../common/redis'
-import { tttMoveQueue } from './queues'
 import { processEvaluate } from './processEvaluate'
 import { TURN_ADD_MS } from './config'
-import { isEvaluatePayload } from '../common/types'
+import { Game, isEvaluatePayload } from '../common/types'
 import { candidate } from './candidate'
 import { processMove } from './processMove'
+import { getMoveQueue } from '../common/queues'
 
 const ticTacToeRouter = Router()
 ticTacToeRouter.get('/hi', (request, response) => {
@@ -121,7 +121,7 @@ ticTacToeRouter.post('/play/:battleId', async (req, res) => {
     error
   }
   if (error === undefined) {
-    tttMoveQueue.add(moveId, move);
+    getMoveQueue().add(moveId, { game: Game.TTT, move });
   } else {
     processMove(move)
   }

@@ -14,7 +14,8 @@ import {
   housekeepForGameBattle,
   SHOULD_START_WITHIN
 } from '../../../src/common/houseKeeping'
-import { ticTacToeMoveWorker } from '../../../src/ttt/queues'
+import { getMoveWorker } from '../../../src/common/queues'
+import { Game } from '../../../src/common/types'
 
 describe('ttt-housekeep', () => {
   it('reports zero score if didnt start in SHOULD_START_WITHIN', () => {
@@ -22,17 +23,17 @@ describe('ttt-housekeep', () => {
     return startBattle('tic-tac-toe',
       TicTacToeCaseType.BASE_AI_O,
       setNow(now + SHOULD_START_WITHIN),
-      async (ctx) => { await housekeepForGameBattle('ttt', ctx.battleId) },
+      async (ctx) => { await housekeepForGameBattle(Game.TTT, ctx.battleId) },
       viewBattle(battle => {
         expect(battle.clock).toEqual(INITIAL_CLOCK_MS)
         expect(battle.flippedReason).not.toBeDefined()
       }),
       setNow(now + SHOULD_START_WITHIN + 500),
-      async (ctx) => { await housekeepForGameBattle('ttt', ctx.battleId) },
+      async (ctx) => { await housekeepForGameBattle(Game.TTT, ctx.battleId) },
       expectTotalScore(0),
       viewBattle(battle => {
         expect(battle.clock).toEqual(INITIAL_CLOCK_MS)
-        expect(battle.flippedReason).toEqual("didnt start game with 30000")
+        expect(battle.flippedReason).toEqual("didnt start game with 300000")
       }))
   })
 
@@ -48,13 +49,13 @@ describe('ttt-housekeep', () => {
         expect(battle.flippedReason).not.toBeDefined()
       }),
       setNow(now + INITIAL_CLOCK_MS),
-      async (ctx) => { await housekeepForGameBattle('ttt', ctx.battleId) },
+      async (ctx) => { await housekeepForGameBattle(Game.TTT, ctx.battleId) },
       viewBattle(battle => {
         expect(battle.clock).toEqual(INITIAL_CLOCK_MS)
         expect(battle.flippedReason).not.toBeDefined()
       }),
       setNow(now + INITIAL_CLOCK_MS + 200),
-      async (ctx) => { await housekeepForGameBattle('ttt', ctx.battleId) },
+      async (ctx) => { await housekeepForGameBattle(Game.TTT, ctx.battleId) },
       expectTotalScore(0),
       viewBattle(battle => {
         expect(battle.clock).toEqual(INITIAL_CLOCK_MS)
@@ -76,21 +77,21 @@ describe('ttt-housekeep', () => {
 
       // pause move processor so arena dont respond to participant's move
       // dont flip cause arena have inf respond time
-      async () => await ticTacToeMoveWorker.pause(),
+      async () => await getMoveWorker().pause(),
       putSymbol('N'),
       expectPutSymbol('N', 'X'),
       setNow(now + INITIAL_CLOCK_MS + 20000),
-      async (ctx) => { await housekeepForGameBattle('ttt', ctx.battleId) },
+      async (ctx) => { await housekeepForGameBattle(Game.TTT, ctx.battleId) },
       viewBattle(battle => {
         expect(battle.clock).toBeGreaterThan(INITIAL_CLOCK_MS)
         expect(battle.flippedReason).not.toBeDefined()
       }),
 
       // resume move processor, dont respond to move in time will flip
-      async () => await Promise.resolve(ticTacToeMoveWorker.resume()),
+      async () => await Promise.resolve(getMoveWorker().resume()),
       expectPutSymbol('NE', 'O'),
       setNow(now + INITIAL_CLOCK_MS + 40000),
-      async (ctx) => { await housekeepForGameBattle('ttt', ctx.battleId) },
+      async (ctx) => { await housekeepForGameBattle(Game.TTT, ctx.battleId) },
       viewBattle(battle => {
         expect(battle.clock).toBeGreaterThan(INITIAL_CLOCK_MS)
         expect(battle.flippedReason).toEqual('You ran out of time')

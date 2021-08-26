@@ -1,42 +1,50 @@
 import { Queue, Worker } from 'bullmq'
-import redis from '../common/redis'
-import { Action, Battle, ChallengeContext, ConcludeRequest, Move, State } from './types'
+import path from 'path'
+import { opt } from '../common/redis'
+import { processConclude } from './processConclude'
+import { processMove } from './processMove'
+import { ConcludePayload, MovePayload } from './types'
 
-export const makeQueue = <A extends Action,
-  B extends Battle<CaseType,Result,S,Turn>,
-  CaseType extends string,
-  M extends Move<A, Turn>,
-  Result,
-  S extends State,
-  Turn,
-  C extends ChallengeContext<A,B,CaseType, M, Result, S, Turn>
-  >
-(ctx: C): C => {
-  const { prefix, processMove, processConclude } = ctx
-  const moveQueue = new Queue<M>(`${prefix}MoveQueue`, { connection: redis })
+let moveQueue: Queue<MovePayload, any, string> | undefined
+let concludeQueue: Queue<ConcludePayload, any, string> | undefined
 
-  const moveWorker = new Worker<M>(`${prefix}MoveQueue`, async (job) => {
-    const move = job.data
-    return await processMove(move)
-  }, { connection: redis })
-
-  const concludeQueue = new Queue<ConcludeRequest>(
-    `${prefix}ConcludeQueue`, { connection: redis })
-  const concludeWorker = new Worker<ConcludeRequest>(
-    `${prefix}ConcludeQueue`, async (job) => {
-      const concludeRequest = job.data
-      return await processConclude(concludeRequest)
-    }, { connection: redis })
-
-  return {
-    ...ctx,
-    queues: {
-      moveQueue,
-      moveWorker,
-      concludeQueue,
-      concludeWorker
-    }
+export const getMoveQueue = () => {
+  if (moveQueue === undefined) {
+    moveQueue = new Queue<MovePayload>('moveQueue', opt)
   }
+  return moveQueue
 }
 
-// Create a new connection in every instance
+export const getConcludeQueue = () => {
+  if (concludeQueue === undefined) {
+    concludeQueue = new Queue<ConcludePayload>('concludeQueue', opt)
+  }
+  return concludeQueue
+}
+
+let moveWorker: Worker<MovePayload, any, string> | undefined
+let concludeWorker: Worker<ConcludePayload, unknown, string> | undefined
+
+export const getMoveWorker = () => {
+  if (moveWorker === undefined) {
+    if (process.env.NODE_ENV === 'test') {
+      moveWorker = new Worker<MovePayload>('moveQueue', async (job) => {
+        return await processMove(job.data)
+      }, opt)
+    } else {
+      const ext = process.env.NODE_ENV === 'development' ? 'ts' : 'js'
+      const p = path.join(__dirname, `sandboxedProcessor.${ext}`)
+      moveWorker = new Worker<MovePayload>('moveQueue', p, opt)
+    }
+  }
+  return moveWorker
+}
+
+export const getConcludeWorker = () => {
+  if (concludeWorker === undefined) {
+    concludeWorker = new Worker<ConcludePayload>('concludeQueue',
+      async ({ data }) => await processConclude(data),
+      opt)
+  }
+  return concludeWorker
+}
