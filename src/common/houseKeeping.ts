@@ -4,7 +4,7 @@ import { QuoridorTurn } from "../quoridor/types"
 import { TicTacToeTurn } from "../ttt/types"
 import { v4 } from "uuid"
 import { FLIP_TABLE } from "./constants"
-import redis, { opt } from "./redis"
+import redis from "./redis"
 import { Battle, Game, Move, START_GAME } from "./types"
 import { getMoveQueue } from "./queues"
 
@@ -82,9 +82,9 @@ export const housekeepForGameBattle = async (game: Game, battleId: string) => {
 }
 
 const HOUSE_KEEP_QUEUE = 'arena:housekeep'
-export const houseKeepQueue = new Queue(HOUSE_KEEP_QUEUE, opt)
+export const houseKeepQueue = new Queue(HOUSE_KEEP_QUEUE, { connection: redis })
 export const houseKeepQueueScheduler = process.env.NODE_ENV !== 'test'
-  ? new QueueScheduler(HOUSE_KEEP_QUEUE, opt)
+  ? new QueueScheduler(HOUSE_KEEP_QUEUE, { connection: redis })
   : { close: async () => await Promise.resolve() };
 export const houseKeepQueueWorker = new Worker(HOUSE_KEEP_QUEUE,
   async ({ data: { game, battleId } }) => {
@@ -93,7 +93,7 @@ export const houseKeepQueueWorker = new Worker(HOUSE_KEEP_QUEUE,
     } else {
       return await houseKeepForGame(game)
     }
-  }, opt
+  }, { connection: redis }
 )
 
 if (process.env.NODE_ENV !== 'test') {

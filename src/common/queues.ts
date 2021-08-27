@@ -1,6 +1,6 @@
 import { Queue, Worker } from 'bullmq'
 import path from 'path'
-import { opt } from '../common/redis'
+import redis from '../common/redis'
 import logger from './logger'
 import { processConclude } from './processConclude'
 import { processMove } from './processMove'
@@ -11,14 +11,14 @@ let concludeQueue: Queue<ConcludePayload, any, string> | undefined
 
 export const getMoveQueue = () => {
   if (moveQueue === undefined) {
-    moveQueue = new Queue<MovePayload>('moveQueue', opt)
+    moveQueue = new Queue<MovePayload>('moveQueue', { connection: redis })
   }
   return moveQueue
 }
 
 export const getConcludeQueue = () => {
   if (concludeQueue === undefined) {
-    concludeQueue = new Queue<ConcludePayload>('concludeQueue', opt)
+    concludeQueue = new Queue<ConcludePayload>('concludeQueue', { connection: redis })
   }
   return concludeQueue
 }
@@ -32,11 +32,11 @@ export const getMoveWorker = () => {
     if (process.env.NODE_ENV === 'test') {
       moveWorker = new Worker<MovePayload>('moveQueue', async (job) => {
         return await processMove(job.data)
-      }, opt)
+      }, { connection: redis })
     } else {
       const ext = process.env.NODE_ENV === 'development' ? 'ts' : 'js'
       const p = path.join(__dirname, `sandboxedProcessor.${ext}`)
-      moveWorker = new Worker<MovePayload>('moveQueue', p, opt)
+      moveWorker = new Worker<MovePayload>('moveQueue', p, { connection: redis })
     }
   }
   return moveWorker
@@ -46,7 +46,7 @@ export const getConcludeWorker = () => {
   if (concludeWorker === undefined) {
     concludeWorker = new Worker<ConcludePayload>('concludeQueue',
       async ({ data }) => await processConclude(data),
-      opt)
+      { connection: redis })
   }
   return concludeWorker
 }
