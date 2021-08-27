@@ -1,11 +1,12 @@
 import { Router } from 'express'
 import { Battle, Run } from '../common/types'
-import redis from '../common/redis'
+import redis, { clearAllKeys, clearOldKeys } from '../common/redis'
 import { ARENA_URL } from '../common/constants'
 import { getBattle as getTTTBattle } from '../ttt/store'
 import { getBattle as getQBattle } from '../quoridor/store'
 import { Redis } from 'ioredis'
 import { DateTime } from 'luxon'
+import { getMoveQueue } from 'src/common/queues'
 
 const timestampToString = (t: number) => {
   return DateTime.fromMillis(t).toString()
@@ -83,6 +84,22 @@ adminRouter.get('/:game/battles/:id', (req, res) => {
   } else {
     res.json([game, 'not in', Object.keys(helper)])
   }
+})
+
+adminRouter.get('/redis/clear', (req, res) => {
+  const { seconds: secondsParam, pattern } = req.params as any
+  if (secondsParam === undefined || typeof secondsParam === 'string') {
+    const seconds = Number.parseInt(secondsParam ?? '3600')
+    clearOldKeys(redis, seconds, pattern).then(cleared => res.json({ seconds, cleared }))
+  } else {
+    res.status(409).json({ error: 'invalid seconds' })
+  }
+})
+
+adminRouter.get('/redis/clearAll', (req, res) => {
+  clearAllKeys(redis, req.query.pattern as string).then(cleared => {
+    res.json({ cleared })
+  })
 })
 
 export default adminRouter

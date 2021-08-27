@@ -60,6 +60,7 @@ export interface Battle<CaseType, Result, S extends State, Turn> {
   flippedBy?: Turn
   type: CaseType
   history: S[]
+  moves: string[]
   score?: number
   clock: number
   createdAt: number

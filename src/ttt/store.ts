@@ -35,10 +35,8 @@ export const getBattle = async (
 export const setBattle = async (redis: Redis, battle: TicTacToeBattle): Promise<void> => {
   await redis.set(
     makeRedisBattleId(battle.id),
-    JSON.stringify(battle),
-    'EX',
-    60 * 60
-  ) // expire in 1 hour
+    JSON.stringify(battle)
+  )
 }
 
 export const getRun = async (redis: Redis,
@@ -51,7 +49,7 @@ export const getRun = async (redis: Redis,
 }
 
 export const setRun = async (redis: Redis, run: Run): Promise<void> => {
-  await redis.set(makeRedisRunId(run.id), JSON.stringify(run), 'EX', 60 * 60) // expire in 1 hour
+  await redis.set(makeRedisRunId(run.id), JSON.stringify(run))
 }
 
 export const publishMessage = async (

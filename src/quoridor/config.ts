@@ -23,6 +23,7 @@ const makeInitialStateGenerator = (aiTurn: QuoridorTurn) =>
     runId,
     externalPlayer: opposite(aiTurn),
     history: [compressState(initState())],
+    moves: [],
     clock: INITIAL_CLOCK_MS,
     createdAt: Date.now()
   })

@@ -34,9 +34,7 @@ export const setBattle = async (redis: Redis, battle: QuoridorBattle): Promise<v
   await redis.set(
     makeRedisBattleId(battle.id),
     JSON.stringify(battle),
-    'EX',
-    60 * 60
-  ) // expire in 1 hour
+  )
 }
 
 export const getRun = async (redis: Redis,
@@ -49,7 +47,7 @@ export const getRun = async (redis: Redis,
 }
 
 export const setRun = async (redis: Redis, run: Run): Promise<void> => {
-  await redis.set(makeRedisRunId(run.id), JSON.stringify(run), 'EX', 60 * 60) // expire in 1 hour
+  await redis.set(makeRedisRunId(run.id), JSON.stringify(run))
 }
 
 export const publishMessage = async (

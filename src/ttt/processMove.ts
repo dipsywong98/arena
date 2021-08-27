@@ -211,6 +211,7 @@ const handleError = (e: Error) => (ctx: ProcessMoveContext): ProcessMoveContext 
 export const processMove = async (move: TicTacToeMove): Promise<unknown> => {
   const battle = await getBattle(redis, move.battleId)
   if (battle !== null) {
+    battle.moves.push(move.id)
     if (battle.result === undefined) {
       let action = { type: TicTacToeActionType.INVALID_ACTION }, error = move.error
       try {
@@ -230,7 +231,7 @@ export const processMove = async (move: TicTacToeMove): Promise<unknown> => {
         ctx.output.errors.push(error)
       }
       try {
-        const { battle: battleNew, input, output } = await pipe(
+        const { input, output } = await pipe(
           validate,
           handlePutSymbol,
           checkEndGame,
@@ -240,7 +241,7 @@ export const processMove = async (move: TicTacToeMove): Promise<unknown> => {
           publishOutput,
           andThen(addToScoreQueue)
         )(ctx)
-        return { battle: battleNew, input, output }
+        return { input, output }
       } catch (e) {
         logger.err(e)
         // store the score to redis and call for score aggregation

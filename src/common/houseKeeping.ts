@@ -81,7 +81,7 @@ export const housekeepForGameBattle = async (game: Game, battleId: string) => {
   }
 }
 
-const HOUSE_KEEP_QUEUE = 'arena:housekeep'
+const HOUSE_KEEP_QUEUE = 'housekeepQueue'
 export const houseKeepQueue = new Queue(HOUSE_KEEP_QUEUE, { connection: redis })
 export const houseKeepQueueScheduler = process.env.NODE_ENV !== 'test'
   ? new QueueScheduler(HOUSE_KEEP_QUEUE, { connection: redis })

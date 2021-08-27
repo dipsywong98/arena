@@ -28,6 +28,7 @@ const makeInitialStateGenerator = (aiTurn: TicTacToeTurn) =>
     runId,
     externalPlayer: opposite(aiTurn),
     history: [initState()],
+    moves: [],
     clock: INITIAL_CLOCK_MS,
     createdAt: Date.now()
   })

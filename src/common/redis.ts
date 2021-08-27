@@ -39,18 +39,21 @@ export const getScheduleRedis = () => {
   return scheduleRedis
 }
 
-export const opt = {
-  prefix: 'Workers',
-  createClient: function (type: string) {
-    switch (type) {
-      case 'client':
-        return redis
-      case 'subscriber':
-        return getSubRedis()
-      default:
-        return makeRedis('unknown')
-    }
-  }
+export const clearOldKeys = async (redis: Redis, olderThanSeconds: number, pattern = '*') => {
+  const keys = await redis.keys(pattern)
+  const keysToDrop = (await Promise.all(keys.map(async (key) => {
+    const idle = await redis.object('idletime', key)
+    console.log({ key, idle, olderThanSeconds, delete: idle > olderThanSeconds })
+    return { key, flag: idle > olderThanSeconds }
+  }))).filter(({ flag }) => flag).map(({ key }) => key)
+  await Promise.all(keysToDrop.map(async key => await redis.del(key)))
+  return keysToDrop
+}
+
+export const clearAllKeys = async (redis: Redis, pattern = '*') => {
+  const keys = await redis.keys(pattern)
+  await Promise.all(keys.map(async key => await redis.del(key)))
+  return keys
 }
 
 export default redis
