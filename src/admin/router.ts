@@ -6,7 +6,8 @@ import { getBattle as getTTTBattle } from '../ttt/store'
 import { getBattle as getQBattle } from '../quoridor/store'
 import { Redis } from 'ioredis'
 import { DateTime } from 'luxon'
-import { getMoveQueue } from 'src/common/queues'
+import { getMoveQueue } from '../common/queues'
+import { range } from 'ramda'
 
 const timestampToString = (t: number) => {
   return DateTime.fromMillis(t).toString()
@@ -64,6 +65,53 @@ const getRuns = async (game: string) => {
       link: `${ARENA_URL}/admin/${game}/runs/${f.id}`
     })).sort((a, b) => b.createdAt - a.createdAt)
 }
+
+const rangeSteps = (a: number, b: number, s: number) => {
+  return range(a, b).filter(k => (k - a) % s === 0)
+}
+
+const findAndCacheMove = async (jobName: string) => {
+  const allKinds = ['wait', 'delayed', 'active', 'completed', 'failed']
+  const queue = getMoveQueue()
+  const counts = Object.values(await queue.getJobCounts(...allKinds)).reduce((a, b) => a + b, 0)
+  const page = 100
+  for (const a of rangeSteps(0, counts, page).reverse()) {
+    const jobs = await queue.getJobs(allKinds, a, Math.min(a + page, counts))
+    for (const j of jobs) {
+      if (j.id) {
+        redis.set(`moveid:${j.name}`, j.id)
+        if (j.name === jobName) {
+          return j.id
+        }
+      }
+    }
+  }
+  return undefined
+}
+
+const findMove = async (jobName: string) => {
+  const id = await redis.get(`moveid:${jobName}`)
+  if (id) {
+    return id
+  }
+  return await findAndCacheMove(jobName)
+}
+
+const getMoveById = async (id?: string) => {
+  if (!id) {
+    return null
+  }
+  return await getMoveQueue().getJob(id)
+}
+
+adminRouter.get('/moves/:id', (req, res) => {
+  const id = req.params.id
+  if (/^\d+$/.test(id)) {
+    getMoveById(id).then((job) => { res.json(job) })
+  } else {
+    findMove(id).then(id => getMoveById(id)).then((job) => { res.json(job) })
+  }
+})
 
 adminRouter.get('/:game/runs', (req, res) => {
   const { game } = req.params
