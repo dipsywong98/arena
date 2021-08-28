@@ -25,6 +25,7 @@ export const getConcludeQueue = () => {
 
 let moveWorker: Worker<MovePayload, any, string> | undefined
 let concludeWorker: Worker<ConcludePayload, unknown, string> | undefined
+const concurrency: number = Number.parseInt(process.env.CONCURRENCY ?? '1')
 
 export const getMoveWorker = () => {
   if (moveWorker === undefined) {
@@ -36,7 +37,7 @@ export const getMoveWorker = () => {
     } else {
       const ext = process.env.NODE_ENV === 'development' ? 'ts' : 'js'
       const p = path.join(__dirname, `sandboxedProcessor.${ext}`)
-      moveWorker = new Worker<MovePayload>('moveQueue', p, { connection: redis })
+      moveWorker = new Worker<MovePayload>('moveQueue', p, { connection: redis, concurrency })
     }
   }
   return moveWorker
