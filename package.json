@@ -62,6 +62,7 @@
   ],
   "dependencies": {
     "@bull-board/express": "^3.3.0",
+    "@types/humanize-duration": "^3.25.1",
     "@types/luxon": "^2.0.0",
     "@types/marked": "^2.0.4",
     "@types/pako": "^1.0.2",
@@ -79,6 +80,7 @@
     "express-basic-auth": "^1.2.0",
     "helmet": "^4.6.0",
     "http-status-codes": "^2.1.4",
+    "humanize-duration": "^3.27.0",
     "immer": "^9.0.5",
     "ioredis": "^4.27.6",
     "jet-logger": "^1.0.4",

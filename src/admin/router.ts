@@ -1,17 +1,14 @@
 import { Router } from 'express'
-import { Battle, Run } from '../common/types'
+import { Battle, Game, Run } from '../common/types'
 import redis, { clearAllKeys, clearOldKeys } from '../common/redis'
 import { ARENA_URL } from '../common/constants'
 import { getBattle as getTTTBattle } from '../ttt/store'
 import { getBattle as getQBattle } from '../quoridor/store'
 import { Redis } from 'ioredis'
-import { DateTime } from 'luxon'
+import { DateTime, Interval } from 'luxon'
 import { getMoveQueue } from '../common/queues'
 import { range } from 'ramda'
-
-const timestampToString = (t: number) => {
-  return DateTime.fromMillis(t).toString()
-}
+import { briefRun, formatBattle, formatRun } from './formatter'
 
 interface Helper {
   getBattle: (redis: Redis, battleId: string) => Promise<Battle<any, any, any, any> | null>
@@ -24,46 +21,21 @@ const helper: Record<string, Helper> = {
 
 const adminRouter = Router()
 
-const getRun = async (game: string, runId: string): Promise<unknown> => {
+const getRun = async (game: Game, runId: string): Promise<unknown> => {
   const j = await redis.get(`arena:${game}:run:${runId}`)
   if (j) {
     const run: Run = JSON.parse(j)
-    const battles = await Promise.all(run.battleIds.map(async battleId => {
-      const b = await redis.get(`arena:${game}:battle:${battleId}`)
-      if (b) {
-        const battle = JSON.parse(b)
-        return {
-          id: battleId,
-          type: battle.type,
-          score: battle.score,
-          result: battle.result,
-          flippedReason: battle.flippedReason,
-          link: `${ARENA_URL}/admin/${game}/battles/${battleId}`
-        }
-      }
-    }))
-    return {
-      ...run,
-      createdAtStr: timestampToString(run.createdAt),
-      battles,
-    }
+    return await formatRun(game, run)
   }
   return j
 }
 
-const getRuns = async (game: string) => {
+const getRuns = async (game: Game) => {
   const ids = await redis.keys(`arena:${game}:run:*`)
   const runs = (await Promise.all(ids.map(async id => await redis.get(id))))
     .filter((f: string | null) => f !== null) as string[]
   return runs.map((f: string) => JSON.parse(f) as Run)
-    .map((f) => ({
-      id: f.id,
-      score: f.score,
-      createdAt: f.createdAt,
-      createdAtStr: timestampToString(f.createdAt),
-      callbackUrl: f.callbackUrl,
-      link: `${ARENA_URL}/admin/${game}/runs/${f.id}`
-    })).sort((a, b) => b.createdAt - a.createdAt)
+    .map((f) => briefRun(game, f)).sort((a, b) => b.createdAt - a.createdAt)
 }
 
 const rangeSteps = (a: number, b: number, s: number) => {
@@ -115,19 +87,23 @@ adminRouter.get('/moves/:id', (req, res) => {
 
 adminRouter.get('/:game/runs', (req, res) => {
   const { game } = req.params
-  getRuns(game).then(j => res.json(j))
+  getRuns(game as Game).then(j => res.json(j))
 })
 
 adminRouter.get('/:game/runs/:runId', (req, res) => {
   const { game, runId } = req.params
-  getRun(game === 'tic-tac-toe' ? 'ttt' : game, runId).then(j => res.json(j))
+  getRun(game === 'tic-tac-toe' ? Game.TTT : game as Game, runId).then(j => res.json(j))
 })
 
 adminRouter.get('/:game/battles/:id', (req, res) => {
   const { id, game } = req.params
   if (game in helper) {
-    helper[game].getBattle(redis, id).then((game: Battle<any, any, any, any> | null) => {
-      res.json({ ...game, createdAtStr: DateTime.fromMillis(game?.createdAt ?? 0).toString() })
+    helper[game].getBattle(redis, id).then((battle: Battle<any, any, any, any> | null) => {
+      if (battle) {
+        res.json(formatBattle(game as Game, battle))
+      } else {
+        res.json(null)
+      }
     })
   } else {
     res.json([game, 'not in', Object.keys(helper)])

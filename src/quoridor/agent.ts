@@ -89,8 +89,8 @@ export const abAgent = (state: QuoridorState): QActionInternal => {
       apply: applyAction
     })
     return alphaBetaTreeResult.action ?? baseAgent(state)
-  } catch (e) {
-    logger.err('error occured in abtree and fall back to baseAgent', e)
+  } catch (e: any) {
+    logger.err('Quoridor abAgent: error occured in abtree and fall back to baseAgent ' + e.message)
     return moveOnlyAgent(state)
   }
 }
@@ -109,8 +109,10 @@ export const moveOnlyAgent = (state: QuoridorState): QActionInternal => {
       apply: applyAction
     })
     return alphaBetaTreeResult.action ?? baseAgent(state)
-  } catch (e) {
-    logger.err('error occured in abtree and fall back to baseAgent', e)
+  } catch (e: any) {
+    logger.err(
+      'Quoridor moveOnlyAgent: error occured in abtree and fall back to baseAgent ' + e.message
+    )
     return baseAgent(state)
   }
 }

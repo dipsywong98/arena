@@ -64,6 +64,7 @@ export interface Battle<CaseType, Result, S extends State, Turn> {
   score?: number
   clock: number
   createdAt: number
+  completedAt?: number
 }
 
 export interface TestCase<S extends State,

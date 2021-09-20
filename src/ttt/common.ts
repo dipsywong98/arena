@@ -73,6 +73,7 @@ export const applyAction = (state: TicTacToeState, action: TicTacToeAction): Tic
         // outside of the board just ignore it
       }
       draft.turn = opposite(state.turn)
+      draft.createdAt = Date.now()
     })
   }
   if (action.action2 !== undefined) {

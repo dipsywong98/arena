@@ -147,8 +147,10 @@ const calculateScore = (ctx: ProcessMoveContext): ProcessMoveContext => produce(
     draft.battle.result = TicTacToeResult.FLIPPED
     draft.battle.flippedReason = draft.output.errors.join('\n')
     draft.battle.flippedBy = opposite(draft.battle.externalPlayer)
+    draft.battle.completedAt = Date.now()
   } else if (draft.battle.result !== undefined) {
     draft.battle.score = config[draft.battle.type].score(draft.battle)
+    draft.battle.completedAt = Date.now()
   }
   return draft
 })
@@ -216,7 +218,7 @@ export const processMove = async (move: TicTacToeMove): Promise<unknown> => {
       let action = { type: TicTacToeActionType.INVALID_ACTION }, error = move.error
       try {
         action = internalizeAction(move.action)
-      } catch (e) {
+      } catch (e: any) {
         error = e.message
       }
       const ctx: ProcessMoveContext = {

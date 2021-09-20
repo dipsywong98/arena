@@ -57,6 +57,7 @@ export const putWall = (x: number, y: number, o: Orientation) => (
       }
       draft.players[draft.turn].walls--
       draft.turn = opposite(draft.turn)
+      draft.createdAt = Date.now()
       return draft
     })
 )
@@ -65,6 +66,7 @@ export const movePawn = (x: number, y: number) => (state: QuoridorState) =>
     draft.players[draft.turn].x = x
     draft.players[draft.turn].y = y
     draft.turn = opposite(draft.turn)
+      draft.createdAt = Date.now()
     return draft
   })
 
