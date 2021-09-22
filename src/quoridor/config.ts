@@ -9,13 +9,14 @@ import {
   QuoridorTurn
 } from './types'
 import { playerWin } from './processMove'
+import { appConfig } from '../common/config'
 
-export const INITIAL_CLOCK_MS = parseInt(process.env.QUORIDOR_INITIAL_CLOCK_MS ?? '60000')
+export const INITIAL_CLOCK_MS = appConfig.QUORIDOR_INITIAL_CLOCK_MS
 
-export const TURN_ADD_MS = parseInt(process.env.QUORIDOR_TURN_ADD_MS ?? '2000')
+export const TURN_ADD_MS = appConfig.QUORIDOR_TURN_ADD_MS
 
 // would directly call the score function for score
-export const TERMINATE_TURNS = parseInt(process.env.QUORIDOR_TERMINATE_TURNS ?? '40')
+export const TERMINATE_TURNS = appConfig.QUORIDOR_TERMINATE_TURNS
 
 const makeInitialStateGenerator = (aiTurn: QuoridorTurn) =>
   (battleId: string, runId: string): Omit<QuoridorBattle, 'type'> => ({

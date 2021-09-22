@@ -1,2 +1,4 @@
-export const ARENA_URL = process.env.APP_URL ?? 'http://localhost:3000'
+import { appConfig } from "./config";
+
+export const ARENA_URL = appConfig.APP_URL;
 export const FLIP_TABLE = '(╯°□°)╯︵ ┻━┻'

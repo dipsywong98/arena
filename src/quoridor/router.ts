@@ -18,6 +18,7 @@ import { Game, isEvaluatePayload } from '../common/types'
 import { candidate } from './candidate'
 import { processMove } from './processMove'
 import { getMoveQueue } from '../common/queues'
+import { appConfig } from '../common/config'
 
 const quoridorRouter = Router()
 quoridorRouter.get('/hi', (request, response) => {
@@ -120,7 +121,7 @@ quoridorRouter.post('/play/:battleId', async (req, res) => {
     error
   }
   if (error === undefined) {
-    await getMoveQueue().add(moveId, {game: Game.QUORIDOR, move})
+    await getMoveQueue().add(moveId, { game: Game.QUORIDOR, move })
   } else {
     processMove(move)
   }
@@ -136,7 +137,7 @@ quoridorRouter.get('/admin/view/:id', (req, res) => {
 })
 
 quoridorRouter.post('/', (req, res) => {
-  if (process.env.CANDIDATE_ENABLED) {
+  if (appConfig.CANDIDATE_ENABLED) {
     res.send('OK')
     candidate(req.body.battleId)
   } else {

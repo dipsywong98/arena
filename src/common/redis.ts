@@ -1,17 +1,18 @@
 import IORedis, { Redis } from 'ioredis'
+import { appConfig } from './config'
 
 export const allRedis: Redis[] = []
 
 export const makeRedis = (name = 'default'): Redis => {
   let redis
-  if (process.env.REDIS_TLS_URL !== undefined) {
-    redis = new IORedis(process.env.REDIS_TLS_URL, {
+  if (appConfig.REDIS_TLS_URL !== undefined) {
+    redis = new IORedis(appConfig.REDIS_TLS_URL, {
       tls: {
         rejectUnauthorized: false
       }
     })
   } else {
-    redis = new IORedis(process.env.REDIS_URL)
+    redis = new IORedis(appConfig.REDIS_URL)
   }
   allRedis.push(redis)
   return redis

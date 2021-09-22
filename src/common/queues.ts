@@ -1,6 +1,7 @@
 import { Queue, Worker } from 'bullmq'
 import path from 'path'
 import redis from '../common/redis'
+import { appConfig } from './config'
 import logger from './logger'
 import { processConclude } from './processConclude'
 import { processMove } from './processMove'
@@ -25,17 +26,17 @@ export const getConcludeQueue = () => {
 
 let moveWorker: Worker<MovePayload, any, string> | undefined
 let concludeWorker: Worker<ConcludePayload, unknown, string> | undefined
-const concurrency: number = Number.parseInt(process.env.CONCURRENCY ?? '1')
+const concurrency: number = appConfig.CONCURRENCY
 
 export const getMoveWorker = () => {
   if (moveWorker === undefined) {
-    logger.info(`NODE_ENV: ${process.env.NODE_ENV ?? 'unknown'}`)
-    if (process.env.NODE_ENV === 'test') {
+    logger.info(`NODE_ENV: ${appConfig.NODE_ENV}`)
+    if (appConfig.NODE_ENV === 'test') {
       moveWorker = new Worker<MovePayload>('moveQueue', async (job) => {
         return await processMove(job.data)
       }, { connection: redis })
     } else {
-      const ext = process.env.NODE_ENV === 'development' ? 'ts' : 'js'
+      const ext = appConfig.NODE_ENV === 'development' ? 'ts' : 'js'
       const p = path.join(__dirname, `sandboxedProcessor.${ext}`)
       moveWorker = new Worker<MovePayload>('moveQueue', p, { connection: redis, concurrency })
     }

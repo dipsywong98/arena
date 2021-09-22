@@ -18,6 +18,7 @@ import { Game, isEvaluatePayload } from '../common/types'
 import { candidate } from './candidate'
 import { processMove } from './processMove'
 import { getMoveQueue } from '../common/queues'
+import { appConfig } from '../common/config'
 
 const ticTacToeRouter = Router()
 ticTacToeRouter.get('/hi', (request, response) => {
@@ -137,7 +138,7 @@ ticTacToeRouter.get('/admin/view/:id', (req, res) => {
 })
 
 ticTacToeRouter.post('/', (req, res) => {
-  if (process.env.CANDIDATE_ENABLED) {
+  if (appConfig.CANDIDATE_ENABLED) {
     res.send('OK')
     candidate(req.body.battleId)
   } else {

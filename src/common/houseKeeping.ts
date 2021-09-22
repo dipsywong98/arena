@@ -7,9 +7,10 @@ import { FLIP_TABLE } from "./constants"
 import redis from "./redis"
 import { Battle, Game, Move, START_GAME } from "./types"
 import { getMoveQueue } from "./queues"
+import { appConfig } from "./config"
 
 // default 5 minutes
-export const SHOULD_START_WITHIN = parseInt(process.env.SHOULD_START_WITHIN ?? '300000')
+export const SHOULD_START_WITHIN: number = appConfig.SHOULD_START_WITHIN
 
 const opposite = (s: string) => {
   switch (s) {
@@ -83,7 +84,7 @@ export const housekeepForGameBattle = async (game: Game, battleId: string) => {
 
 const HOUSE_KEEP_QUEUE = 'housekeepQueue'
 export const houseKeepQueue = new Queue(HOUSE_KEEP_QUEUE, { connection: redis })
-export const houseKeepQueueScheduler = process.env.NODE_ENV !== 'test'
+export const houseKeepQueueScheduler = appConfig.NODE_ENV !== 'test'
   ? new QueueScheduler(HOUSE_KEEP_QUEUE, { connection: redis })
   : { close: async () => await Promise.resolve() };
 export const houseKeepQueueWorker = new Worker(HOUSE_KEEP_QUEUE,
@@ -96,7 +97,7 @@ export const houseKeepQueueWorker = new Worker(HOUSE_KEEP_QUEUE,
   }, { connection: redis }
 )
 
-if (process.env.NODE_ENV !== 'test') {
+if (appConfig.NODE_ENV !== 'test') {
   houseKeepQueue.add('cron-ttt', { game: 'ttt' }, { repeat: { every: 60000 } })
   houseKeepQueue.add('cron-quoridor', { game: 'quoridor' }, { repeat: { every: 60000 } })
 }

@@ -1,4 +1,5 @@
 import axios from 'axios'
+import { appConfig } from './config'
 import { CallbackPayload } from './types'
 
 export const reportScore = async (
@@ -8,7 +9,7 @@ export const reportScore = async (
   message: string
 ) => {
   const headers = {
-    Authorization: process.env.AUTH_TOKEN ?? ''
+    Authorization: appConfig.AUTH_TOKEN ?? ''
   }
   const payload: CallbackPayload = {
     runId,

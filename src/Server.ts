@@ -17,6 +17,7 @@ import basicAuth from 'express-basic-auth'
 import adminRouter from './admin/router'
 import { houseKeepQueue } from './common/houseKeeping'
 import { getConcludeQueue, getConcludeWorker, getMoveQueue, getMoveWorker } from './common/queues'
+import { appConfig } from './common/config'
 
 const app = express()
 
@@ -28,23 +29,23 @@ app.use(express.json())
 app.use(express.urlencoded({ extended: true }))
 app.use(cookieParser())
 
-if (process.env.NODE_ENV !== 'test') {
+if (appConfig.NODE_ENV !== 'test') {
   app.use(/.*admin.*/, basicAuth({
     challenge: true,
     authorizer: (_username: string, password: string) => {
-      return password === (process.env.AUTH_TOKEN ?? 'token')
+      return password === (appConfig.ADMIN_PASSWORD ?? appConfig.AUTH_TOKEN)
     },
     unauthorizedResponse: 'Unauthorized'
   }))
 }
 
 // Show routes called in console during development
-if (process.env.NODE_ENV === 'development') {
+if (appConfig.NODE_ENV === 'development') {
   app.use(morgan('dev'))
 }
 
 // Security
-if (process.env.NODE_ENV === 'production') {
+if (appConfig.NODE_ENV === 'production') {
   app.use(helmet())
 }
 
