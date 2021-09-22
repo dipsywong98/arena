@@ -4,28 +4,27 @@
 
 ## Story
 
-Inspired by a real-life story... Social distancing keeps you away from your friends, so you can't play board games with your friends physically, however at home your friends just play ring fit themselves but not board games. Don't be sad there is still Arena can play board games with you.
+Inspired by a real-life story... Social distancing keeps you away from your friends so you can't play board games with them physically anymore. But in actuality, your friends don't want to play board games with you regardless as they'd rather play Ring Fit with themselves. Don't be sad, you can still play board games with Arena.
 
 ## Challenge description
 
-The Arena consists of two levels, level 1 [tic-tac-toe](https://en.wikipedia.org/wiki/Tic-tac-toe) and level
-2 [quoridor](https://en.wikipedia.org/wiki/Quoridor). The tic-tac-toe is more of trying around the network protocol, and
-the quoridor is where the real battle happens.
+The Arena challenge consists of two levels, level 1 [Tic-Tac-Toe](https://en.wikipedia.org/wiki/Tic-tac-toe) and level
+2 [Quoridor](https://en.wikipedia.org/wiki/Quoridor). The Tic-Tac-Toe level is more about familiarizing with the networking protocol. Quoridor is really where the real battle happens.
 
-## Tic Tac Toe
+## Tic-Tac-Toe
 
 ### Goal
 
-Win the baseline AI, at least draw with the advanced AI and flip the table when necessary within the time limit. For each tic-tac-toe game, you have a total of 18s to think, every time you respond you will gain additional 2s to think.
+Win the baseline AI, at least draw with the advanced AI, and flip the table when necessary within the time limit. For each Tic-Tac-Toe game, you will start with 18s in your timer to think. Every time you respond you will gain an additional 2s to think.
 
-### Rule
+### Rules
 
-The good old tic-tac-toe rule, two players `O` and `X`, `O` go first, and then take turns to put their symbol to an empty
-box in the 3x3 grid, the first to get three in a row/column/diagonal wins, otherwise, when the grid is full it's a draw.
+The good old Tic-Tac-Toe rules. There are two players, `O` and `X`. `O` goes first, and they each take turns placing one of their symbols in an empty
+box in the 3x3 grid. The first to get three in a row/column/diagonal wins. Otherwise, when the grid is full, it's a draw.
 
 ### Notation
 
-Use this compass notation when requesting and handling response with arena tic-tac-toe.
+Use this compass notation when requesting and handling responses with the Arena Tic-Tac-Toe agent.
 
 ```
 |NW|N |NE|
@@ -37,60 +36,64 @@ Use this compass notation when requesting and handling response with arena tic-t
 
 ### How to play
 
-1. Request for grading tic-tac-toe at the coordinator
-2. The coordinator will ask Arena to play tic-tac-toe with you. The Arena will `POST` to your `/tic-tac-toe` with `battleId` in
-   the body
+1. Request for a Tic-Tac-Toe evaluation at the coordinator.
+2. The coordinator will ask Arena to play Tic-Tac-Toe with you. The Arena will `POST` to your `/tic-tac-toe` endpoint with `battleId` in
+   the body.
 
-```json
-{
-  "battleId": "21083c13-f0c2-4b54-8cb1-090129ffaa93"
-}
-```
+   ```json
+   {
+     "battleId": "21083c13-f0c2-4b54-8cb1-090129ffaa93"
+   }
+   ```
 
-3. Your system `GET` `{arenaEndpoint}/tic-tac-toe/start/{battleId}`, which is
+3. Your system initiates a `GET` request at `{arenaEndpoint}/tic-tac-toe/start/{battleId}`, which is
    an [`event/stream`](https://developer.mozilla.org/en-US/docs/Web/API/Server-sent_events/Using_server-sent_events)
-   that it can keep pushing latest update (aka events) of the battle to you. The possible events are in the next section
+   of which the Arena server can keep pushing the latest updates (as events) of the battle to you. The possible events are defined in the next section.
 
-4. When it is your turn, you need to submit your move within your thinking time. To submit move, `POST`
-   to `{arenaEndpoint}/tic-tac-toe/play/{battleId}` with payload
+4. When it is your turn, you will need to submit your move within your thinking time. To submit a move, `POST`
+   to `{arenaEndpoint}/tic-tac-toe/play/{battleId}` with the payload
 
-```json
-{
-  "action": "putSymbol",
-  "position": "SE"
-}
-```
+   ```json
+   {
+     "action": "putSymbol",
+     "position": "SE"
+   }
+   ```
 
-where the position is the compass notation for the grid
+   where the position is written in compass notation.
 
-5. Invalid moves are considered as surrendering, and the opponent should flip the table. To flip table, `POST`
-   to `{arenaEndpoint}/tic-tac-toe/play/{battleId}` with payload
+5. Invalid moves are considered surrendering and the opponent should flip the table. To flip the table, `POST`
+   to `{arenaEndpoint}/tic-tac-toe/play/{battleId}` with the payload
 
-```json
-{
-   "action": "(╯°□°)╯︵ ┻━┻"
-}
-```
+   ```json
+   {
+     "action": "(╯°□°)╯︵ ┻━┻"
+   }
+   ```
 
 ### Events
 
-The initial event tells your symbol
+The initial event tells you what symbol you are.
+
 ```
 data: {"youAre":"O","id":"15f6301f-cbdd-4084-a810-df2e9c83238f"}
 ```
 
-The move event tells you who made what move
+The move event tells you who has made what move.
+
 ```
 data: {"player":"O","action":"putSymbol","position":"NW"}
 ```
 
-The game end event tells you the game end result
+The game end event tells you the game result.
+
 ```
 data: {"winner":"draw"}
 data: {"winner":"O"}
 ```
 
-The flip table event tells you someone flipped table and who flipped it
+The flip table event tells who has flipped the table.
+
 ```
 data: {"player":"O","action":"(╯°□°)╯︵ ┻━┻"}
 ```
@@ -99,12 +102,12 @@ data: {"player":"O","action":"(╯°□°)╯︵ ┻━┻"}
 
 ### Goal
 
-Win the baseline AI, survive long enough when battling with advanced AI, and flip table when necessary within the time limit.
-For each quoridor game, you have a total of 60s to think, every time you respond you will gain additional 2s to think.
+Win the baseline AI, survive long enough when battling with the advanced AI, and flip the table when necessary within the time limit.
+For each Quoridor game, you will start with 60s in your timer to think. Every time you respond you will gain an additional 2s to think.
 
-### Rule
+### Rules
 
-(copy paste from wiki)
+(Copy-pasted from wiki)
 
 Quoridor is played on a game board of 81 square spaces (9x9). Each player is represented by a pawn which begins at the center space of one edge of the board (in a two-player game, the pawns begin opposite each other). The objective is to be the first player to move their pawn to any space on the opposite side of the game board from which it begins.
 
@@ -117,68 +120,72 @@ Walls can be placed directly between two spaces, in any groove not already occup
 
 ### Notation
 
-We use the [standard quoridor notation](https://quoridorstrats.wordpress.com/notation/) for the arena quoridor game.
-
-You may be the `first` or `second` player,
-the first player will start at `e1` and the second start at `e9`.
-The first will win if it reaches row `9` and the second win if it reaches row `1`.
-
-For walls, each player will have 10
+We use the [standard Quoridor notation](https://quoridorstrats.wordpress.com/notation/) for the Arena Quoridor game.
 
 ![](static/quoridor-view.png)
 ![](static/quoridor.png)
 
+### Few things to note
+
+- You may be the `first` or `second` player.
+- The first player starts at `e1` and the second at `e9`.
+- The first player wins if they reach row `9` and the second wins if they reach row `1`.
+- Each player has 10 walls.
+
 ### How to play
 
-1. Request for grading quoridor at the coordinator
-2. The coordinator will ask Arena to play quoridor with you. The Arena will `POST` to your `/quoridor` with `battleId` in
-   the body
+1. Request for a Quoridor evaluation at the coordinator.
+2. The coordinator will ask Arena to play Quoridor with you. The Arena will `POST` to your `/quoridor` endpoint with `battleId` in
+   the body.
 
-```json
-{
-  "battleId": "21083c13-f0c2-4b54-8cb1-090129ffaa93"
-}
-```
+   ```json
+   {
+     "battleId": "21083c13-f0c2-4b54-8cb1-090129ffaa93"
+   }
+   ```
 
-3. Your system `GET` `{arenaEndpoint}/quoridor/start/{battleId}`, which is
+3. Your system initiates a `GET` request at `{arenaEndpoint}/quoridor/start/{battleId}`, which is
    an [`event/stream`](https://developer.mozilla.org/en-US/docs/Web/API/Server-sent_events/Using_server-sent_events)
-   that it can keep pushing latest update (aka events) of the battle to you. The possible events are in the next section
+   of which the Arena server can keep pushing the latest updates (as events) of the battle to you. The possible events are defined in the next section.
 
-4. When it is your turn, you need to submit your move within the time limit. To submit move, `POST`
+4. When it is your turn, you will need to submit your move within the time limit. To submit a move, `POST`
    to `{arenaEndpoint}/quoridor/play/{battleId}`.
 
-Move your pawn:
-```json
-{
-  "action": "move",
-  "position": "e8"
-}
-```
+   To move your pawn:
 
-Where the `position` is the chess notation location that you want to move your pawn to.
+   ```json
+   {
+     "action": "move",
+     "position": "e8"
+   }
+   ```
 
-Place wall:
-```json
-{
-   "action": "putWall",
-   "position": "a8h"
-}
-```
+   where the `position` is written in chess notation.
 
-Where the `position` is a 3 character standard quoridor notation indicating the wall's placement
+   To place a wall:
 
-5. Invalid moves are considered as surrendering, and the opponent should flip the table. To flip table, `POST`
-   to `{arenaEndpoint}/quoridor/play/{battleId}` with payload
+   ```json
+   {
+     "action": "putWall",
+     "position": "a8h"
+   }
+   ```
 
-```json
-{
-   "action": "(╯°□°)╯︵ ┻━┻"
-}
-```
+   where the `position` is written in the 3-character standard Quoridor notation.
+
+5. Invalid moves are considered surrendering, and the opponent should flip the table. To flip the table, `POST`
+   to `{arenaEndpoint}/quoridor/play/{battleId}` with the payload
+
+   ```json
+   {
+     "action": "(╯°□°)╯︵ ┻━┻"
+   }
+   ```
 
 ### Events
 
-Initial event tells your color
+The initial event tells your which player you are.
+
 ```
 data: {"youAre":"second","id":"15f6301f-cbdd-4084-a810-df2e9c83238f"}
 ```
@@ -187,7 +194,8 @@ data: {"youAre":"second","id":"15f6301f-cbdd-4084-a810-df2e9c83238f"}
 data: {"youAre":"first","id":"15f6301f-cbdd-4084-a810-df2e9c83238f"}
 ```
 
-Move event tells you who made what move
+The move event tells you who has made what move.
+
 ```
 data: {"player":"second","position":"e8","action": "move"}
 ```
@@ -195,13 +203,15 @@ data: {"player":"second","position":"e8","action": "move"}
 data: {"player":"first","position":"e6v","action": "putWall"}
 ```
 
-Game end event tells you the game end result
+The game end event tells you the game result.
+
 ```
 data: {"winner":"first"}
 data: {"winner":"second"}
 ```
 
-Flip table tells you someone flipped table and who flipped it
+The flip table event tells who has flipped the table.
+
 ```
 data: {"player":"first","action":"(╯°□°)╯︵ ┻━┻"}
 ```
