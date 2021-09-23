@@ -10,7 +10,8 @@ export enum TicTacToeCaseType {
   C_AI_X_FIRST = 'C_AI_X_FIRST',
   C_AI_DUP = 'C_AI_DUP',
   C_AI_OUT_OF_BOUND = 'C_AI_OUT_OF_BOUND',
-  C_AI_TWICE_A_ROW = 'C_AI_TWICE_A_ROW'
+  C_AI_TWICE_A_ROW = 'C_AI_TWICE_A_ROW',
+  C_AI_FLIP_TABLE_RANDOMLY = 'C_AI_FLIP_TABLE_RANDOMLY',
 }
 
 export function isCaseType (p: string | undefined): p is TicTacToeCaseType {

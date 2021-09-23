@@ -1,5 +1,5 @@
 import { abAgent } from '../../../src/ttt/agent'
-import { TicTacToeCaseType } from '../../../src/ttt/types'
+import { TicTacToeCaseType, TicTacToeResult } from '../../../src/ttt/types'
 import {
   autoPlay,
   expectFlipTable,
@@ -19,6 +19,8 @@ import {
 } from '../common'
 import { initState } from '../../../src/ttt/config'
 import { applyAction, externalizeAction, internalizeAction } from '../../../src/ttt/common'
+import { FLIP_TABLE } from '../../../src/common/constants'
+import axios from 'axios'
 
 const winSequence = [
   expectGameStart('X'),
@@ -36,9 +38,9 @@ const winSequence = [
 ]
 
 describe('ttt-simple', () => {
-  it('request for grade will generate 8 battles', async () => {
+  it('request for grade will generate 9 battles', async () => {
     const battleIds = await requestForGrade('tic-tac-toe')
-    expect(battleIds).toHaveLength(8)
+    expect(battleIds).toHaveLength(9)
   })
 
   it('gives me my position when start game', async () => {
@@ -235,8 +237,30 @@ describe('ttt-simple', () => {
       expectTotalScore(0))
   })
 
-  it('whole all 9 flip', () => {
+  it('response with 429 if playing a ended battle', () => {
+    return startBattle('tic-tac-toe',
+      TicTacToeCaseType.BASE_AI_X,
+      listenEvent(),
+      expectGameStart('O'),
+      flipTable(),
+      expectFlipTable('O'),
+      expectFlipTable('X'),
+      viewBattle(battle => {
+        expect(battle.result).toEqual(TicTacToeResult.FLIPPED)
+      }),
+      expectTotalScore(0),
+      async (ctx) => {
+        await axios.post(`/${ctx.game}/play/${ctx.battleId}`, { action: FLIP_TABLE })
+          .catch(({ response }) => {
+            expect(response.status).toEqual(423)
+            expect(response.data).toEqual({ error: 'Battle already ended' })
+          })
+      })
+  })
+
+  it('whole all flip', () => {
     return startRun('tic-tac-toe', [
+      [flipTable()],
       [flipTable()],
       [flipTable()],
       [flipTable()],
@@ -253,6 +277,7 @@ describe('ttt-simple', () => {
     return startRun('tic-tac-toe', [
       [listenEvent(),
       ...winSequence, expectTotalScore(20)],
+      [flipTable()],
       [flipTable()],
       [flipTable()],
       [flipTable()],

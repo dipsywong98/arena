@@ -35,7 +35,7 @@ describe('ttt-cheat', () => {
         expectPutSymbol('', 'X'),
         flipTable(),
         expectFlipTable('O'),
-        expectTotalScore(5))
+        expectTotalScore(4))
     })
   })
   describe('C_AI_DUP', () => {
@@ -62,7 +62,7 @@ describe('ttt-cheat', () => {
         expectPutSymbol('W', 'X'),
         flipTable(),
         expectFlipTable('O'),
-        expectTotalScore(5))
+        expectTotalScore(4))
     })
   })
   describe('C_AI_X_FIRST', () => {
@@ -85,7 +85,7 @@ describe('ttt-cheat', () => {
         expectPutSymbol('NW', 'X'),
         flipTable(),
         expectFlipTable('O'),
-        expectTotalScore(5))
+        expectTotalScore(4))
     })
   })
   describe('C_AI_TWICE_A_ROW', () => {
@@ -116,7 +116,36 @@ describe('ttt-cheat', () => {
         expectPutSymbol('N', 'O'),
         flipTable(),
         expectFlipTable('X'),
-        expectTotalScore(5))
+        expectTotalScore(4))
     })
+  })
+
+  describe('C_AI_FLIP_TABLE_RANDOMLY', () => {
+    it('dont flip', () => {
+      return startBattle('tic-tac-toe',
+        TicTacToeCaseType.C_AI_FLIP_TABLE_RANDOMLY,
+        listenEvent(),
+        expectGameStart('O'),
+        putSymbol('W'),
+        expectPutSymbol('W', 'O'),
+        expectFlipTable('X'),
+        putSymbol('C'),
+        expectPutSymbol('C', 'O'),
+        expectFlipTable('X'),
+        expectTotalScore(0))
+    })
+
+    it('flip', () => {
+      return startBattle('tic-tac-toe',
+        TicTacToeCaseType.C_AI_FLIP_TABLE_RANDOMLY,
+        listenEvent(),
+        expectGameStart('O'),
+        putSymbol('W'),
+        expectPutSymbol('W', 'O'),
+        expectFlipTable('X'),
+        flipTable(),
+        expectFlipTable('O'),
+        expectTotalScore(4))
+    })    
   })
 })

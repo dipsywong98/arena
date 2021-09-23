@@ -19,6 +19,7 @@ import { candidate } from './candidate'
 import { processMove } from './processMove'
 import { getMoveQueue } from '../common/queues'
 import { appConfig } from '../common/config'
+import { FLIP_TABLE } from '../common/constants'
 
 const quoridorRouter = Router()
 quoridorRouter.get('/hi', (request, response) => {
@@ -54,7 +55,7 @@ quoridorRouter.get('/start/:battleId', async (req, res) => {
   const moveId = v4()
   res.write(`data: ${JSON.stringify({ youAre: battle.externalPlayer, id: battleId })}\n\n`)
 
-  await subscribeMessage(getSubRedis(), battleId, (message) => {
+  await subscribeMessage(getSubRedis(), battleId, async (message) => {
     try {
       // this timerReset is ok because even
       //   if this message is published by player sending move to us
@@ -66,6 +67,12 @@ quoridorRouter.get('/start/:battleId', async (req, res) => {
       res.write(`data: ${JSON.stringify(rest)}\n\n`)
       if (action2 !== undefined) {
         res.write(`data: ${JSON.stringify(action2)}\n\n`)
+      }
+      if (rest.winner || rest.action === FLIP_TABLE) {
+        const battle = await getBattle(getPubRedis(), battleId)
+        if (battle?.result) {
+          res.end()
+        }
       }
     } catch (e) {
       logger.err(e)
@@ -90,6 +97,10 @@ quoridorRouter.post('/play/:battleId', async (req, res) => {
   const battle = await getBattle(getPubRedis(), battleId)
   if (battle === null) {
     res.status(404).send({ error: 'Battle not found' })
+    return
+  }
+  if (battle.result) {
+    res.status(423).send({ error: 'Battle already ended' })
     return
   }
   if (battle.clock - elapsed < 0) {

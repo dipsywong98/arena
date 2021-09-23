@@ -102,6 +102,7 @@ export const formatBattle = (game: Game, battle: Battle<any, any, any, any>) => 
     externalPlayer: battle.externalPlayer,
     clock: battle.clock,
     result: battle.result,
+    flippedReason: battle.flippedReason,
     score: battle.score,
     createdAtStr: DateTime.fromMillis(battle.createdAt ?? 0).toString(),
     completedAtStr: timestampToString(battle.completedAt),

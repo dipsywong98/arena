@@ -16,7 +16,7 @@ import {
   startRun,
   viewBattle
 } from '../common'
-import { QuoridorActionType, QuoridorCaseType } from '../../../src/quoridor/types'
+import { QuoridorActionType, QuoridorCaseType, QuoridorResult } from '../../../src/quoridor/types'
 import {
   applyAction,
   externalizeAction,
@@ -24,6 +24,8 @@ import {
   internalizeAction
 } from '../../../src/quoridor/common'
 import { moveOnlyAgent } from '../../../src/quoridor/agent'
+import axios from 'axios'
+import { FLIP_TABLE } from '../../../src/common/constants'
 
 const autoPlay1 = autoPlay({
   init: initState,
@@ -226,6 +228,30 @@ describe('quoridor-simple', () => {
         expect(battle.flippedReason).toEqual('send move before arena replies')
       }),
       expectTotalScore(0))
+  })
+
+  it('response with 429 if playin a ended battle', () => {
+    return startBattle('quoridor',
+      QuoridorCaseType.BASE_AI_SECOND,
+      listenEvent(),
+      expectGameStart('first'),
+      flipTable(),
+      expectFlipTable('first'),
+      expectFlipTable('second'),
+      viewBattle(battle => {
+        expect(battle.result).toEqual(QuoridorResult.FLIPPED)
+      }),
+      expectTotalScore(0),
+      async (ctx) => {
+        await axios.post(`/${ctx.game}/play/${ctx.battleId}`, { action: FLIP_TABLE })
+          .then(() => {
+            throw new Error('this request should throw 423 status code')
+          })
+          .catch(({ response }) => {
+            expect(response.status).toEqual(423)
+            expect(response.data).toEqual({ error: 'Battle already ended' })
+          })
+      })
   })
 
   it('whole all 9 flip', () => {

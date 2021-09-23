@@ -74,7 +74,7 @@ export const config: Record<TicTacToeCaseType, TicTacToeTestCase> = Object.freez
       }
     },
     score: () => {
-      return 5
+      return 4
     }
   },
   [TicTacToeCaseType.C_AI_DUP]: {
@@ -94,7 +94,7 @@ export const config: Record<TicTacToeCaseType, TicTacToeTestCase> = Object.freez
       return baseAgent(state)
     },
     score: () => {
-      return 5
+      return 4
     }
   },
   [TicTacToeCaseType.C_AI_X_FIRST]: {
@@ -107,7 +107,7 @@ export const config: Record<TicTacToeCaseType, TicTacToeTestCase> = Object.freez
       }
     },
     score: () => {
-      return 5
+      return 4
     }
   },
   [TicTacToeCaseType.C_AI_TWICE_A_ROW]: {
@@ -149,7 +149,20 @@ export const config: Record<TicTacToeCaseType, TicTacToeTestCase> = Object.freez
       }
     },
     score: () => {
-      return 5
+      return 4
+    }
+  },
+  [TicTacToeCaseType.C_AI_FLIP_TABLE_RANDOMLY]: {
+    initialStateGenerator: makeInitialStateGenerator(TicTacToeTurn.X),
+    agent() {
+      return {
+        cheat: {
+          type: TicTacToeActionType.FLIP_TABLE
+        }
+      }
+    },
+    score: () => {
+      return 4
     }
   }
 })
