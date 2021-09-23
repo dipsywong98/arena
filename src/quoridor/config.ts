@@ -177,7 +177,7 @@ export const config: Record<QuoridorCaseType, QuoridorTestCase> = Object.freeze(
       }
     },
     score: () => {
-      return 4
+      return 2
     }
   },
   [QuoridorCaseType.C_AI_WALL_BLOCKING]: {
@@ -187,4 +187,28 @@ export const config: Record<QuoridorCaseType, QuoridorTestCase> = Object.freeze(
       return 6
     }
   },
+  [QuoridorCaseType.C_AI_WALK_THROUGH_WALL]: {
+    initialStateGenerator: makeInitialStateGenerator(QuoridorTurn.FIRST),
+    agent: (state) => {
+      if (state.players[QuoridorTurn.FIRST].walls === 10) {
+        return {
+          type: QuoridorActionType.PUT_WALL,
+          x: 4,
+          y: 7,
+          o: Orientation.HORIZONTAL
+        }
+      } else {
+        return {
+          cheat: {
+            type: QuoridorActionType.MOVE,
+            x: 4,
+            y: 7
+          }
+        }
+      }
+    },
+    score: () => {
+      return 2
+    }
+  }
 })

@@ -1,6 +1,7 @@
 import produce from 'immer'
 import { Orientation, QuoridorActionType, QuoridorTurn } from '../../../src/quoridor/types'
 import {
+  externalizeAction,
   getWalkableNeighborCoords,
   initState,
   internalizeAction,
@@ -16,10 +17,10 @@ describe('quoridor', () => {
       })
       expect(getWalkableNeighborCoords(state, QuoridorTurn.SECOND))
         .toEqual([
-          {x: 4, y: 3},
-          {x: 5, y: 4},
-          {x: 4, y: 5},
-          {x: 3, y: 4},
+          { x: 4, y: 3 },
+          { x: 5, y: 4 },
+          { x: 4, y: 5 },
+          { x: 3, y: 4 },
         ])
     })
     it('border case', () => {
@@ -29,17 +30,17 @@ describe('quoridor', () => {
       })
       expect(getWalkableNeighborCoords(state, QuoridorTurn.SECOND))
         .toEqual([
-          {x: 0, y: 3},
-          {x: 1, y: 4},
-          {x: 0, y: 5},
+          { x: 0, y: 3 },
+          { x: 1, y: 4 },
+          { x: 0, y: 5 },
         ])
     })
     it('wall case', () => {
       const state1 = putWall(4, 0, Orientation.HORIZONTAL)(initState())
       expect(getWalkableNeighborCoords(state1, QuoridorTurn.SECOND))
         .toEqual([
-          {x: 5, y: 0},
-          {x: 3, y: 0},
+          { x: 5, y: 0 },
+          { x: 3, y: 0 },
         ])
     })
     it('jump pawn straight', () => {
@@ -50,10 +51,10 @@ describe('quoridor', () => {
       state.players[QuoridorTurn.FIRST].y = 4
       expect(getWalkableNeighborCoords(state, QuoridorTurn.FIRST))
         .toEqual([
-          {x: 3, y: 3},
-          {x: 5, y: 4},
-          {x: 3, y: 5},
-          {x: 2, y: 4},
+          { x: 3, y: 3 },
+          { x: 5, y: 4 },
+          { x: 3, y: 5 },
+          { x: 2, y: 4 },
         ])
     })
     it('jump pawn has wall', () => {
@@ -65,11 +66,11 @@ describe('quoridor', () => {
       })
       expect(getWalkableNeighborCoords(state, QuoridorTurn.FIRST))
         .toEqual([
-          {x: 3, y: 3},
-          {x: 4, y: 5},
-          {x: 4, y: 3},
-          {x: 3, y: 5},
-          {x: 2, y: 4},
+          { x: 3, y: 3 },
+          { x: 4, y: 5 },
+          { x: 4, y: 3 },
+          { x: 3, y: 5 },
+          { x: 2, y: 4 },
         ])
     })
     describe('internalizeAction', () => {
@@ -92,6 +93,40 @@ describe('quoridor', () => {
           x: 0,
           y: 7,
           o: Orientation.VERTICAL
+        })
+      })
+    })
+    describe('externalizeAction', () => {
+      it('move', () => {
+        expect(externalizeAction({
+          type: QuoridorActionType.MOVE,
+          x: 0,
+          y: 8
+        })).toEqual({
+          action: QuoridorActionType.MOVE,
+          position: 'a1'
+        })
+      })
+      it('wall', () => {
+        expect(externalizeAction({
+          type: QuoridorActionType.PUT_WALL,
+          x: 0,
+          y: 7,
+          o: Orientation.VERTICAL
+        })).toEqual({
+          action: QuoridorActionType.PUT_WALL,
+          position: 'a1v'
+        })
+      })
+      it('wall2', () => {
+        expect(externalizeAction({
+          type: QuoridorActionType.PUT_WALL,
+          x: 4,
+          y: 7,
+          o: Orientation.HORIZONTAL
+        })).toEqual({
+          action: QuoridorActionType.PUT_WALL,
+          position: 'e1h'
         })
       })
     })

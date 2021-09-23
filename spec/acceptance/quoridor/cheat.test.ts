@@ -218,4 +218,34 @@ describe('quoridor-cheat', () => {
         expectTotalScoreSomething())
     }, 10000)
   })
+  describe('C_AI_WALK_THROUGH_WALL', () => {
+    it('dont flip', () => {
+      return startBattle('quoridor',
+        QuoridorCaseType.C_AI_WALK_THROUGH_WALL,
+        listenEvent(),
+        expectGameStart('second'),
+        expectPutWall('e1h', 'first'),
+        movePawn('e8'),
+        expectPawnMove('e8', 'second'),
+        expectPawnMove('e2', 'first'),
+        movePawn('e7'),
+        expectPawnMove('e7', 'second'),
+        expectFlipTable('first'),
+        expectTotalScore(0))
+    })
+    it('flip', () => {
+      return startBattle('quoridor',
+        QuoridorCaseType.C_AI_WALK_THROUGH_WALL,
+        listenEvent(),
+        expectGameStart('second'),
+        expectPutWall('e1h', 'first'),
+        movePawn('e8'),
+        expectPawnMove('e8', 'second'),
+        expectPawnMove('e2', 'first'),
+        flipTable(),
+        expectFlipTable('second'),
+        expectTotalScore(2))
+    })
+  })
+
 })
