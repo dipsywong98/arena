@@ -64,9 +64,13 @@ ticTacToeRouter.get('/start/:battleId', async (req, res) => {
       // arena should have already reset the timer
       timerReset(redis, battleId)
       const { action2, ...rest } = JSON.parse(message)
-      res.write(`data: ${JSON.stringify(rest)}\n\n`)
+      const logAndWrite = (str: string) => {
+        logger.info(`[ttt-event-stream:${battleId}] ${str}`)
+        res.write(`data: ${str}\n\n`)
+      }
+      logAndWrite(JSON.stringify(rest))
       if (action2 !== undefined) {
-        res.write(`data: ${JSON.stringify(action2)}\n\n`)
+        logAndWrite(JSON.stringify(action2))
       }
       if (rest.winner || rest.action === FLIP_TABLE) {
         const battle = await getBattle(getPubRedis(), battleId)
