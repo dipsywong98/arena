@@ -196,7 +196,7 @@ describe('quoridor-cheat', () => {
         listenEvent(),
         autoPlayNoFlip,
         expectTotalScore(0))
-    }, 10000)
+    }, 20000)
     it('flip', () => {
       const autoPlayWithFlip = autoPlay({
         init: initState,
