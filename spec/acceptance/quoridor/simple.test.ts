@@ -18,6 +18,7 @@ import {
 } from '../common'
 import { QuoridorActionType, QuoridorCaseType, QuoridorResult } from '../../../src/quoridor/types'
 import {
+  allPossibleWalls,
   applyAction,
   externalizeAction,
   initState,
@@ -230,6 +231,30 @@ describe('quoridor-simple', () => {
       }),
       expectTotalScore(0))
   })
+
+  it('flip when player place 11th wall', () => {
+    let numberOfWalls = 0
+    const keepPlacingWall = autoPlay({
+      init: initState,
+      apply: applyAction,
+      agent: state => {
+        numberOfWalls++
+        return allPossibleWalls(state)[0]
+      },
+      externalizeAction,
+      internalizeAction
+    })
+    return startBattle('quoridor',
+      QuoridorCaseType.BASE_AI_SECOND,
+      listenEvent(),
+      keepPlacingWall,
+      viewBattle(battle => {
+        expect(numberOfWalls).toEqual(11)
+        expect(battle.flippedBy).toEqual('second')
+        expect(battle.flippedReason).toEqual('You have used up your walls')
+      }),
+      expectTotalScore(0))
+  }, 100000)
 
   it('flips when player play twice a row', () => {
     return startBattle('quoridor',

@@ -251,6 +251,9 @@ export const handlePutWall = (ctx: ProcessMoveContext): ProcessMoveContext => {
         )
         return draft
       } else {
+        if (state.players[ctx.battle.externalPlayer].walls <= 0) {
+          draft.output.errors.push('You have used up your walls')
+        }
         if (!canPutWall(state, x1, y1, o)) {
           const s = externalizeAction(action).position?.substr(0, 2) ?? 'undefined'
           draft.output.errors.push(`Cannot put ${o} wall at ${s}`)
