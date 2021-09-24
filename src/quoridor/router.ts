@@ -53,7 +53,11 @@ quoridorRouter.get('/start/:battleId', async (req, res) => {
   res.setHeader('Connection', 'keep-alive')
   res.flushHeaders()
   const moveId = v4()
-  res.write(`data: ${JSON.stringify({ youAre: battle.externalPlayer, id: battleId })}\n\n`)
+  const logAndWrite = (str: string) => {
+    logger.info(`[quoridor-event-stream:${battleId}] ${str}`)
+    res.write(`data: ${str}\n\n`)
+  }
+  logAndWrite(JSON.stringify({ youAre: battle.externalPlayer, id: battleId }))
 
   await subscribeMessage(getSubRedis(), battleId, async (message) => {
     try {
@@ -64,10 +68,6 @@ quoridorRouter.get('/start/:battleId', async (req, res) => {
       // arena should have already reset the timer
       timerReset(redis, battleId)
       const { action2, ...rest } = JSON.parse(message)
-      const logAndWrite = (str: string) => {
-        logger.info(`[quoridor-event-stream:${battleId}] ${str}`)
-        res.write(`data: ${str}\n\n`)
-      }
       logAndWrite(JSON.stringify(rest))
       if (action2 !== undefined) {
         logAndWrite(JSON.stringify(action2))
