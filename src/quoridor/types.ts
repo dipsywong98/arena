@@ -15,7 +15,7 @@ export enum QuoridorCaseType {
   C_AI_WALL_CROSS = 'C_AI_WALL_CROSS',
   C_AI_WALL_BLOCKING = 'C_AI_WALL_BLOCKING',
   C_AI_WALK_THROUGH_WALL = 'C_AI_WALK_THROUGH_WALL',
-  // C_AI_USE_UP_WALLS
+  C_AI_PUT_11_WALLS = 'C_AI_PUT_11_WALLS',
 }
 
 export function isCaseType(p: string | undefined): p is QuoridorCaseType {

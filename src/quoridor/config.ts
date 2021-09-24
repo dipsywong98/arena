@@ -1,4 +1,4 @@
-import { compressState, initState, opposite } from './common'
+import { allPossibleWalls, compressState, initState, opposite } from './common'
 import { abAgent, baseAgent, blockingWallAgent } from './agent'
 import {
   Orientation,
@@ -184,7 +184,7 @@ export const config: Record<QuoridorCaseType, QuoridorTestCase> = Object.freeze(
     initialStateGenerator: makeInitialStateGenerator(QuoridorTurn.SECOND),
     agent: blockingWallAgent,
     score: () => {
-      return 6
+      return 4
     }
   },
   [QuoridorCaseType.C_AI_WALK_THROUGH_WALL]: {
@@ -204,6 +204,23 @@ export const config: Record<QuoridorCaseType, QuoridorTestCase> = Object.freeze(
             x: 4,
             y: 7
           }
+        }
+      }
+    },
+    score: () => {
+      return 2
+    }
+  },
+  [QuoridorCaseType.C_AI_PUT_11_WALLS]: {
+    initialStateGenerator: makeInitialStateGenerator(QuoridorTurn.SECOND),
+    agent: (state) => {
+      const walls = allPossibleWalls(state)
+      const wall = walls[Math.floor(Math.random() * walls.length)]
+      if (state.players[state.turn].walls > 0) {
+        return wall
+      } else {
+        return {
+          cheat: wall
         }
       }
     },

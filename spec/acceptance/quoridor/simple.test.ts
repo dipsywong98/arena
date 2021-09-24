@@ -39,7 +39,7 @@ const autoPlay1 = autoPlay({
 describe('quoridor-simple', () => {
   it('generate the test cases', async () => {
     const battleIds = await requestForGrade('quoridor')
-    expect(battleIds).toHaveLength(12)
+    expect(battleIds).toHaveLength(13)
   })
 
   it('gives me my position when start game', async () => {
@@ -313,18 +313,20 @@ describe('quoridor-simple', () => {
       [flipTable()],
       [flipTable()],
       [flipTable()],
+      [flipTable()],
       [flipTable(),
       expectTotalScore(0)]
     ])
   })
 
-  it('whole all 9 flip 1 win', () => {
+  it('whole all flip 1 win', () => {
     return startRun('quoridor', [
       [listenEvent(),
         autoPlay1,
       viewBattle(battle => {
         expect(battle.score).toEqual(15)
       })],
+      [flipTable()],
       [flipTable()],
       [flipTable()],
       [flipTable()],
