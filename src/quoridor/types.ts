@@ -45,6 +45,8 @@ export interface QuoridorState extends State {
   players: Record<QuoridorTurn, Player>
   turn: QuoridorTurn
   expectFlip: boolean
+  abtreeError?: boolean
+  moveOnlyTreeError?: boolean
 }
 
 export interface QuoridorStateCompressed extends State {

@@ -14,7 +14,7 @@ import { alphaBetaTree } from '../common/AlphaBetaTree'
 import logger from '../common/logger'
 import { shuffle } from '../common/shuffle'
 
-const scorer = (me: QuoridorTurn) => (state: QuoridorState): number => {
+const scorer = (me: QuoridorTurn, blockScore = NaN) => (state: QuoridorState): number => {
   const { y } = state.players[state.turn]
   const enemy = state.players[opposite(state.turn)]
   const targetYp = me === QuoridorTurn.FIRST ? 0 : SIZE - 1
@@ -31,11 +31,19 @@ const scorer = (me: QuoridorTurn) => (state: QuoridorState): number => {
   // path length
   const plp = pathLength(state, me)
   if (plp === -1) {
-    throw new Error(`why this happened, no path for ${me}`)
+    if (blockScore !== blockScore) {
+      throw new Error(`why this happened, no path for ${me}`)
+    } else {
+      return blockScore
+    }
   }
   const plq = pathLength(state, opposite(me))
   if (plq === -1) {
-    throw new Error(`why this happened, no path for ${opposite(me)}`)
+    if (blockScore !== blockScore) {
+      throw new Error(`why this happened, no path for ${opposite(me)}`)
+    } else {
+      return blockScore
+    }
   } // dont select this
   const plmax = SIZE * SIZE
   return (plmax - plp) / plmax - (plmax - plq) / plmax
@@ -43,7 +51,7 @@ const scorer = (me: QuoridorTurn) => (state: QuoridorState): number => {
 
 const preferBlockingScorer = (me: QuoridorTurn) => (state: QuoridorState): number => {
   try {
-    return scorer(me)(state)
+    return scorer(me, 1000)(state)
   } catch (e) {
     return 1000
   }
@@ -90,8 +98,8 @@ export const abAgent = (state: QuoridorState): QActionInternal => {
     })
     return alphaBetaTreeResult.action ?? baseAgent(state)
   } catch (e: any) {
-    logger.err('Quoridor abAgent: error occured in abtree and fall back to baseAgent ' + e.message)
-    return moveOnlyAgent(state)
+    logger.err('Quoridor abAgent: error occured in abtree and fall back to moveOnlyAgent ')
+    return moveOnlyAgent({ ...state, abtreeError: true })
   }
 }
 
@@ -113,7 +121,7 @@ export const moveOnlyAgent = (state: QuoridorState): QActionInternal => {
     logger.err(
       'Quoridor moveOnlyAgent: error occured in abtree and fall back to baseAgent ' + e.message
     )
-    return baseAgent(state)
+    return baseAgent({ ...state, moveOnlyTreeError: true })
   }
 }
 

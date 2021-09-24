@@ -31,7 +31,7 @@ export const make2dArray = <T>(size: number, value: T): T[][] => {
 }
 
 export const initState = (): QuoridorState => ({
-  walls: make2dArray(SIZE * 2 + 1, false),
+  walls: make2dArray(SIZE * 2 - 1, false),
   players: {
     [QuoridorTurn.SECOND]: initPlayer(0),
     [QuoridorTurn.FIRST]: initPlayer(SIZE - 1)
@@ -45,15 +45,13 @@ export const putWall = (x: number, y: number, o: Orientation) => (
   (state: QuoridorState): QuoridorState =>
     produce(state, draft => {
       if (o === Orientation.HORIZONTAL) {
-        draft.walls[2 * y + 1][2 * x]
-          = draft.walls[2 * y + 1][2 * x + 1]
-          = draft.walls[2 * y + 1][2 * x + 2]
-          = true
+        draft.walls[2 * y + 1][2 * x] = true
+        draft.walls[2 * y + 1][2 * x + 1] = true
+        draft.walls[2 * y + 1][2 * x + 2] = true
       } else {
-        draft.walls[2 * y][2 * x + 1]
-          = draft.walls[2 * y + 1][2 * x + 1]
-          = draft.walls[2 * y + 2][2 * x + 1]
-          = true
+        draft.walls[2 * y][2 * x + 1] = true
+        draft.walls[2 * y + 1][2 * x + 1] = true
+        draft.walls[2 * y + 2][2 * x + 1] = true
       }
       draft.players[draft.turn].walls--
       draft.turn = opposite(draft.turn)
@@ -66,7 +64,7 @@ export const movePawn = (x: number, y: number) => (state: QuoridorState) =>
     draft.players[draft.turn].x = x
     draft.players[draft.turn].y = y
     draft.turn = opposite(draft.turn)
-      draft.createdAt = Date.now()
+    draft.createdAt = Date.now()
     return draft
   })
 
@@ -140,9 +138,9 @@ export const isWallHavePath = (
   o: Orientation
 ): boolean => {
   const nextState = putWall(x, y, o)(state)
-  const secondHavePath = pathLength(nextState, QuoridorTurn.SECOND) >= 0
-  const firstHavePath = pathLength(nextState, QuoridorTurn.FIRST) >= 0
-  return secondHavePath && firstHavePath
+  const secondHavePath = pathLength(nextState, QuoridorTurn.SECOND)
+  const firstHavePath = pathLength(nextState, QuoridorTurn.FIRST)
+  return secondHavePath >= 0 && firstHavePath >= 0
 }
 
 export const pathLength = (state: QuoridorState, turn: QuoridorTurn): number => {
@@ -158,12 +156,14 @@ export const pathLength = (state: QuoridorState, turn: QuoridorTurn): number => 
     targetDistance: Math.abs(sourceY - targetY)
   })
   const visited = make2dArray(SIZE, false)
-  visited[sourceX][sourceY] = true
+  visited[sourceY][sourceX] = true
   while (!queue.isEmpty()) {
     const node: Node = queue.deq()
     const neighbors = getWalkableNeighborCoords(state, turn, node)
     for (const n of neighbors) {
-      if (visited[n.y][n.x]) continue
+      if (visited[n.y][n.x]) {
+        continue
+      }
       const targetDistance = Math.abs(n.y - targetY)
       if (targetDistance === 0) {
         return node.sourceDistance + 1
@@ -174,8 +174,8 @@ export const pathLength = (state: QuoridorState, turn: QuoridorTurn): number => 
         sourceDistance: node.sourceDistance + 1,
         targetDistance: targetDistance
       })
-      visited[n.y][n.x] = true
     }
+    visited[node.y][node.x] = true
   }
   return -1
 }
@@ -195,15 +195,29 @@ export const getWalkableNeighborCoords = (
   const nodes: Array<Coord> = []
   const opponent = state.players[opposite(turn)]
   for (let i = 0; i < 4; i++) {
+    // loop through 4 neighbors
     const x1 = x + dx[i]
     const y1 = y + dy[i]
-    pushIfWalkable(nodes, state, x, y, x1, y1)
-    if (opponent.x === x1 && opponent.y === y1) {
-      if (!pushIfWalkable(nodes, state, x1, y1, x1 + dx[i], y1 + dy[i])) {
-        const i1 = (i + 1) % 4
-        const i3 = (i + 3) % 4
-        pushIfWalkable(nodes, state, x1, y1, x1 + dx[i1], y1 + dy[i1])
-        pushIfWalkable(nodes, state, x1, y1, x1 + dx[i3], y1 + dy[i3])
+
+    // if that neighbor isnt blocked by a wall
+    if (state.walls?.[y + y1]?.[x + x1] === false) {
+
+      // if that neighbor is actually the opponent
+      if (opponent.x === x1 && opponent.y === y1) {
+
+        // first try to use the place behind the opponent
+        if (!pushIfWalkable(nodes, state, x1, y1, x1 + dx[i], y1 + dy[i])) {
+
+          // place behind the opponent is not usable
+          // use his left and right
+          const i1 = (i + 1) % 4
+          const i3 = (i + 3) % 4
+          pushIfWalkable(nodes, state, x1, y1, x1 + dx[i1], y1 + dy[i1])
+          pushIfWalkable(nodes, state, x1, y1, x1 + dx[i3], y1 + dy[i3])
+        }
+      } else {
+        // directly use that place if not the opponent
+        pushIfWalkable(nodes, state, x, y, x1, y1)
       }
     }
   }

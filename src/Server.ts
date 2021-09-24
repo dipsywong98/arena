@@ -18,6 +18,7 @@ import adminRouter from './admin/router'
 import { houseKeepQueue } from './common/houseKeeping'
 import { getConcludeQueue, getConcludeWorker, getMoveQueue, getMoveWorker } from './common/queues'
 import { appConfig } from './common/config'
+import cors from 'cors'
 
 const app = express()
 
@@ -25,6 +26,7 @@ const app = express()
  *                              Set basic express settings
  ***********************************************************************************/
 
+app.use(cors())
 app.use(express.json())
 app.use(express.urlencoded({ extended: true }))
 app.use(cookieParser())
