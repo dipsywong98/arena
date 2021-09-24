@@ -210,6 +210,27 @@ describe('quoridor-simple', () => {
       expectTotalScore(0))
   })
 
+  it('flip when player block the road to goal', () => {
+    return startBattle('quoridor',
+      QuoridorCaseType.BASE_AI_SECOND,
+      listenEvent(),
+      expectGameStart('first'),
+      putWall('d1v'),
+      expectPutWall('d1v', 'first'),
+      receiveEvent(),
+      putWall('e1v'),
+      expectPutWall('e1v', 'first'),
+      receiveEvent(),
+      putWall('d2h'),
+      expectPutWall('d2h', 'first'),
+      expectFlipTable('second'),
+      viewBattle(battle => {
+        expect(battle.flippedBy).toEqual('second')
+        expect(battle.flippedReason).toEqual('Cannot put - wall at d2')
+      }),
+      expectTotalScore(0))
+  })
+
   it('flips when player play twice a row', () => {
     return startBattle('quoridor',
       QuoridorCaseType.BASE_AI_FIRST,

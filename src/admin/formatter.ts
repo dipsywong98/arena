@@ -109,7 +109,7 @@ export const formatBattle = (game: Game, battle: Battle<any, any, any, any>) => 
     duration: getDuration(battle.createdAt, battle.completedAt),
     waitingTime: getWaitingTime(battle),
     history: battle.history, //getHistoryWithMove(game, battle),
-    moves: battle.moves,
+    moves: battle.moves.map(moveId => getMoveUrl(game, moveId)),
   }
 }
 
