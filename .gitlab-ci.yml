@@ -94,7 +94,7 @@ deploy:
     - apt-get update -qy
     - apt-get install -y ruby-dev
     - gem install dpl
-    - dpl --provider=heroku --app=cis2021-arena-dev --api-key=$HEROKU_API_KEY_DEV
+    - dpl --provider=heroku --app=cis2021-arena --api-key=$HEROKU_API_KEY_DEV
   only:
     - master
 
