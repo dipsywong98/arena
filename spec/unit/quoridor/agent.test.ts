@@ -4,6 +4,7 @@ import {
 } from '../../../src/quoridor/common'
 import { abAgent, baseAgent } from '../../../src/quoridor/agent'
 import { Orientation, QuoridorState, QuoridorTurn } from '../../../src/quoridor/types'
+import { turnsToScore } from '../../../src/quoridor/config'
 
 describe('quoridor', () => {
   describe('abAgent', () => {
@@ -110,6 +111,21 @@ describe('quoridor', () => {
       const action = pipe(initState, movePawn(2, 1), baseAgent)()
       expect(action).toBeTruthy()
     })
+  })
+
+  it('turnsToScore', () => {
+    let pre = 0
+    const limit = 40
+    for (let i = 0; i <= 50; i++) {
+      const value = turnsToScore(i, limit)
+      expect(value).toBeGreaterThanOrEqual(pre)
+      pre = value
+      console.log(i, value)
+      if (i === limit) {
+        expect(pre).toEqual(25)
+      }
+    }
+    expect(pre).toEqual(25)
   })
 })
 

@@ -29,24 +29,28 @@ const makeInitialStateGenerator = (aiTurn: QuoridorTurn) =>
     createdAt: Date.now()
   })
 
+export const turnsToScore = (turns: number, maxTurns: number): number => {
+  if (turns < 8) {
+    return 0
+  } else if (turns < 14) {
+    return 1
+  } else if (turns < 18) {
+    return 3
+  } else if (turns < 22) {
+    return 6
+  } else if (turns >= maxTurns) {
+    return 25
+  } else {
+    return 10 + Math.floor((turns - 22) / (maxTurns - 22) * 15)
+  }
+}
+
 const abAiScore = (battle: QuoridorBattle) => {
   if (playerWin(battle)) {
     return 25
   }
   const turns = Math.floor(battle.history.length / 2)
-  if (turns < 5) {
-    return 0
-  } else if (turns < 10) {
-    return 1
-  } else if (turns < 15) {
-    return 3
-  } else if (turns < 20) {
-    return 6
-  } else if (turns >= 35) {
-    return 25
-  } else {
-    return 10 + turns - 20
-  }
+  return turnsToScore(turns, TERMINATE_TURNS)
 }
 
 export const config: Record<QuoridorCaseType, QuoridorTestCase> = Object.freeze({
