@@ -53,9 +53,12 @@ quoridorRouter.get('/start/:battleId', async (req, res) => {
   res.setHeader('Connection', 'keep-alive')
   res.flushHeaders()
   const moveId = v4()
+  let ended = false
   const logAndWrite = (str: string) => {
-    logger.info(`[quoridor-event-stream:${battleId}] ${str}`)
-    res.write(`data: ${str}\n\n`)
+    if (!ended) {
+      logger.info(`[quoridor-event-stream:${battleId}] ${str}`)
+      res.write(`data: ${str}\n\n`)
+    }
   }
   logAndWrite(JSON.stringify({ youAre: battle.externalPlayer, id: battleId }))
 
@@ -75,6 +78,7 @@ quoridorRouter.get('/start/:battleId', async (req, res) => {
       if (rest.winner || rest.action === FLIP_TABLE) {
         const battle = await getBattle(getPubRedis(), battleId)
         if (battle?.result) {
+          ended = true
           res.end()
         }
       }
@@ -90,6 +94,7 @@ quoridorRouter.get('/start/:battleId', async (req, res) => {
     elapsed: 0
   })
   res.on('close', () => {
+    ended = true
     res.end()
   })
 })

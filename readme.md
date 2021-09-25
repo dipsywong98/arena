@@ -46,12 +46,12 @@ Use this compass notation when requesting and handling responses with the Arena 
    }
    ```
 
-3. Your system initiates a `GET` request at `{arenaEndpoint}/tic-tac-toe/start/{battleId}`, which is
+3. Your system initiates a `GET` request at `https://cis2021-arena.herokuapp.com/tic-tac-toe/start/{battleId}`, which is
    an [`event/stream`](https://developer.mozilla.org/en-US/docs/Web/API/Server-sent_events/Using_server-sent_events)
    of which the Arena server can keep pushing the latest updates (as events) of the battle to you. The possible events are defined in the next section.
 
 4. When it is your turn, you will need to submit your move within your thinking time. To submit a move, `POST`
-   to `{arenaEndpoint}/tic-tac-toe/play/{battleId}` with the payload
+   to `https://cis2021-arena.herokuapp.com/tic-tac-toe/play/{battleId}` with the payload
 
    ```json
    {
@@ -63,7 +63,7 @@ Use this compass notation when requesting and handling responses with the Arena 
    where the position is written in compass notation.
 
 5. Invalid moves are considered surrendering and the opponent should flip the table. To flip the table, `POST`
-   to `{arenaEndpoint}/tic-tac-toe/play/{battleId}` with the payload
+   to `https://cis2021-arena.herokuapp.com/tic-tac-toe/play/{battleId}` with the payload
 
    ```json
    {
@@ -144,12 +144,12 @@ We use the [standard Quoridor notation](https://quoridorstrats.wordpress.com/not
    }
    ```
 
-3. Your system initiates a `GET` request at `{arenaEndpoint}/quoridor/start/{battleId}`, which is
+3. Your system initiates a `GET` request at `https://cis2021-arena.herokuapp.com/quoridor/start/{battleId}`, which is
    an [`event/stream`](https://developer.mozilla.org/en-US/docs/Web/API/Server-sent_events/Using_server-sent_events)
    of which the Arena server can keep pushing the latest updates (as events) of the battle to you. The possible events are defined in the next section.
 
 4. When it is your turn, you will need to submit your move within the time limit. To submit a move, `POST`
-   to `{arenaEndpoint}/quoridor/play/{battleId}`.
+   to `https://cis2021-arena.herokuapp.com/quoridor/play/{battleId}`.
 
    To move your pawn:
 
@@ -174,7 +174,7 @@ We use the [standard Quoridor notation](https://quoridorstrats.wordpress.com/not
    where the `position` is written in the 3-character standard Quoridor notation.
 
 5. Invalid moves are considered surrendering, and the opponent should flip the table. To flip the table, `POST`
-   to `{arenaEndpoint}/quoridor/play/{battleId}` with the payload
+   to `https://cis2021-arena.herokuapp.com/quoridor/play/{battleId}` with the payload
 
    ```json
    {
