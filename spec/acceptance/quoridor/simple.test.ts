@@ -33,7 +33,7 @@ const autoPlay1 = autoPlay({
   internalizeAction
 })
 
-describe('quoridor-simple', () => {
+describe.skip('quoridor-simple', () => {
   it('generate the test cases', async () => {
     const battleIds = await requestForGrade('quoridor')
     expect(battleIds).toHaveLength(13)

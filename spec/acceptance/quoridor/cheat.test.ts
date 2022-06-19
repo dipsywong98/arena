@@ -20,7 +20,7 @@ import {
 import { moveOnlyAgent } from '../../../src/quoridor/agent'
 import { expectPawnMove, expectPutWall, movePawn, putWall } from './utils'
 
-describe('quoridor-cheat', () => {
+describe.skip('quoridor-cheat', () => {
   describe('C_AI_TELEPORT', () => {
     it('dont flip', () => {
       return startBattle('quoridor',

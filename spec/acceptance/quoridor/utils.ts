@@ -1,4 +1,4 @@
-import { QuoridorActionType } from "src/quoridor/types"
+import { QuoridorActionType } from "../../../src/quoridor/types"
 import { play, receiveEvent, Step } from "../common"
 
 export const expectPawnMove = (position: string, player: string) =>

@@ -1,4 +1,4 @@
-import { TicTacToeActionType } from "src/ttt/types"
+import { TicTacToeActionType } from "../../../src/ttt/types"
 import { play, receiveEvent, Step } from "../common"
 
 export const expectPutSymbol = (position: string, player: string) =>
