@@ -8,75 +8,38 @@ username: `<blank>`
 
 password: the auth token of coordinator
 
-queue: https://cis2021-arena-dev.herokuapp.com/admin/queues/
+queue: https://cis2022-arena-dev.herokuapp.com/admin/queues/
 
-quoridor: https://cis2021-arena-dev.herokuapp.com/admin/quoridor/runs/
+quoridor: https://cis2022-arena-dev.herokuapp.com/admin/quoridor/runs/
 
-ttt: https://cis2021-arena-dev.herokuapp.com/admin/ttt/runs/
+ttt: https://cis2022-arena-dev.herokuapp.com/admin/ttt/runs/
 
-## Tic Tac Toe (100%)
+## Connect 4 (100%)
 
-tic-tac-toe cheater (20%): player scores if they flip table right after this
+connect 4 cheater (20%): player scores if they flip table right after this
 
-5% for ai being X but went first `C_AI_X_FIRST`
+4% for ai being YELLOW but went first `C_AI_Y_FIRST`
 
-5% for ai putting his symbol to non-empty box `C_AI_DUP`
+4% for ai putting his symbol to fully filled column `C_AI_OVERFLOW`
 
-5% for ai trying to expand the grid (aka x=3) `C_AI_OUT_OF_BOUND`
+4% for ai trying to put outside of  `C_AI_OUT_OF_BOUND`
 
-5% for ai move twice a row `C_AI_TWICE_A_ROW`
+4% for ai move twice a row `C_AI_TWICE_A_ROW`
 
-tic-tac-toe baseline (40%): sequentially fill up all boxes
+4% for ai provide empty to column `C_AI_NIL`
 
-20% for player being O win us `BASE_AI_O`
+connect 4 baseline (40%): sequentially put to columns that are not full
 
-20% for player being X win us `BASE_AI_X`
+20% for player being RED win us `BASE_AI_R`
 
-tic-tac-toe advance (40%): alpha beta pruning tree
+20% for player being YELLOW win us `BASE_AI_Y`
 
-20% for player being O at least draw `AB_AI_O`
+connect 4 advance (40%): alpha beta pruning tree
 
-20% for player being X at least draw `AB_AI_X`
+20% for player being RED at least draw `AB_AI_R`
 
-## Quoridor (100%)
+20% for player being YELLOW at least draw `AB_AI_Y`
 
-quoridor cheater (20%): (player scores if they flip table right after this)
-
-2% for teleporting pawn `C_AI_TELEPORT`
-
-2% for ai being second but went first `C_AI_SECOND_FIRST`
-
-2% for ai move twice a row `C_AI_TWICE_A_ROW`
-
-2% for putting a wall outside the grid `C_AI_WALL_OUTSIDE`
-
-2% for moving out of grid `C_AI_PAWN_OUTSIDE`
-
-4% crossing over wall `C_AI_WALL_CROSS`
-
-6% wall that will block the way to goal `C_AI_WALL_BLOCKING`
-
-quoridor baseline (30%): choose random move from all possible movements
-
-15% for winning baseline with first `BASE_AI_FIRST`
-
-15% for winning baseline with second `BASE_AI_SECOND`
-
-quoridor advanced (40% + 10%): alpha beta tree `AB_AI_FIRST`, `AB_AI_SECOND`
-
-for first and second each case has 20 + 5 marks
-
-| surviving # turns | score  |
-| ----------------- | ------ |
-| 5                 | 1      |
-| 10                | 3      |
-| 15                | 6      |
-| 20                | 10     |
-| 20+               | 1/turn |
-| 30+               | 20     |
-score 25 immediately after winning that battle
-
---------------------------------------
 
 I am expecting the participants will find some library or make/ clone an ui to play these boardgames as they are standard rules.
 The game timer start only after they call the /tic-tac-toe/start or /quoridor/start (still have some time limit),
