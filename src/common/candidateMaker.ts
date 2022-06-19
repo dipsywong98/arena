@@ -14,7 +14,7 @@ interface Candidate<S extends State, A extends Action> {
   externalizeAction: (a: A) => Record<string, unknown>
   internalizeAction: (a: any) => any
   initState: () => S
-  valid: (s: S, a: A, player: string) => boolean
+  valid: (s: S, a: any, player: string) => boolean
 }
 
 export const candidateMaker = <S extends State, A extends Action>({

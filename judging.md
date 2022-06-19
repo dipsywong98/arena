@@ -16,29 +16,33 @@ ttt: https://cis2022-arena-dev.herokuapp.com/admin/ttt/runs/
 
 ## Connect 4 (100%)
 
-connect 4 cheater (20%): player scores if they flip table right after this
+connect 4 cheater (50%): player scores if they flip table right after this
 
-4% for ai being YELLOW but went first `C_AI_Y_FIRST`
+10% for ai being YELLOW but went first `C_AI_Y_FIRST`
 
-4% for ai putting his symbol to fully filled column `C_AI_OVERFLOW`
+10% for ai putting his symbol to fully filled column `C_AI_OVERFLOW`
 
-4% for ai trying to put outside of  `C_AI_OUT_OF_BOUND`
+10% for ai move twice a row `C_AI_TWICE_A_ROW`
 
-4% for ai move twice a row `C_AI_TWICE_A_ROW`
+10% for ai flip table for correct move `C_AI_FLIP_TABLE_RANDOMLY`
 
-4% for ai provide empty to column `C_AI_NIL`
+3% for ai trying to put outside of  `C_AI_OUT_OF_BOUND`
 
-connect 4 baseline (40%): sequentially put to columns that are not full
+3% for ai provide empty to column `C_AI_NIL`
 
-20% for player being RED win us `BASE_AI_R`
+4% for ai provide unknown action `C_AI_SURPRISE`
 
-20% for player being YELLOW win us `BASE_AI_Y`
+connect 4 baseline (20%): sequentially put to columns that are not full
 
-connect 4 advance (40%): alpha beta pruning tree
+10% for player being RED win us `BASE_AI_R`
 
-20% for player being RED at least draw `AB_AI_R`
+10% for player being YELLOW win us `BASE_AI_Y`
 
-20% for player being YELLOW at least draw `AB_AI_Y`
+connect 4 advance (30%): alpha beta pruning tree
+
+15% for player being RED at least draw `AB_AI_R`
+
+15% for player being YELLOW at least draw `AB_AI_Y`
 
 
 I am expecting the participants will find some library or make/ clone an ui to play these boardgames as they are standard rules.

@@ -4,6 +4,7 @@ import redis, { clearAllKeys, clearOldKeys } from '../common/redis'
 import { ARENA_URL } from '../common/constants'
 import { getBattle as getTTTBattle } from '../ttt/store'
 import { getBattle as getQBattle } from '../quoridor/store'
+import { getBattle as getC4Battle } from '../connect4/store'
 import { Redis } from 'ioredis'
 import { DateTime, Interval } from 'luxon'
 import { getMoveQueue } from '../common/queues'
@@ -16,7 +17,8 @@ interface Helper {
 
 const helper: Record<string, Helper> = {
   quoridor: { getBattle: getQBattle },
-  ttt: { getBattle: getTTTBattle }
+  ttt: { getBattle: getTTTBattle },
+  connect4: { getBattle: getC4Battle },
 }
 
 const adminRouter = Router()

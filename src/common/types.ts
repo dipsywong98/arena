@@ -7,6 +7,7 @@ export const START_GAME = 'startGame'
 export enum Game {
   TTT = 'ttt',
   QUORIDOR = 'quoridor',
+  CONNECT4 = 'connect4',
 }
 
 export interface EvaluatePayload {

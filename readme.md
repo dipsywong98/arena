@@ -20,7 +20,7 @@ The good old Connect 4 rules. There are two players, `🔴` and `🟡`. `🔴` g
 
 ### Notation
 
-There are 7 columns in the connnect 4 game, namely A, B, C, D, E, F, G.
+There are 7 columns in the connnect 4 game, namely A, B, C, D, E, F, G. Each column can at max put 6 tokens
 
 ### How to play
 
@@ -49,7 +49,7 @@ There are 7 columns in the connnect 4 game, namely A, B, C, D, E, F, G.
    ```
 
 5. Invalid moves are considered surrendering and the opponent should flip the table. To flip the table, `POST`
-   to `https://cis2022-arena.herokuapp.com/connect4/play/{battleId}` with the payload
+   to `https://cis2022-arena.herokuapp.com/connect4/play/{battleId}` with the payload. (Imagine arena is a real player that she may make any kinds of mistakes to you!)
 
    ```json
    {
