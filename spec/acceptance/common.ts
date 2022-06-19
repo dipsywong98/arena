@@ -6,7 +6,7 @@ import { allRedis } from '../../src/common/redis'
 import stoppable from 'stoppable'
 import { v4 } from 'uuid'
 import { CallbackPayload, EvaluatePayload } from '../../src/common/types'
-import { QuoridorAction, QuoridorActionType } from '../../src/quoridor/types'
+import { QuoridorAction } from '../../src/quoridor/types'
 import logger from '../../src/common/logger'
 import { FLIP_TABLE } from '../../src/common/constants'
 import {
@@ -30,7 +30,7 @@ interface PlayContext {
   runId: string
 }
 
-type Step = (ctx: PlayContext) => Promise<void>
+export type Step = (ctx: PlayContext) => Promise<void>
 
 let server: http.Server & stoppable.WithStop | undefined
 const sentBattleIds: string[] = []
@@ -134,29 +134,6 @@ export const expectGameStart = (youAre: string) =>
     expect(event).toEqual({ id: battleId, youAre })
   })
 
-export const expectPutSymbol = (position: string, player: string) =>
-  receiveEvent((event) => {
-    expect(event).toEqual({ action: 'putSymbol', position, player })
-  })
-
-export const expectPawnMove = (position: string, player: string) =>
-  receiveEvent((event) => {
-    expect(event).toEqual({
-      action: QuoridorActionType.MOVE,
-      position,
-      player
-    })
-  })
-
-export const expectPutWall = (position: string, player: string) =>
-  receiveEvent((event) => {
-    expect(event).toEqual({
-      action: QuoridorActionType.PUT_WALL,
-      position,
-      player
-    })
-  })
-
 export const expectWinner = (winner: string) =>
   receiveEvent((event) => {
     expect(event).toEqual({ winner })
@@ -198,23 +175,7 @@ export const play = (payload: unknown, payload2?: unknown): Step => async (ctx: 
   await p
 }
 
-export const putSymbol = (
-  position: string
-): Step => {
-  return play({ action: 'putSymbol', position })
-}
-
 export const flipTable = (): Step => play({ action: FLIP_TABLE })
-
-export const movePawn = (position: string): Step => play({
-  action: QuoridorActionType.MOVE,
-  position
-})
-
-export const putWall = (position: string): Step => play({
-  action: QuoridorActionType.PUT_WALL,
-  position
-})
 
 export const viewBattle = (cb: (battle: TicTacToeBattle) => unknown): Step => (
   async (ctx: PlayContext) => {

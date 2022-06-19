@@ -2,14 +2,10 @@ import {
   autoPlay,
   expectFlipTable,
   expectGameStart,
-  expectPawnMove,
-  expectPutWall,
   expectTotalScore,
   flipTable,
   listenEvent,
-  movePawn,
   play,
-  putWall,
   receiveEvent,
   requestForGrade,
   startBattle,
@@ -22,11 +18,12 @@ import {
   applyAction,
   externalizeAction,
   initState,
-  internalizeAction
+  internalizeAction,
 } from '../../../src/quoridor/common'
 import { moveOnlyAgent } from '../../../src/quoridor/agent'
 import axios from 'axios'
 import { FLIP_TABLE } from '../../../src/common/constants'
+import { expectPawnMove, expectPutWall, movePawn, putWall } from './utils'
 
 const autoPlay1 = autoPlay({
   init: initState,

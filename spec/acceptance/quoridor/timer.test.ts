@@ -1,9 +1,7 @@
 import {
   expectFlipTable,
   expectGameStart,
-  expectPawnMove,
   listenEvent,
-  movePawn,
   receiveEvent,
   setNow,
   startBattle,
@@ -11,6 +9,7 @@ import {
 } from '../common'
 import { QuoridorCaseType } from '../../../src/quoridor/types'
 import { INITIAL_CLOCK_MS, TURN_ADD_MS } from '../../../src/quoridor/config'
+import { movePawn, expectPawnMove } from './utils'
 
 describe('quoridor-timer', () => {
   it('initially is INITIAL_CLOCK_MS', () => {

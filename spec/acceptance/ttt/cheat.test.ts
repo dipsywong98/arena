@@ -1,14 +1,13 @@
 import {
   expectFlipTable,
   expectGameStart,
-  expectPutSymbol,
   expectTotalScore,
   flipTable,
   listenEvent,
-  putSymbol,
   startBattle
 } from '../common'
 import { TicTacToeCaseType } from '../../../src/ttt/types'
+import { putSymbol, expectPutSymbol } from './utils'
 
 describe('ttt-cheat', () => {
   describe('C_AI_OUT_OF_BOUND', () => {

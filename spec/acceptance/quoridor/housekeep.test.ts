@@ -1,9 +1,7 @@
 import {
   expectGameStart,
-  expectPutWall,
   expectTotalScore,
   listenEvent,
-  putWall,
   receiveEvent,
   setNow,
   startBattle,
@@ -17,6 +15,7 @@ import {
 } from '../../../src/common/houseKeeping'
 import { getMoveWorker } from '../../../src/common/queues'
 import { Game } from '../../../src/common/types'
+import { putWall, expectPutWall } from './utils'
 
 describe('quoridor-housekeep', () => {
   it('reports zero score if didnt start in SHOULD_START_WITHIN', () => {

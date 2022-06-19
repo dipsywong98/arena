@@ -1,9 +1,7 @@
 import {
   expectGameStart,
-  expectPutSymbol,
   expectTotalScore,
   listenEvent,
-  putSymbol,
   setNow,
   startBattle,
   viewBattle
@@ -16,6 +14,7 @@ import {
 } from '../../../src/common/houseKeeping'
 import { getMoveWorker } from '../../../src/common/queues'
 import { Game } from '../../../src/common/types'
+import { expectPutSymbol, putSymbol } from './utils'
 
 describe('ttt-housekeep', () => {
   it('reports zero score if didnt start in SHOULD_START_WITHIN', () => {

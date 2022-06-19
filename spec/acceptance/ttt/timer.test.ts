@@ -1,15 +1,14 @@
 import {
   expectFlipTable,
   expectGameStart,
-  expectPutSymbol,
   listenEvent,
-  putSymbol,
   setNow,
   startBattle,
   viewBattle
 } from '../common'
 import { TicTacToeCaseType } from '../../../src/ttt/types'
 import { INITIAL_CLOCK_MS, TURN_ADD_MS } from '../../../src/ttt/config'
+import { expectPutSymbol, putSymbol } from './utils'
 
 describe('ttt-timer', () => {
   it('initially is INITIAL_CLOCK_MS', () => {

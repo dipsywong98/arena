@@ -2,14 +2,10 @@ import {
   autoPlay,
   expectFlipTable,
   expectGameStart,
-  expectPawnMove,
-  expectPutWall,
   expectTotalScore,
   expectTotalScoreSomething,
   flipTable,
   listenEvent,
-  movePawn,
-  putWall,
   receiveEvent,
   startBattle
 } from '../common'
@@ -22,6 +18,7 @@ import {
   internalizeAction,
 } from '../../../src/quoridor/common'
 import { moveOnlyAgent } from '../../../src/quoridor/agent'
+import { expectPawnMove, expectPutWall, movePawn, putWall } from './utils'
 
 describe('quoridor-cheat', () => {
   describe('C_AI_TELEPORT', () => {

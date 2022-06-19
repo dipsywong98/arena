@@ -4,13 +4,11 @@ import {
   autoPlay,
   expectFlipTable,
   expectGameStart,
-  expectPutSymbol,
   expectTotalScore,
   expectWinner,
   flipTable,
   listenEvent,
   play,
-  putSymbol,
   receiveEvent,
   requestForGrade,
   startBattle,
@@ -21,6 +19,7 @@ import { initState } from '../../../src/ttt/config'
 import { applyAction, externalizeAction, internalizeAction } from '../../../src/ttt/common'
 import { FLIP_TABLE } from '../../../src/common/constants'
 import axios from 'axios'
+import { expectPutSymbol, putSymbol } from './utils'
 
 const winSequence = [
   expectGameStart('X'),

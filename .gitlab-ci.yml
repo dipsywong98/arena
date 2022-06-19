@@ -83,20 +83,20 @@ lint:
   script:
     - yarn lint
 
-deploy:
-  stage: deploy
-  cache:
-    key: $CI_COMMIT_REF_SLUG-$CI_PROJECT_DIR
-    paths:
-      - node_modules/
-    policy: pull
-  script:
-    - apt-get update -qy
-    - apt-get install -y ruby-dev
-    - gem install dpl
-    - dpl --provider=heroku --app=cis2021-arena --api-key=$HEROKU_API_KEY_DEV
-  only:
-    - master
+# deploy:
+#   stage: deploy
+#   cache:
+#     key: $CI_COMMIT_REF_SLUG-$CI_PROJECT_DIR
+#     paths:
+#       - node_modules/
+#     policy: pull
+#   script:
+#     - apt-get update -qy
+#     - apt-get install -y ruby-dev
+#     - gem install dpl
+#     - dpl --provider=heroku --app=cis2021-arena --api-key=$HEROKU_API_KEY_DEV
+#   only:
+#     - master
 
 pages:
   stage: deploy
