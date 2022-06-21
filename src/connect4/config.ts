@@ -82,7 +82,7 @@ export const config: Record<Connect4CaseType, Connect4TestCase> = Object.freeze(
   [Connect4CaseType.C_AI_OVERFLOW]: {
     initialStateGenerator: makeInitialStateGenerator(Connect4Turn.RED),
     agent(state) {
-      if (state.board[0][3] !== null) {
+      if (state.board[0][3] === null) {
         return {
           type: Connect4ActionType.PUT_TOKEN, column: 3
         }

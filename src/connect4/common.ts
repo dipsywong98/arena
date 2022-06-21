@@ -5,7 +5,8 @@ import {
   Connect4Result,
   Connect4State,
   Connect4Turn,
-  COLUMNS
+  COLUMNS,
+  Column
 } from './types'
 import produce from 'immer'
 
@@ -155,6 +156,14 @@ export const externalizeAction = (
         player,
         ...rest,
         column: COLUMNS[action.column]
+      }
+    } else {
+      // intended to return a bad column
+      return {
+        action: action.type,
+        player,
+        ...rest,
+        column: action.column as unknown as Column
       }
     }
   }

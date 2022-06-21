@@ -1,12 +1,13 @@
 import { alphaBetaTree } from '../common/AlphaBetaTree'
 import { applyAction, isColumnFull, isEndGame, isPlayerWin, opposite, WIDTH } from './common'
+import { getRandomMove } from './getRandomMove'
 import { Connect4Action, Connect4ActionType, Connect4State, Connect4Turn } from './types'
 
 const scorer = (me: Connect4Turn) => (state: Connect4State): number => {
   if (isPlayerWin(state, me)) {
     return 100
   }
-  if (isPlayerWin(state, opposite(me))){
+  if (isPlayerWin(state, opposite(me))) {
     return -100
   }
   return 0
@@ -27,7 +28,7 @@ export type Connect4Agent = (state: Connect4State) => Connect4Action
 export const baseAgent: Connect4Agent = (state) => {
   const moves = generator(state)
   if (moves.length > 0) {
-    return moves[Math.floor(Math.random() * moves.length)]
+    return moves[getRandomMove(moves.length)]
   }
   return {
     type: Connect4ActionType.END_GAME

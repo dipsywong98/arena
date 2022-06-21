@@ -3,6 +3,7 @@ import { FLIP_TABLE } from '../common/constants'
 import { Action, Battle, Move, State, TestCase } from '../common/types'
 
 export const COLUMNS = ['A', 'B', 'C', 'D', 'E', 'F', 'G'] as const
+export type Column = typeof COLUMNS[number]
 
 export enum Connect4CaseType {
   BASE_AI_R = 'BASE_AI_R',

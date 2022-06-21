@@ -17,6 +17,7 @@ import {
   getConcludeQueue,
   getConcludeWorker, getMoveQueue, getMoveWorker
 } from '../../src/common/queues'
+import { Connect4Action } from '../../src/connect4/types'
 
 type Event = Record<string, unknown>
 type OnEvent = (event: Event, ctx: PlayContext) => void
@@ -48,6 +49,10 @@ beforeAll(() => {
     res.send({})
   })
   arenaApp.post('/test/quoridor', (req, res) => {
+    sentBattleIds.push(req.body.battleId)
+    res.send({})
+  })
+  arenaApp.post('/test/connect4', (req, res) => {
     sentBattleIds.push(req.body.battleId)
     res.send({})
   })
@@ -148,10 +153,14 @@ export const expectTotalScore = (expectedScore: number | ((score: number) => voi
       const actualScore = callbackEndpointResults[context.runId]?.score
       check(actualScore)
     } else {
-      await new Promise((resolve => {
+      await new Promise(((resolve, reject) => {
         onCallbackCalled[context.runId] = (payload) => {
-          check(payload.score)
-          resolve(0)
+          try {
+            check(payload.score)
+            resolve(0)
+          } catch (e) {
+            reject(e)
+          }
         }
       }))
     }
@@ -229,7 +238,7 @@ export const startRun = async (game: string, stepsForCases: Step[][]): Promise<v
   await Promise.all(promises)
 }
 
-export const autoPlay = <S, A extends TicTacToeAction | QuoridorAction>(
+export const autoPlay = <S, A extends TicTacToeAction | QuoridorAction | Connect4Action>(
   { init, apply, agent, externalizeAction, internalizeAction }: {
     init: () => S,
     apply: (s: S, a: A) => S,

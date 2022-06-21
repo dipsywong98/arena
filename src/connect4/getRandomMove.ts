@@ -1,0 +1,1 @@
+export const getRandomMove = (moves: number) => Math.floor(Math.random() * moves)
