@@ -12,5 +12,4 @@ export const appConfig = {
   QUORIDOR_TURN_ADD_MS: Number(process.env.QUORIDOR_TURN_ADD_MS ?? 2000),
   QUORIDOR_TERMINATE_TURNS: Number(process.env.QUORIDOR_TERMINATE_TURNS ?? 40),
   CANDIDATE_ENABLED: process.env.CANDIDATE_ENABLED,
-
 }

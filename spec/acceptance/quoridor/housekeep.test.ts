@@ -17,7 +17,7 @@ import { getMoveWorker } from '../../../src/common/queues'
 import { Game } from '../../../src/common/types'
 import { putWall, expectPutWall } from './utils'
 
-describe.skip('quoridor-housekeep', () => {
+describe('quoridor-housekeep', () => {
   it('reports zero score if didnt start in SHOULD_START_WITHIN', () => {
     const now = Date.now()
     return startBattle(Game.QUORIDOR,

@@ -20,7 +20,7 @@ import {
 import { moveOnlyAgent } from '../../../src/quoridor/agent'
 import { expectPawnMove, expectPutWall, movePawn, putWall } from './utils'
 
-describe.skip('quoridor-cheat', () => {
+describe('quoridor-cheat', () => {
   describe('C_AI_TELEPORT', () => {
     it('dont flip', () => {
       return startBattle('quoridor',
@@ -179,44 +179,44 @@ describe.skip('quoridor-cheat', () => {
         expectTotalScoreSomething())
     })
   })
-  describe('C_AI_WALL_BLOCKING', () => {
-    it('dont flip', () => {
-      const autoPlayNoFlip = autoPlay({
-        init: initState,
-        apply: applyAction,
-        agent: moveOnlyAgent,
-        externalizeAction: externalizeAction,
-        internalizeAction: internalizeAction
-      })
-      return startBattle('quoridor',
-        QuoridorCaseType.C_AI_WALL_BLOCKING,
-        listenEvent(),
-        autoPlayNoFlip,
-        expectTotalScore(0))
-    }, 30000)
-    it('flip', () => {
-      const autoPlayWithFlip = autoPlay({
-        init: initState,
-        apply: applyAction,
-        agent: state => {
-          if (blocked(state)) {
-            return {
-              type: QuoridorActionType.FLIP_TABLE,
-              x: 0, y: 0
-            }
-          }
-          return moveOnlyAgent(state)
-        },
-        externalizeAction: externalizeAction,
-        internalizeAction: internalizeAction
-      })
-      return startBattle('quoridor',
-        QuoridorCaseType.C_AI_WALL_BLOCKING,
-        listenEvent(),
-        autoPlayWithFlip,
-        expectTotalScoreSomething())
-    }, 10000)
-  })
+  // describe('C_AI_WALL_BLOCKING', () => {
+  //   it('dont flip', () => {
+  //     const autoPlayNoFlip = autoPlay({
+  //       init: initState,
+  //       apply: applyAction,
+  //       agent: moveOnlyAgent,
+  //       externalizeAction: externalizeAction,
+  //       internalizeAction: internalizeAction
+  //     })
+  //     return startBattle('quoridor',
+  //       QuoridorCaseType.C_AI_WALL_BLOCKING,
+  //       listenEvent(),
+  //       autoPlayNoFlip,
+  //       expectTotalScore(0))
+  //   }, 30000)
+  //   it('flip', () => {
+  //     const autoPlayWithFlip = autoPlay({
+  //       init: initState,
+  //       apply: applyAction,
+  //       agent: state => {
+  //         if (blocked(state)) {
+  //           return {
+  //             type: QuoridorActionType.FLIP_TABLE,
+  //             x: 0, y: 0
+  //           }
+  //         }
+  //         return moveOnlyAgent(state)
+  //       },
+  //       externalizeAction: externalizeAction,
+  //       internalizeAction: internalizeAction
+  //     })
+  //     return startBattle('quoridor',
+  //       QuoridorCaseType.C_AI_WALL_BLOCKING,
+  //       listenEvent(),
+  //       autoPlayWithFlip,
+  //       expectTotalScoreSomething())
+  //   }, 10000)
+  // })
   describe('C_AI_WALK_THROUGH_WALL', () => {
     it('dont flip', () => {
       return startBattle('quoridor',
