@@ -19,7 +19,7 @@ export enum Connect4CaseType {
   C_AI_SURPRISE = 'C_AI_SURPRISE',
 }
 
-export function isCaseType (p: string | undefined): p is Connect4CaseType {
+export function isCaseType(p: string | undefined): p is Connect4CaseType {
   return p !== undefined && p in Connect4CaseType
 }
 
@@ -28,11 +28,13 @@ export enum Connect4Turn {
   RED = '🔴'
 }
 
-export type Board = Array<Array<Connect4Turn | null>>
+export type Connect4Cell = Connect4Turn | null
+
+export type Connect4Board = Array<Array<Connect4Cell>>
 
 export interface Connect4State extends State {
   turn: Connect4Turn
-  board: Board
+  board: Connect4Board
 }
 
 export enum Connect4ActionType {

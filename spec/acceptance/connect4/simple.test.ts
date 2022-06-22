@@ -5,7 +5,6 @@ import {
   expectFlipTable,
   expectGameStart,
   expectTotalScore,
-  expectTotalScoreSomething,
   expectWinner,
   flipTable,
   listenEvent,

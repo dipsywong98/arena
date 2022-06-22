@@ -78,18 +78,18 @@ export const isPlayerWin = (state: Connect4State, turn: Connect4Turn): boolean =
 }
 
 export const isDraw = (state: Connect4State): boolean => {
-  return state.board.filter(row => row.findIndex(c => c === null) !== -1).length === 0
+  return COLUMNS.every((_, index) => isColumnFull(state, index))
 }
 
 export const getResult = (state: Connect4State): Connect4Result | undefined => {
-  if (isDraw(state)) {
-    return Connect4Result.DRAW
-  }
   if (isPlayerWin(state, Connect4Turn.RED)) {
     return Connect4Result.RED_WIN
   }
   if (isPlayerWin(state, Connect4Turn.YELLOW)) {
     return Connect4Result.YELLOW_WIN
+  }
+  if (isDraw(state)) {
+    return Connect4Result.DRAW
   }
   return undefined
 }
@@ -102,7 +102,7 @@ export const isColumnFull = (state: Connect4State, column: number): boolean => {
   return state.board[0][column] !== null
 }
 
-export const takeColumn = (state: Connect4State, column: number): Array<Connect4Turn | null> => {
+const takeColumn = (state: Connect4State, column: number): Array<Connect4Turn | null> => {
   return state.board.map(row => row[column])
 }
 

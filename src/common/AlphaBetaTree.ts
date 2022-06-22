@@ -1,22 +1,24 @@
-interface AlphaBetaTreeConfig<State, Action> {
+interface AlphaBetaTreeConfig<State, Action, Cache> {
   state: State
-  isEndGame: (state: State) => boolean
-  scorer: (state: State) => number
-  generator: (state: State) => Action[]
+  isEndGame: (state: State, cache?: Cache) => boolean
+  scorer: (state: State, cache?: Cache) => number
+  generator: (state: State, cache?: Cache) => Action[]
   apply: (state: State, action: Action) => State
   depth: number
   maximize: boolean
   alpha: number
   beta: number
+  computCache?: (state: State) => Cache
 }
 
-interface AlphaBetaTreeResult<State, Action> {
+interface AlphaBetaTreeResult<State, Action, Cache> {
   state: State
   action?: Action
   score: number
+  cache?: Cache
 }
 
-export const alphaBetaTree = <State, Action> (
+export const alphaBetaTree = <State, Action, Cache = undefined> (
   {
     state,
     isEndGame,
@@ -26,15 +28,17 @@ export const alphaBetaTree = <State, Action> (
     maximize = true,
     alpha = -Infinity,
     beta = Infinity,
-    apply
-  }: AlphaBetaTreeConfig<State, Action>
-): AlphaBetaTreeResult<State, Action> => {
-  if (depth === 0 || isEndGame(state)) {
-    return { score: scorer(state), state }
+    apply,
+    computCache,
+  }: AlphaBetaTreeConfig<State, Action, Cache>
+): AlphaBetaTreeResult<State, Action, Cache> => {
+  const cache = computCache?.(state)
+  if (depth === 0 || isEndGame(state, cache)) {
+    return { score: scorer(state, cache), state }
   }
-  const children = generator(state)
+  const children = generator(state, cache)
   if (maximize) {
-    let bestResult: AlphaBetaTreeResult<State, Action> = {
+    let bestResult: AlphaBetaTreeResult<State, Action, Cache> = {
       state,
       score: -Infinity
     }
@@ -48,7 +52,8 @@ export const alphaBetaTree = <State, Action> (
         maximize: !maximize,
         alpha,
         beta,
-        apply
+        apply,
+        computCache,
       })
       if (result.score > bestResult.score) {
         bestResult = result
@@ -61,7 +66,7 @@ export const alphaBetaTree = <State, Action> (
     }
     return bestResult
   } else {
-    let bestResult: AlphaBetaTreeResult<State, Action> = {
+    let bestResult: AlphaBetaTreeResult<State, Action, Cache> = {
       state,
       score: Infinity
     }
@@ -75,7 +80,8 @@ export const alphaBetaTree = <State, Action> (
         maximize: !maximize,
         alpha,
         beta,
-        apply
+        apply,
+        computCache,
       })
       if (result.score < bestResult.score) {
         bestResult = result
