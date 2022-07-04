@@ -20,6 +20,7 @@ import { getConcludeQueue, getConcludeWorker, getMoveQueue, getMoveWorker } from
 import { appConfig } from './common/config'
 import cors from 'cors'
 import Connect4Router from './connect4/router'
+import { config } from 'dotenv'
 
 const app = express()
 
@@ -74,7 +75,7 @@ app.use('/403', (_req, res) => {
 app.use('/admin/queues', serverAdapter.getRouter())
 app.use('/admin', adminRouter)
 app.use('/tic-tac-toe', ticTacToeRouter)
-// app.use('/quoridor', quoridorRouter)
+app.use('/quoridor', quoridorRouter)
 app.use('/connect4', Connect4Router)
 const viewsDir = path.join(__dirname, '..', 'static')
 app.use('/static', express.static(viewsDir))
