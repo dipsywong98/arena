@@ -74,7 +74,7 @@ app.use('/403', (_req, res) => {
 app.use('/admin/queues', serverAdapter.getRouter())
 app.use('/admin', adminRouter)
 app.use('/tic-tac-toe', ticTacToeRouter)
-app.use('/quoridor', quoridorRouter)
+// app.use('/quoridor', quoridorRouter)
 app.use('/connect4', Connect4Router)
 const viewsDir = path.join(__dirname, '..', 'static')
 app.use('/static', express.static(viewsDir))

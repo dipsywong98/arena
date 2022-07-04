@@ -8,7 +8,98 @@ Inspired by a real-life story... Social distancing keeps you away from your frie
 
 ## Challenge description
 
-The Arena is actually playing the famous [connect4 game](https://en.wikipedia.org/wiki/Connect_Four)
+The Arena challenge consists of two levels, level 1 [Tic-Tac-Toe](https://en.wikipedia.org/wiki/Tic-tac-toe) and level
+2 [Connect4](https://en.wikipedia.org/wiki/Connect_Four). The Tic-Tac-Toe level is more about familiarizing with the networking protocol (With sample code that can beat baseline AI). Quoridor is really where the real battle happens.
+
+
+## Tic-Tac-Toe
+
+### Goal
+
+Win the baseline AI, at least draw with the advanced AI, and flip the table when necessary within the time limit. For each Tic-Tac-Toe game, you will start with 18s in your timer to think. Every time you respond you will gain an additional 2s to think.
+
+### Rules
+
+The good old Tic-Tac-Toe rules. There are two players, `O` and `X`. `O` goes first, and they each take turns placing one of their symbols in an empty
+box in the 3x3 grid. The first to get three in a row/column/diagonal wins. Otherwise, when the grid is full, it's a draw.
+
+### Notation
+
+Use this compass notation when requesting and handling responses with the Arena Tic-Tac-Toe agent.
+
+```
+|NW|N |NE|
++--+--+--+
+|W |C |E |
++--+--+--+
+|SW|S |SE|
+```
+
+### How to play
+
+1. Request for a Tic-Tac-Toe evaluation at the coordinator.
+2. The coordinator will ask Arena to play Tic-Tac-Toe with you. The Arena will `POST` to your `/tic-tac-toe` endpoint with `battleId` in
+   the body.
+
+   ```json
+   {
+     "battleId": "21083c13-f0c2-4b54-8cb1-090129ffaa93"
+   }
+   ```
+
+3. Your system initiates a `GET` request at `https://cis2021-arena.herokuapp.com/tic-tac-toe/start/{battleId}`, which is
+   an [`event/stream`](https://developer.mozilla.org/en-US/docs/Web/API/Server-sent_events/Using_server-sent_events)
+   of which the Arena server can keep pushing the latest updates (as events) of the battle to you. The possible events are defined in the next section.
+
+4. When it is your turn, you will need to submit your move within your thinking time. To submit a move, `POST`
+   to `https://cis2021-arena.herokuapp.com/tic-tac-toe/play/{battleId}` with the payload
+
+   ```json
+   {
+     "action": "putSymbol",
+     "position": "SE"
+   }
+   ```
+
+   where the position is written in compass notation.
+
+5. Invalid moves are considered surrendering and the opponent should flip the table. To flip the table, `POST`
+   to `https://cis2021-arena.herokuapp.com/tic-tac-toe/play/{battleId}` with the payload
+
+   ```json
+   {
+     "action": "(╯°□°)╯︵ ┻━┻"
+   }
+   ```
+
+### Events
+
+The initial event tells you what symbol you are.
+
+```
+data: {"youAre":"O","id":"15f6301f-cbdd-4084-a810-df2e9c83238f"}
+```
+
+The move event tells you who has made what move.
+
+```
+data: {"player":"O","action":"putSymbol","position":"NW"}
+```
+
+The game end event tells you the game result.
+
+```
+data: {"winner":"draw"}
+data: {"winner":"O"}
+```
+
+The flip table event tells who has flipped the table.
+
+```
+data: {"player":"O","action":"(╯°□°)╯︵ ┻━┻"}
+```
+
+## Connect 4
 
 ### Goal
 
