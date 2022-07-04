@@ -8,21 +8,8 @@ variables:
   REDIS_PORT: 6379
 
 stages:
-  - install
   - test
   - deploy
-
-install:
-  stage: install
-  cache:
-    key: $CI_COMMIT_REF_SLUG-$CI_PROJECT_DIR
-    paths:
-      - node_modules/
-  script:
-    - yarn install --frozen-lockfile
-  only:
-    changes:
-      - yarn.lock
 
 unit:
   stage: test
@@ -32,6 +19,7 @@ unit:
       - node_modules/
     policy: pull
   script:
+    - yarn
     - yarn test:unit --reporters=default --reporters=jest-junit
   artifacts:
     when: always
@@ -49,6 +37,7 @@ acceptance:
     - paths:
         - coverage/
   script:
+    - yarn
     - yarn test:acceptance --reporters=default --reporters=jest-junit
   artifacts:
     when: always
@@ -67,8 +56,9 @@ build:
     key: $CI_COMMIT_REF_SLUG-$CI_PROJECT_DIR
     paths:
       - node_modules/
-    policy: pull
+    policy: push-pull
   script:
+    - yarn 
     - yarn build
   artifacts:
     paths:
@@ -82,6 +72,7 @@ lint:
       - node_modules/
     policy: pull
   script:
+    - yarn
     - yarn lint
 
 deploy:
