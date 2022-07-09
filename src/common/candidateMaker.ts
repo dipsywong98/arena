@@ -77,7 +77,6 @@ export const candidateMaker = <S extends State, A extends Action>({
             }
           } catch (err) {
             logger.err(err)
-            play({ action: TicTacToeActionType.FLIP_TABLE })
           }
         })
       })
