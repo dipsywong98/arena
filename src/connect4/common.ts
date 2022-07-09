@@ -138,10 +138,13 @@ export const internalizeAction = (action: ExternalAction): Connect4Action => {
     } else {
       throw new Error(`${action.column ?? 'undefined'} is not a valid column`)
     }
-  } else {
+  } else if ([Connect4ActionType.FLIP_TABLE, Connect4ActionType.START_GAME]
+    .includes(action.action)) {
     return {
       type: action.action
     }
+  } else {
+    throw new Error('unknown action')
   }
 }
 

@@ -24,11 +24,13 @@ export const candidateMaker = <S extends State, A extends Action>({
   const start = (battleId: string) => {
     logger.info('candidate start ' + battleId)
     let timeout: NodeJS.Timeout | undefined
-    const play = (payload: unknown) => {
+    const play = (payload: unknown) => new Promise((resolve, reject) => {
       timeout = setTimeout(() => {
         axios.post(`${ARENA_URL}/${game}/play/${battleId}`, payload)
+        .then(resolve)
+        .catch(reject)
       }, 500)
-    }
+    })
     const dequeue = () => {
       queue.shift()
       if (queue.length > 0) {
@@ -45,11 +47,12 @@ export const candidateMaker = <S extends State, A extends Action>({
             const value = JSON.parse(text.replace('data: ', ''))
             if (value.action === FLIP_TABLE
               || value.winner !== undefined) {
+              play({ action: TicTacToeActionType.FLIP_TABLE })
               req.end()
               dequeue()
             } else if (value.youAre !== undefined) {
               me = value.youAre
-              if (me === 'O' || me === 'first') {
+              if (me === 'O' || me === 'first' || me === '🔴') {
                 const react = agent(state)
                 play({ ...externalizeAction(react), action: react.type })
               }
@@ -74,6 +77,7 @@ export const candidateMaker = <S extends State, A extends Action>({
             }
           } catch (err) {
             logger.err(err)
+            play({ action: TicTacToeActionType.FLIP_TABLE })
           }
         })
       })
