@@ -24,11 +24,11 @@ export const candidateMaker = <S extends State, A extends Action>({
   const start = (battleId: string) => {
     logger.info('candidate start ' + battleId)
     let timeout: NodeJS.Timeout | undefined
-    const play = (payload: unknown) => new Promise((resolve, reject) => {
+    const play = (payload: unknown) => new Promise((resolve) => {
       timeout = setTimeout(() => {
         axios.post(`${ARENA_URL}/${game}/play/${battleId}`, payload)
         .then(resolve)
-        .catch(reject)
+        .catch((e) => console.log(e.message ?? e))
       }, 500)
     })
     const dequeue = () => {
@@ -75,8 +75,8 @@ export const candidateMaker = <S extends State, A extends Action>({
                 play({ action: TicTacToeActionType.FLIP_TABLE })
               }
             }
-          } catch (err) {
-            logger.err(err)
+          } catch (err: any) {
+            logger.err(err.message ?? err)
           }
         })
       })

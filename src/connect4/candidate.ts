@@ -10,7 +10,7 @@ const apply = applyAction
 
 export const candidate = candidateMaker({
   agent,
-  game, 
+  game,
   apply,
   externalizeAction,
   internalizeAction,
@@ -30,7 +30,6 @@ export const candidate = candidateMaker({
       }
       return true
     } catch (err) {
-      console.error(err)
       return false
     }
   }
