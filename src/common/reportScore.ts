@@ -16,5 +16,5 @@ export const reportScore = async (
     score,
     message
   }
-  await axios.post(reportUrl, payload, { headers })
+  await axios.post(appConfig.CALLBACK_URL_OVERRIDE ?? reportUrl, payload, { headers })
 }
