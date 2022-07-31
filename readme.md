@@ -103,7 +103,7 @@ data: {"player":"O","action":"(╯°□°)╯︵ ┻━┻"}
 
 ### Goal
 
-Win the baseline AI, win the advance AI as Red and not losing the advance AI as Yellow in 15 turns, and flip the table when necessary within the time limit. For each Connect 4 game, you will start with 18s in your timer to think. Every time you respond you will gain an additional 2s to think.
+Win the baseline AI and advanced AI (which is not perfect so it is possible to win it!), and flip the table when necessary within the time limit. For each Connect 4 game, you will start with 18s in your timer to think. Every time you respond you will gain an additional 2s to think.
 
 ### Rules
 

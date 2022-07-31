@@ -60,7 +60,7 @@ export const config: Record<Connect4CaseType, Connect4TestCase> = Object.freeze(
     initialStateGenerator: makeInitialStateGenerator(Connect4Turn.RED),
     agent: abAgent,
     score: (battle) => {
-      return (playerWin(battle) || battle.result === Connect4Result.DRAW) ? 15 : 0
+      return playerWin(battle) ? 15 : 0
     }
   },
   [Connect4CaseType.AB_AI_Y]: {

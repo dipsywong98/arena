@@ -42,7 +42,7 @@ connect 4 advance (30%): alpha beta pruning tree
 
 15% for player being RED win `AB_AI_R`
 
-15% for player being YELLOW not losing in 15 turns `AB_AI_Y`
+15% for player being YELLOW win `AB_AI_Y`
 
 I am expecting the participants will find some library or make/ clone an ui to play these boardgames as they are standard rules.
 The game timer start only after they call the /tic-tac-toe/start or /connect4/start (still have some time limit),
