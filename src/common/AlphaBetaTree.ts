@@ -1,7 +1,7 @@
 interface AlphaBetaTreeConfig<State, Action, Cache> {
   state: State
   isEndGame: (state: State, cache?: Cache) => boolean
-  scorer: (state: State, cache?: Cache) => number
+  scorer: (state: State, depth: number, cache?: Cache) => number
   generator: (state: State, cache?: Cache) => Action[]
   apply: (state: State, action: Action) => State
   depth: number
@@ -34,7 +34,7 @@ export const alphaBetaTree = <State, Action, Cache = undefined> (
 ): AlphaBetaTreeResult<State, Action, Cache> => {
   const cache = computCache?.(state)
   if (depth === 0 || isEndGame(state, cache)) {
-    return { score: scorer(state, cache), state }
+    return { score: scorer(state, depth, cache), state }
   }
   const children = generator(state, cache)
   if (maximize) {

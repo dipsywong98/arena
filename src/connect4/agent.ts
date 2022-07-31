@@ -97,24 +97,25 @@ function sectionScore(section: Section, player: Connect4Turn) {
   return score;
 }
 
-const scorer = (me: Connect4Turn) => (state: Connect4State, cache?: Cache): number => {
-  let score = 0;
-  if (isPlayerWin(state, me)) {
-    return 9999999999999;
-  }
-  if (isPlayerWin(state, opposite(me))) {
-    return -99999999999999999
-  }
-  const sections = cache?.sections ?? getSections(state.board);
+const scorer = (me: Connect4Turn) => (
+  (state: Connect4State, depth: number, cache?: Cache): number => {
+    let score = 0;
+    if (isPlayerWin(state, me)) {
+      return 9999999999999 + depth
+    }
+    if (isPlayerWin(state, opposite(me))) {
+      return -9999999999999 + depth
+    }
+    const sections = cache?.sections ?? getSections(state.board);
 
-  for (let i = 0; i < sections.length; i++)
-    score += sectionScore(sections[i], me);
+    for (let i = 0; i < sections.length; i++)
+      score += sectionScore(sections[i], me);
 
-  for (let i = 0; i < 6; i++)
-    if (state.board[i][3] == me) score += 3;
+    for (let i = 0; i < 6; i++)
+      if (state.board[i][3] == me) score += 3;
 
-  return score;
-}
+    return score;
+  })
 
 const generator = (state: Connect4State): Connect4Action[] => {
   const moves: Connect4Action[] = []

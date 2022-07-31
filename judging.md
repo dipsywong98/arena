@@ -40,13 +40,12 @@ connect 4 baseline (20%): sequentially put to columns that are not full
 
 connect 4 advance (30%): alpha beta pruning tree
 
-15% for player being RED at least draw `AB_AI_R`
+15% for player being RED win `AB_AI_R`
 
-15% for player being YELLOW at least draw `AB_AI_Y`
-
+15% for player being YELLOW not losing in 15 turns `AB_AI_Y`
 
 I am expecting the participants will find some library or make/ clone an ui to play these boardgames as they are standard rules.
-The game timer start only after they call the /tic-tac-toe/start or /quoridor/start (still have some time limit),
+The game timer start only after they call the /tic-tac-toe/start or /connect4/start (still have some time limit),
 so they dont need to play all these test cases simultaneously,
 thus building an ui to play is possible,
 just that the time limit is just few seconds only so they need to think fast and carefully not to break rules.

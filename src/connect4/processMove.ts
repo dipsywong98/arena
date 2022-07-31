@@ -23,7 +23,7 @@ import { Redis } from 'ioredis'
 import { v4 } from 'uuid'
 import redis from '../common/redis'
 import logger from '../common/logger'
-import { config } from './config'
+import { config, TERMINATE_TURNS } from './config'
 import { getConcludeQueue } from '../common/queues'
 import { Game } from '../common/types'
 
@@ -121,6 +121,9 @@ export const checkEndGame = (ctx: ProcessMoveContext): ProcessMoveContext => pro
       if (winner) {
         draft.battle.result = winner
       }
+    }
+    if (Math.floor(draft.battle.history.length / 2) >= TERMINATE_TURNS) {
+      draft.battle.result = Connect4Result.DRAW
     }
     return draft
   }

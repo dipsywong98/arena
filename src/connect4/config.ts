@@ -10,6 +10,7 @@ import {
   Connect4Turn,
 } from './types'
 import { playerWin } from './processMove'
+import { appConfig } from 'src/common/config'
 
 export const INITIAL_CLOCK_MS = 18 * 1000
 
@@ -37,6 +38,9 @@ const makeInitialStateGenerator = (aiTurn: Connect4Turn) =>
 
 export const TURN_ADD_MS = 2 * 1000
 
+// would directly call the score function for score
+export const TERMINATE_TURNS = appConfig.CONNECT4_TERMINATE_TURNS
+
 export const config: Record<Connect4CaseType, Connect4TestCase> = Object.freeze({
   [Connect4CaseType.BASE_AI_R]: {
     initialStateGenerator: makeInitialStateGenerator(Connect4Turn.RED),
@@ -63,7 +67,7 @@ export const config: Record<Connect4CaseType, Connect4TestCase> = Object.freeze(
     initialStateGenerator: makeInitialStateGenerator(Connect4Turn.YELLOW),
     agent: abAgent,
     score: (battle) => {
-      return (playerWin(battle) || battle.result === Connect4Result.DRAW) ? 15 : 0
+      return playerWin(battle) ? 15 : 0
     }
   },
   [Connect4CaseType.C_AI_OUT_OF_BOUND]: {

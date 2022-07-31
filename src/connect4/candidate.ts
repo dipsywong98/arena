@@ -28,7 +28,7 @@ export const candidate = candidateMaker({
           return false
         }
       }
-      return true
+      return false;
     } catch (err) {
       return false
     }

@@ -55,6 +55,23 @@ describe('abAgent', () => {
     expect(action.column).toEqual(4)
   })
 
+  it('favors winner over losing case 2', () => {
+    const board = parseBoard(`\
+      |R YY     
+      |YYRY     
+      |RYRR     
+      |YYRR R   
+      |RRYY R    
+      |YYYRRRY`)
+    const action = abAgent({
+      board: board,
+      createdAt: 0,
+      expectFlip: false,
+      turn: Connect4Turn.RED
+    })
+    expect(action.column).toEqual(4)
+  })
+
   it('can output some location if not possible to prevent losing', () => {
     const board = parseBoard(`\
       |       

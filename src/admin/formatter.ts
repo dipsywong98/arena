@@ -1,5 +1,6 @@
 import humanizeDuration from "humanize-duration";
 import { DateTime, Interval } from "luxon";
+import { Connect4Battle } from "src/connect4/types";
 import { ARENA_URL } from "../common/constants";
 import redis from "../common/redis";
 import { Battle, Game, Run } from "../common/types";
@@ -93,6 +94,16 @@ export const getHistoryWithMove = (game: Game, battle: Battle<any, any, any, any
   })
 }
 
+const formatHistory = (game: Game, history: Connect4Battle['history']) => {
+  if (game !== Game.CONNECT4) {
+    return history
+  }
+  return history.map((state) => ({
+    ...state,
+    board: state.board.map((row) => (row.map(cell => cell ?? '⚪')).join(''))
+  }))
+}
+
 export const formatBattle = (game: Game, battle: Battle<any, any, any, any>) => {
   return {
     id: battle.id,
@@ -108,7 +119,7 @@ export const formatBattle = (game: Game, battle: Battle<any, any, any, any>) => 
     completedAtStr: timestampToString(battle.completedAt),
     duration: getDuration(battle.createdAt, battle.completedAt),
     waitingTime: getWaitingTime(battle),
-    history: battle.history, //getHistoryWithMove(game, battle),
+    history: formatHistory(game, battle.history), //getHistoryWithMove(game, battle),
     moves: battle.moves.map(moveId => getMoveUrl(game, moveId)),
   }
 }

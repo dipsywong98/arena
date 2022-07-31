@@ -47,12 +47,12 @@ Use this compass notation when requesting and handling responses with the Arena 
    }
    ```
 
-3. Your system initiates a `GET` request at `https://cis2021-arena.herokuapp.com/tic-tac-toe/start/{battleId}`, which is
+3. Your system initiates a `GET` request at `https://cis2022-arena.herokuapp.com/tic-tac-toe/start/{battleId}`, which is
    an [`event/stream`](https://developer.mozilla.org/en-US/docs/Web/API/Server-sent_events/Using_server-sent_events)
    of which the Arena server can keep pushing the latest updates (as events) of the battle to you. The possible events are defined in the next section.
 
 4. When it is your turn, you will need to submit your move within your thinking time. To submit a move, `POST`
-   to `https://cis2021-arena.herokuapp.com/tic-tac-toe/play/{battleId}` with the payload
+   to `https://cis2022-arena.herokuapp.com/tic-tac-toe/play/{battleId}` with the payload
 
    ```json
    {
@@ -64,7 +64,7 @@ Use this compass notation when requesting and handling responses with the Arena 
    where the position is written in compass notation.
 
 5. Invalid moves are considered surrendering and the opponent should flip the table. To flip the table, `POST`
-   to `https://cis2021-arena.herokuapp.com/tic-tac-toe/play/{battleId}` with the payload
+   to `https://cis2022-arena.herokuapp.com/tic-tac-toe/play/{battleId}` with the payload
 
    ```json
    {
@@ -103,7 +103,7 @@ data: {"player":"O","action":"(╯°□°)╯︵ ┻━┻"}
 
 ### Goal
 
-Win the baseline AI, at least draw with the advanced AI, and flip the table when necessary within the time limit. For each Connect 4 game, you will start with 18s in your timer to think. Every time you respond you will gain an additional 2s to think.
+Win the baseline AI, win the advance AI as Red and not losing the advance AI as Yellow in 15 turns, and flip the table when necessary within the time limit. For each Connect 4 game, you will start with 18s in your timer to think. Every time you respond you will gain an additional 2s to think.
 
 ### Rules
 
