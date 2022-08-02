@@ -33,7 +33,8 @@ describe('abAgent', () => {
       board: board,
       createdAt: 0,
       expectFlip: false,
-      turn: Connect4Turn.RED
+      turn: Connect4Turn.RED,
+      moves: '',
     })
     expect(action.column).toEqual(3)
   })
@@ -50,7 +51,8 @@ describe('abAgent', () => {
       board: board,
       createdAt: 0,
       expectFlip: false,
-      turn: Connect4Turn.RED
+      turn: Connect4Turn.RED,
+      moves: '',
     })
     expect(action.column).toEqual(4)
   })
@@ -67,7 +69,8 @@ describe('abAgent', () => {
       board: board,
       createdAt: 0,
       expectFlip: false,
-      turn: Connect4Turn.RED
+      turn: Connect4Turn.RED,
+      moves: '',
     })
     expect(action.column).toEqual(4)
   })
@@ -84,7 +87,8 @@ describe('abAgent', () => {
       board: board,
       createdAt: 0,
       expectFlip: false,
-      turn: Connect4Turn.RED
+      turn: Connect4Turn.RED,
+      moves: '',
     })
     expect(action.column).toEqual(0)
   })
@@ -101,7 +105,8 @@ describe('abAgent', () => {
       board: board,
       createdAt: 0,
       expectFlip: false,
-      turn: Connect4Turn.RED
+      turn: Connect4Turn.RED,
+      moves: '',
     })
     expect(action.column).not.toEqual(undefined)
   })
@@ -118,7 +123,8 @@ describe('abAgent', () => {
       board: board,
       createdAt: 0,
       expectFlip: false,
-      turn: Connect4Turn.RED
+      turn: Connect4Turn.RED,
+      moves: '',
     })
     expect(action.column).not.toEqual(undefined)
   })
@@ -135,7 +141,8 @@ describe('abAgent', () => {
       board: board,
       createdAt: 0,
       expectFlip: false,
-      turn: Connect4Turn.RED
+      turn: Connect4Turn.RED,
+      moves: '',
     })
     expect(action.type).toEqual(Connect4ActionType.END_GAME)
   })

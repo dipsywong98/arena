@@ -10,7 +10,7 @@ import {
   Connect4Turn,
 } from './types'
 import { playerWin } from './processMove'
-import { appConfig } from 'src/common/config'
+import { appConfig } from '../common/config'
 
 export const INITIAL_CLOCK_MS = 18 * 1000
 
