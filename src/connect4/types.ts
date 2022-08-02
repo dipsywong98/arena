@@ -35,6 +35,7 @@ export type Connect4Board = Array<Array<Connect4Cell>>
 export interface Connect4State extends State {
   turn: Connect4Turn
   board: Connect4Board
+  moves: string
 }
 
 export enum Connect4ActionType {

@@ -8,7 +8,7 @@ import { Action, State } from "./types"
 
 
 interface Candidate<S extends State, A extends Action> {
-  agent: (s: S) => A
+  agent: (s: S) => A | Promise<A>
   game: string
   apply: (s: S, a: A) => S
   externalizeAction: (a: A) => Record<string, unknown>
@@ -41,7 +41,7 @@ export const candidateMaker = <S extends State, A extends Action>({
       .get(`${ARENA_URL}/${game}/start/${battleId}`, res => {
         let state = initState()
         let me: unknown | undefined
-        res.on('data', data => {
+        const handleData = async (data: Buffer) => {
           const text = new TextDecoder('utf-8').decode(data)
           try {
             const value = JSON.parse(text.replace('data: ', ''))
@@ -53,14 +53,14 @@ export const candidateMaker = <S extends State, A extends Action>({
             } else if (value.youAre !== undefined) {
               me = value.youAre
               if (me === 'O' || me === 'first' || me === '🔴') {
-                const react = agent(state)
+                const react = await agent(state)
                 play({ ...externalizeAction(react), action: react.type })
               }
             } else if (value.action !== undefined) {
               if (valid(state, value, value.player)) {
                 state = apply(state, internalizeAction(value))
                 if (value.player !== me) {
-                  const react = agent(state)
+                  const react = await agent(state)
                   if (react.type === TicTacToeActionType.END_GAME) {
                     req.end()
                     dequeue()
@@ -78,6 +78,9 @@ export const candidateMaker = <S extends State, A extends Action>({
           } catch (err: any) {
             logger.err(err.message ?? err)
           }
+        }
+        res.on('data', (data) => {
+          handleData(data).catch(err => logger.err(err))
         })
       })
   }

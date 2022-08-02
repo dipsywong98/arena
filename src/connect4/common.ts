@@ -114,6 +114,7 @@ export const applyAction = (state: Connect4State, action: Connect4Action): Conne
       try {
         const lastEmptyRow = takeColumn(draft, col).lastIndexOf(null)
         draft.board[lastEmptyRow][col] = state.turn
+        draft.moves += `${col + 1}`
       } catch (e) {
         // outside of the board just ignore it
       }

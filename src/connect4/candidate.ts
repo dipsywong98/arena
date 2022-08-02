@@ -1,10 +1,10 @@
 import { Connect4ActionType, Connect4State, ExternalAction } from './types'
 import { internalizeAction, externalizeAction, applyAction, isColumnFull } from './common'
 import { initState } from './config'
-import abAgent from './agent'
 import { candidateMaker } from '../common/candidateMaker'
+import bestAgent from './bestAgent'
 
-const agent = abAgent
+const agent = bestAgent
 const game = 'connect4'
 const apply = applyAction
 

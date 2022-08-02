@@ -50,3 +50,5 @@ so they dont need to play all these test cases simultaneously,
 thus building an ui to play is possible,
 just that the time limit is just few seconds only so they need to think fast and carefully not to break rules.
 So the real challenge is actually wiring all the things up but not AI haha
+
+best solution: call this API - https://connect4.gamesolver.org/solve?pos=4444414

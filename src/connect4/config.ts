@@ -21,7 +21,8 @@ export const initState = (): Connect4State => {
     board: new Array(HEIGHT).fill(null).map(() => (
       new Array(WIDTH).fill(null) as (Connect4Turn | null)[]
     )),
-    createdAt: Date.now()
+    createdAt: Date.now(),
+    moves: ''
   }
 }
 
