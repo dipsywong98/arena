@@ -20,7 +20,7 @@ import { getConcludeQueue, getConcludeWorker, getMoveQueue, getMoveWorker } from
 import { appConfig } from './common/config'
 import cors from 'cors'
 import Connect4Router from './connect4/router'
-import { config } from 'dotenv'
+import { clearInterval, clearTimeout } from 'timers'
 
 const app = express()
 
@@ -84,6 +84,28 @@ app.post('/', (req, res) => {
   console.log(req.body)
   res.json(req.body)
 })
+
+app.get('/sse-sample', (req, res) => {
+  res.setHeader('Content-Type', 'text/event-stream')
+  res.setHeader('Access-Control-Allow-Origin', '*')
+  res.setHeader('Connection', 'keep-alive')
+  res.flushHeaders()
+  let num = 0
+
+  const interval = setInterval(() => {
+    res.write(`data: ${JSON.stringify({countingTo10: ++num})}\n\n`)
+  }, 1000)
+
+  const timeout = setTimeout(() => {
+    res.end()
+    clearInterval(interval)
+  },10500)
+
+  res.on('close', () => {
+    clearInterval(interval)
+    clearTimeout(timeout)
+  })
+});
 
 const homeHtml = marked(readFileSync(path.join(__dirname, '..', 'readme.md'), { encoding: 'utf8' }))
 

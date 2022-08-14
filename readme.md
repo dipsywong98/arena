@@ -4,12 +4,22 @@
 
 ## Story
 
-Inspired by a real-life story... Social distancing keeps you away from your friends so you can't play board games with them physically anymore. But in actuality, your friends don't want to play board games with you regardless as they'd rather play Ring Fit with themselves. Don't be sad, you can still play board games with Arena.
+Inspired by a real-life story... Social distancing keeps you away from your friends so you can't play board games with them physically anymore. But in actuality, your friends don't want to play board games with you regardless as they'd rather play Ring Fit with themselves. Don't be sad, you can still play board games with Arena ~~like last year~~.
+
 
 ## Challenge description
 
-The Arena challenge consists of two levels, level 1 [Tic-Tac-Toe](https://en.wikipedia.org/wiki/Tic-tac-toe) and level
-2 [Connect4](https://en.wikipedia.org/wiki/Connect_Four). The Tic-Tac-Toe level is more about familiarizing with the networking protocol (With sample code that can beat baseline AI). Quoridor is really where the real battle happens.
+The Arena challenge consists of two levels, level 0 [Tic-Tac-Toe](https://en.wikipedia.org/wiki/Tic-tac-toe) and level
+1 [Connect4](https://en.wikipedia.org/wiki/Connect_Four).
+
+
+Tic Tac Toe serves as an example that worth 0 score and Connect 4 is the challenge that you should focus on.
+
+
+[Ugly code produced in a hurry but still able to solve Tic-Tac-Toe challenge in full score (TypeScript)](/static/sample.zip)
+
+
+You are free to use or not use the code provided to solve connect4, where the real challenge happens~
 
 
 ## Tic-Tac-Toe
@@ -49,7 +59,7 @@ Use this compass notation when requesting and handling responses with the Arena 
 
 3. Your system initiates a `GET` request at `https://cis2022-arena.herokuapp.com/tic-tac-toe/start/{battleId}`, which is
    an [`event/stream`](https://developer.mozilla.org/en-US/docs/Web/API/Server-sent_events/Using_server-sent_events)
-   of which the Arena server can keep pushing the latest updates (as events) of the battle to you. The possible events are defined in the next section.
+   of which the Arena server can keep pushing the latest updates (as events) of the battle to you. The possible events are defined in the next section. [See a live SSE page here](/sse-sample)
 
 4. When it is your turn, you will need to submit your move within your thinking time. To submit a move, `POST`
    to `https://cis2022-arena.herokuapp.com/tic-tac-toe/play/{battleId}` with the payload
@@ -127,7 +137,7 @@ There are 7 columns in the connnect 4 game, namely A, B, C, D, E, F, G. Each col
 
 3. Your system initiates a `GET` request at `https://cis2022-arena.herokuapp.com/connect4/start/{battleId}`, which is
    an [`event/stream`](https://developer.mozilla.org/en-US/docs/Web/API/Server-sent_events/Using_server-sent_events)
-   of which the Arena server can keep pushing the latest updates (as events) of the battle to you. The possible events are defined in the next section.
+   of which the Arena server can keep pushing the latest updates (as events) of the battle to you. The possible events are defined in the next section. [See a live SSE page here](/sse-sample)
 
 4. When it is your turn, you will need to submit your move within your thinking time. To submit a move, `POST`
    to `https://cis2022-arena.herokuapp.com/connect4/play/{battleId}` with the payload
