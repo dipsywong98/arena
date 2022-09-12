@@ -125,7 +125,7 @@ There are 7 columns in the connnect 4 game, namely A, B, C, D, E, F, G. Each col
 
 ### How to play
 
-1. Request for a Connect4 evaluation at the coordinator `https://cis2022.herokuapp.com/` (TBA).
+1. Request for a Connect4 evaluation at the coordinator `https://cis2022-{sg or hk}-{individual or team}.herokuapp.com/`.
 2. The coordinator will ask Arena to play connect 4 with you. The Arena will `POST` to your `/connect4` endpoint with `battleId` in
    the body.
 

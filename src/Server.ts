@@ -116,7 +116,9 @@ app.get('/', (req, res) => {
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <link 
       rel="stylesheet"
-      href="/static/github-markdown.css" /></head>
+      href="/static/github-markdown.css" />
+    <link rel="icon" type="image/x-icon" href="/static/favicon.ico">
+    </head>
     <style>
     .markdown-body {
     box-sizing: border-box;
