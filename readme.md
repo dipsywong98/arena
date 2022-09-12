@@ -47,8 +47,13 @@ Use this compass notation when requesting and handling responses with the Arena 
 
 ### How to play
 
-1. Request for a Tic-Tac-Toe evaluation at the coordinator.
-2. The coordinator will ask Arena to play Tic-Tac-Toe with you. The Arena will `POST` to your `/tic-tac-toe` endpoint with `battleId` in
+1. Tic Tac Toe is NOT a part of this year's challenge, you cannot request grading from the coordinator. Instead, `POST` to `https://cis2022-arena.herokuapp.com/tic-tac-toe/tryout` with the following payload to ask arena to play Tic Tac Toe with you. `resultUrl` is the url that you can `GET` your score, `errors` contains the errors when posting to your url in the next step.
+```json
+{
+  "teamUrl": "http://your-team-url.herokuapp.com"
+}
+```
+2. The Arena will `POST` to your `/tic-tac-toe` endpoint with `battleId` in
    the body.
 
    ```json
@@ -125,7 +130,7 @@ There are 7 columns in the connnect 4 game, namely A, B, C, D, E, F, G. Each col
 
 ### How to play
 
-1. Request for a Connect4 evaluation at the coordinator `https://cis2022-{sg or hk}-{individual or team}.herokuapp.com/`.
+1. Request for a Connect4 evaluation at the coordinator `https://cis2022-{sg or hk}-{individual or team}.herokuapp.com/`. (Connect4 dont have tryout endpoint, please use the coordinator for evaluation and result look up)
 2. The coordinator will ask Arena to play connect 4 with you. The Arena will `POST` to your `/connect4` endpoint with `battleId` in
    the body.
 

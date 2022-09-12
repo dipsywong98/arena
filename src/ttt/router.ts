@@ -6,7 +6,8 @@ import {
   setBattle,
   subscribeMessage,
   timerReadAndClear,
-  timerReset
+  timerReset,
+  getRun
 } from './store'
 import { v4 } from 'uuid'
 import { TicTacToeActionType, TicTacToeMove } from './types'
@@ -36,6 +37,33 @@ ticTacToeRouter.post('/evaluate', async (req, res) => {
     res
       .status(400)
       .send({ error: 'missing runId, callbackUrl or teamUrl' })
+  }
+})
+
+// eslint-disable-next-line @typescript-eslint/no-misused-promises
+ticTacToeRouter.post('/tryout', async (req, res) => {
+  const payload = req.body
+  const runId = v4()
+  payload.runId = runId
+  payload.callbackUrl = `http://localhost:${appConfig.PORT}`
+  if (isEvaluatePayload(payload)) {
+    const { errors } = await processEvaluate(payload)
+    res.send({ resultUrl: `${appConfig.APP_URL}/tic-tac-toe/result/${runId}`, errors })
+  } else {
+    res
+      .status(400)
+      .send({ error: 'missing teamUrl' })
+  }
+})
+
+// eslint-disable-next-line @typescript-eslint/no-misused-promises
+ticTacToeRouter.get('/result/:runId', async (req, res) => {
+  const runId = req.params.runId
+  const run = await getRun(redis, runId)
+  if (run) {
+    res.json(run.message ?? {message: 'no result yet'})
+  } else {
+    res.sendStatus(404)
   }
 })
 
