@@ -8,6 +8,7 @@ import redis from "./redis"
 import { Battle, Game, Move, START_GAME } from "./types"
 import { getMoveQueue } from "./queues"
 import { appConfig } from "./config"
+import { Connect4Turn } from 'src/connect4/types'
 
 // default 5 minutes
 export const SHOULD_START_WITHIN: number = appConfig.SHOULD_START_WITHIN
@@ -18,6 +19,8 @@ const opposite = (s: string) => {
     case QuoridorTurn.SECOND: return QuoridorTurn.FIRST
     case TicTacToeTurn.X: return TicTacToeTurn.O
     case TicTacToeTurn.O: return TicTacToeTurn.X
+    case Connect4Turn.RED: return Connect4Turn.YELLOW
+    case Connect4Turn.YELLOW: return Connect4Turn.RED
     default: return 'arena'
   }
 }
@@ -100,4 +103,5 @@ export const houseKeepQueueWorker = new Worker(HOUSE_KEEP_QUEUE,
 if (appConfig.NODE_ENV !== 'test') {
   houseKeepQueue.add('cron-ttt', { game: 'ttt' }, { repeat: { every: 60000 } })
   houseKeepQueue.add('cron-quoridor', { game: 'quoridor' }, { repeat: { every: 60000 } })
+  houseKeepQueue.add('cron-connect4', { game: 'connect4' }, { repeat: { every: 60000 } })
 }
