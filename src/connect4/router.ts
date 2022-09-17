@@ -42,6 +42,8 @@ Connect4Router.post('/evaluate', async (req, res) => {
 // eslint-disable-next-line @typescript-eslint/no-misused-promises
 Connect4Router.get('/start/:battleId', async (req, res) => {
   const { battleId } = req.params
+  logger.info(`[connect4-start:${battleId}]: headers: ${
+    JSON.stringify(req.headers)}`)
   const battle = await getBattle(getPubRedis(), battleId)
   if (battle === null) {
     res.status(404).send({ error: 'battle not found' })
@@ -102,6 +104,8 @@ Connect4Router.get('/start/:battleId', async (req, res) => {
 // eslint-disable-next-line @typescript-eslint/no-misused-promises
 Connect4Router.post('/play/:battleId', async (req, res) => {
   const { battleId } = req.params
+  logger.info(`[connect4-play:${battleId}]: headers: ${
+    JSON.stringify(req.headers)} body: ${JSON.stringify(req.body)}`)
   const elapsed = await timerReadAndClear(redis, battleId)
   const battle = await getBattle(getPubRedis(), battleId)
   if (battle === null) {

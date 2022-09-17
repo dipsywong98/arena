@@ -70,6 +70,8 @@ ticTacToeRouter.get('/result/:runId', async (req, res) => {
 // eslint-disable-next-line @typescript-eslint/no-misused-promises
 ticTacToeRouter.get('/start/:battleId', async (req, res) => {
   const { battleId } = req.params
+  logger.info(`[ttt-start:${battleId}]: headers: ${
+    JSON.stringify(req.headers)}`)
   const battle = await getBattle(getPubRedis(), battleId)
   if (battle === null) {
     res.status(404).send({ error: 'battle not found' })
@@ -130,6 +132,8 @@ ticTacToeRouter.get('/start/:battleId', async (req, res) => {
 // eslint-disable-next-line @typescript-eslint/no-misused-promises
 ticTacToeRouter.post('/play/:battleId', async (req, res) => {
   const { battleId } = req.params
+  logger.info(`[connect4-play:${battleId}]: headers: ${
+    JSON.stringify(req.headers)} body: ${JSON.stringify(req.body)}`)
   const elapsed = await timerReadAndClear(redis, battleId)
   const battle = await getBattle(getPubRedis(), battleId)
   if (battle === null) {
