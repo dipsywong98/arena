@@ -132,7 +132,7 @@ ticTacToeRouter.get('/start/:battleId', async (req, res) => {
 // eslint-disable-next-line @typescript-eslint/no-misused-promises
 ticTacToeRouter.post('/play/:battleId', async (req, res) => {
   const { battleId } = req.params
-  logger.info(`[connect4-play:${battleId}]: headers: ${
+  logger.info(`[ttt-play:${battleId}]: headers: ${
     JSON.stringify(req.headers)} body: ${JSON.stringify(req.body)}`)
   const elapsed = await timerReadAndClear(redis, battleId)
   const battle = await getBattle(getPubRedis(), battleId)
