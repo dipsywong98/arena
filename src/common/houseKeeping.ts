@@ -8,7 +8,7 @@ import redis from "./redis"
 import { Battle, Game, Move, START_GAME } from "./types"
 import { getMoveQueue } from "./queues"
 import { appConfig } from "./config"
-import { Connect4Turn } from 'src/connect4/types'
+import { Connect4Turn } from '../connect4/types'
 
 // default 5 minutes
 export const SHOULD_START_WITHIN: number = appConfig.SHOULD_START_WITHIN
