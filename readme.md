@@ -47,10 +47,17 @@ Use this compass notation when requesting and handling responses with the Arena 
 
 ### How to play
 
-1. Tic Tac Toe is NOT a part of this year's challenge, you cannot request grading from the coordinator. Instead, `POST` to `https://cis2022-arena.herokuapp.com/tic-tac-toe/tryout` with the following payload to ask arena to play Tic Tac Toe with you. `resultUrl` is the url that you can `GET` your score, `errors` contains the errors when posting to your url in the next step.
+1. Tic Tac Toe is NOT a part of this year's challenge, you cannot request grading from the coordinator. Instead, `POST` to `https://cis2022-arena.herokuapp.com/tic-tac-toe/tryout` with the following payload to ask arena to play Tic Tac Toe with you. 
 ```json
 {
   "teamUrl": "http://your-team-url.herokuapp.com"
+}
+```
+In response, `resultUrl` is the url that you can `GET` your score, `errors` contains the errors when posting to your url in the next step.
+```json
+{
+    "resultUrl": "https://cis2022-arena.herokuapp.com/tic-tac-toe/result/9888d9de-1809-4a78-b567-74c2362b987c",
+    "errors": {}
 }
 ```
 2. The Arena will `POST` to your `/tic-tac-toe` endpoint with `battleId` in
@@ -64,7 +71,7 @@ Use this compass notation when requesting and handling responses with the Arena 
 
 3. Your system initiates a `GET` request at `https://cis2022-arena.herokuapp.com/tic-tac-toe/start/{battleId}`, which is
    an [`event/stream`](https://developer.mozilla.org/en-US/docs/Web/API/Server-sent_events/Using_server-sent_events)
-   of which the Arena server can keep pushing the latest updates (as events) of the battle to you. The possible events are defined in the next section. [See a live SSE page here](/sse-sample)
+   of which the Arena server can keep pushing the latest updates (as events) of the battle to you. The possible events are defined in the next section. [See a live example SSE page here](/sse-sample)
 
 4. When it is your turn, you will need to submit your move within your thinking time. To submit a move, `POST`
    to `https://cis2022-arena.herokuapp.com/tic-tac-toe/play/{battleId}` with the payload
@@ -142,7 +149,7 @@ There are 7 columns in the connnect 4 game, namely A, B, C, D, E, F, G. Each col
 
 3. Your system initiates a `GET` request at `https://cis2022-arena.herokuapp.com/connect4/start/{battleId}`, which is
    an [`event/stream`](https://developer.mozilla.org/en-US/docs/Web/API/Server-sent_events/Using_server-sent_events)
-   of which the Arena server can keep pushing the latest updates (as events) of the battle to you. The possible events are defined in the next section. [See a live SSE page here](/sse-sample)
+   of which the Arena server can keep pushing the latest updates (as events) of the battle to you. The possible events are defined in the next section. [See a live example SSE page here](/sse-sample)
 
 4. When it is your turn, you will need to submit your move within your thinking time. To submit a move, `POST`
    to `https://cis2022-arena.herokuapp.com/connect4/play/{battleId}` with the payload
